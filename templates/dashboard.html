@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Attendance Notification System Pro</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+
+<style>
+
+body{
+    background:#f4f7fc;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.navbar{
+    background:#0d6efd;
+}
+
+.navbar-brand{
+    color:white !important;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.developer{
+    color:white;
+    font-size:14px;
+}
+
+.card-box{
+    border-radius:15px;
+    color:white;
+    padding:20px;
+    transition:.3s;
+    box-shadow:0 10px 20px rgba(0,0,0,.15);
+}
+
+.card-box:hover{
+    transform:translateY(-5px);
+}
+
+.total{background:#0d6efd;}
+.present{background:#198754;}
+.late{background:#dc3545;}
+.early{background:#fd7e14;}
+.missing{background:#6f42c1;}
+.ot{background:#20c997;}
+
+.card-box h2{
+    font-size:34px;
+    margin-top:10px;
+}
+
+.top-buttons .btn{
+    margin-right:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg">
+
+<div class="container-fluid">
+
+<span class="navbar-brand">
+<i class="fa-solid fa-user-check"></i>
+Attendance Notification System Pro
+</span>
+
+<span class="developer">
+Developed by Maharajan
+</span>
+
+</div>
+
+</nav>
+
+<div class="container-fluid mt-4">
+
+<div class="row">
+
+<div class="col-md-12">
+
+<h3>
+<i class="fa-solid fa-calendar-days"></i>
+Daily Attendance Dashboard
+</h3>
+
+<hr>
+
+</div>
+
+</div>
+
+<div class="row g-3">
+
+<div class="col-md-2">
+
+<div class="card-box total">
+
+<h5>Total Employees</h5>
+
+<h2>{{ result.summary.total }}</h2>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card-box present">
+
+<h5>Present</h5>
+
+<h2>{{ result.summary.total-result.summary.missing_in }}</h2>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card-box late">
+
+<h5>Late Punch</h5>
+
+<h2>{{ result.summary.late_in }}</h2>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card-box early">
+
+<h5>Early Out</h5>
+
+<h2>{{ result.summary.early_out }}</h2>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card-box missing">
+
+<h5>Missing Out</h5>
+
+<h2>{{ result.summary.missing_out }}</h2>
+
+</div>
+
+</div>
+
+<div class="col-md-2">
+
+<div class="card-box ot">
+
+<h5>Overtime</h5>
+
+<h2>{{ result.summary.overtime }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="top-buttons">
+
+<button 
+class="btn btn-success btn-lg"
+onclick="sendHRReport()">
+
+<i class="fa-brands fa-whatsapp"></i>
+
+Send HR Report
+
+</button>
+
+<a href="/download" class="btn btn-primary btn-lg">
+
+<i class="fa-solid fa-file-excel"></i>
+
+Download Report
+
+</a>
+
+<button class="btn btn-danger btn-lg">
+
+<i class="fa-solid fa-file-pdf"></i>
+
+Download PDF
+
+</button>
+
+</div>
+
+<hr>
+<!-- Employee Search -->
+
+<div class="row mb-3">
+
+<div class="col-md-4">
+
+<input
+type="text"
+id="employeeSearch"
+class="form-control form-control-lg"
+placeholder="🔍 Search Employee">
+
+</div>
+
+<div class="col-md-8 text-end">
+
+<button class="btn btn-outline-primary filter-btn" data-filter="All">All</button>
+
+<button class="btn btn-outline-danger filter-btn" data-filter="Late">Late</button>
+
+<button class="btn btn-outline-warning filter-btn" data-filter="Early">Early Out</button>
+
+<button class="btn btn-outline-secondary filter-btn" data-filter="Missing">Missing</button>
+
+<button class="btn btn-outline-success filter-btn" data-filter="Overtime">OT</button>
+
+</div>
+
+</div>
+
+<!-- Employee Table -->
+
+<div class="card shadow-lg">
+
+<div class="card-header bg-primary text-white">
+
+<h4>
+
+<i class="fa-solid fa-users"></i>
+
+Employee Attendance Details
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<div class="table-responsive">
+
+<table
+class="table table-hover table-bordered align-middle"
+id="employeeTable">
+
+<thead class="table-dark">
+
+<tr>
+
+<th>Employee ID</th>
+
+<th>Name</th>
+
+<th>Phone</th>
+
+<th>Punch In</th>
+
+<th>Punch Out</th>
+
+<th>Status</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for emp in result.employees %}
+
+<tr>
+
+<td>{{ emp.employee_id }}</td>
+
+<td>{{ emp.name }}</td>
+
+<td>{{ emp.phone }}</td>
+
+<td>{{ emp.punch_in }}</td>
+
+<td>{{ emp.punch_out }}</td>
+
+<td>
+
+{% for status in emp.status %}
+
+{% if "Late" in status %}
+
+<span class="badge bg-danger">{{ status }}</span>
+
+{% elif "Early" in status %}
+
+<span class="badge bg-warning text-dark">{{ status }}</span>
+
+{% elif "Missing" in status %}
+
+<span class="badge bg-secondary">{{ status }}</span>
+
+{% elif "Overtime" in status %}
+
+<span class="badge bg-success">{{ status }}</span>
+
+{% else %}
+
+<span class="badge bg-primary">{{ status }}</span>
+
+{% endif %}
+
+<br>
+
+{% endfor %}
+
+</td>
+
+<td>
+
+<button
+class="btn btn-primary btn-sm"
+
+onclick="showEmployee(
+
+'{{ emp.employee_id }}',
+
+'{{ emp.name }}',
+
+'{{ emp.phone }}',
+
+'{{ emp.punch_in }}',
+
+'{{ emp.punch_out }}',
+
+`{{ emp.notification }}`
+
+)">
+
+<i class="fa-solid fa-eye"></i>
+
+View
+
+</button>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<br>
+<!-- ========================================= -->
+<!-- Employee Details Modal -->
+<!-- ========================================= -->
+
+<div class="modal fade" id="employeeModal" tabindex="-1">
+
+<div class="modal-dialog modal-lg">
+
+<div class="modal-content">
+
+<div class="modal-header bg-primary text-white">
+
+<h4>
+
+<i class="fa-solid fa-user"></i>
+
+Employee Information
+
+</h4>
+
+<button
+type="button"
+class="btn-close btn-close-white"
+data-bs-dismiss="modal">
+</button>
+
+</div>
+
+<div class="modal-body">
+
+<div class="row">
+
+<div class="col-md-6">
+
+<h5>Employee ID</h5>
+
+<p id="mEmpId"></p>
+
+<h5>Name</h5>
+
+<p id="mName"></p>
+
+<h5>Phone</h5>
+
+<p id="mPhone"></p>
+
+</div>
+
+<div class="col-md-6">
+
+<h5>Punch In</h5>
+
+<p id="mPunchIn"></p>
+
+<h5>Punch Out</h5>
+
+<p id="mPunchOut"></p>
+
+</div>
+
+</div>
+
+<hr>
+
+<h5>
+
+Attendance Notification Preview
+
+</h5>
+
+<textarea
+
+id="mNotification"
+
+class="form-control"
+
+rows="10"
+
+readonly>
+
+</textarea>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+
+class="btn btn-secondary"
+
+onclick="copyNotification()">
+
+<i class="fa-solid fa-copy"></i>
+
+Copy
+
+</button>
+
+<button
+
+class="btn btn-success"
+
+onclick="addToReport()">
+
+<i class="fa-solid fa-plus"></i>
+
+Add To HR Report
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ========================================= -->
+<!-- HR Report Preview -->
+<!-- ========================================= -->
+
+<div class="card shadow-lg mt-4">
+
+<div class="card-header bg-success text-white">
+
+<h4>
+
+<i class="fa-brands fa-whatsapp"></i>
+
+Today's HR WhatsApp Report
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<textarea
+
+id="hrReport"
+
+class="form-control"
+
+rows="18"
+
+readonly>{{ hr_report }}</textarea>
+
+<br>
+
+<button
+
+class="btn btn-success btn-lg"
+
+onclick="copyHRReport()">
+
+<i class="fa-brands fa-whatsapp"></i>
+
+Copy HR Report
+
+</button>
+
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+let reportText = "";
+
+function showEmployee(
+id,
+name,
+phone,
+pin,
+pout,
+notification
+){
+
+document.getElementById("mEmpId").innerHTML=id;
+
+document.getElementById("mName").innerHTML=name;
+
+document.getElementById("mPhone").innerHTML=phone;
+
+document.getElementById("mPunchIn").innerHTML=pin;
+
+document.getElementById("mPunchOut").innerHTML=pout;
+
+document.getElementById("mNotification").value=notification;
+
+new bootstrap.Modal(
+document.getElementById("employeeModal")
+).show();
+
+}
+
+function copyNotification(){
+
+navigator.clipboard.writeText(
+
+document.getElementById("mNotification").value
+
+);
+
+alert("Notification Copied");
+
+}
+
+function addToReport(){
+
+reportText +=
+
+document.getElementById("mNotification").value
+
++"\n\n--------------------------------\n\n";
+
+document.getElementById("hrReport").value=reportText;
+
+alert("Added to HR Report");
+
+}
+
+function copyHRReport(){
+
+navigator.clipboard.writeText(
+
+document.getElementById("hrReport").value
+
+);
+
+alert("HR Report Copied");
+
+}
+function sendHRReport() {
+
+    const report = document.getElementById("hrReport").value;
+
+    // Encode the report for a URL
+    const message = encodeURIComponent(report);
+
+    // Opens WhatsApp with the report pre-filled
+    window.open(
+        "https://wa.me/?text=" + message,
+        "_blank"
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>
