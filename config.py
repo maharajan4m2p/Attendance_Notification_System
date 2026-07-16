@@ -37,6 +37,8 @@ SHIFT_IN = "09:00"
 
 SHIFT_OUT = "18:00"
 
+GRACE_TIME = "09:11"
+
 # ==============================
 # Rules
 # ==============================
@@ -80,3 +82,21 @@ GENERATE_SUMMARY = True
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 os.makedirs(REPORT_FOLDER, exist_ok=True)
+
+# =====================================================
+# Email Configuration
+# =====================================================
+
+EMAIL_ENABLED = True
+
+SMTP_SERVER = "smtp.gmail.com"
+
+SMTP_PORT = 587
+
+EMAIL_ADDRESS = "adishtam.hr@gmail.com"
+
+EMAIL_PASSWORD = "abcd efgh ijkl mnop"
+
+COMPANY_NAME = "ADISTHAM VENTURES PRIVATE LIMITED"
+
+HR_NAME = "HR Department"

@@ -5,62 +5,143 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<title>Attendance Notification System Pro</title>
+<title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+Attendance Notification System Pro
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+</title>
+
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+rel="stylesheet">
+
+<link
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+rel="stylesheet">
 
 <style>
 
 body{
+
     background:#f4f7fc;
+
     font-family:Arial,Helvetica,sans-serif;
+
 }
 
+/* ============================== */
+
 .navbar{
+
     background:#0d6efd;
+
 }
 
 .navbar-brand{
-    color:white !important;
+
+    color:white!important;
+
     font-size:28px;
+
     font-weight:bold;
+
 }
 
 .developer{
+
     color:white;
+
     font-size:14px;
+
 }
 
+/* ============================== */
+
 .card-box{
+
     border-radius:15px;
+
     color:white;
+
     padding:20px;
+
     transition:.3s;
+
     box-shadow:0 10px 20px rgba(0,0,0,.15);
+
 }
 
 .card-box:hover{
+
     transform:translateY(-5px);
+
 }
 
-.total{background:#0d6efd;}
-.present{background:#198754;}
-.late{background:#dc3545;}
-.early{background:#fd7e14;}
-.missing{background:#6f42c1;}
-.ot{background:#20c997;}
+.total{
+
+    background:#0d6efd;
+
+}
+
+.present{
+
+    background:#198754;
+
+}
+
+.late{
+
+    background:#dc3545;
+
+}
+
+.early{
+
+    background:#fd7e14;
+
+}
+
+.missing{
+
+    background:#6f42c1;
+
+}
+
+.ot{
+
+    background:#20c997;
+
+}
 
 .card-box h2{
+
     font-size:34px;
+
     margin-top:10px;
+
 }
 
 .top-buttons .btn{
+
     margin-right:10px;
+
+    margin-bottom:10px;
+
+}
+
+.table td{
+
+    vertical-align:middle;
+
+}
+
+.modal textarea{
+
+    font-size:15px;
+
 }
 
 </style>
@@ -74,12 +155,17 @@ body{
 <div class="container-fluid">
 
 <span class="navbar-brand">
+
 <i class="fa-solid fa-user-check"></i>
+
 Attendance Notification System Pro
+
 </span>
 
 <span class="developer">
+
 Developed by Maharajan
+
 </span>
 
 </div>
@@ -87,295 +173,370 @@ Developed by Maharajan
 </nav>
 
 <div class="container-fluid mt-4">
+    <!-- ========================================= -->
+<!-- Dashboard Title -->
+<!-- ========================================= -->
 
 <div class="row">
 
-<div class="col-md-12">
+    <div class="col-12">
 
-<h3>
-<i class="fa-solid fa-calendar-days"></i>
-Daily Attendance Dashboard
-</h3>
+        <h3>
 
-<hr>
+            <i class="fa-solid fa-calendar-days"></i>
+
+            Daily Attendance Dashboard
+
+        </h3>
+
+        <hr>
+
+    </div>
 
 </div>
 
-</div>
+<!-- ========================================= -->
+<!-- Summary Cards -->
+<!-- ========================================= -->
 
 <div class="row g-3">
 
-<div class="col-md-2">
+    <div class="col-lg-2 col-md-4">
 
-<div class="card-box total">
+        <div class="card-box total">
 
-<h5>Total Employees</h5>
+            <h5>Total Employees</h5>
 
-<h2>{{ result.summary.total }}</h2>
+            <h2>{{ result.summary.total }}</h2>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
-<div class="col-md-2">
+    <div class="col-lg-2 col-md-4">
 
-<div class="card-box present">
+        <div class="card-box present">
 
-<h5>Present</h5>
+            <h5>Present</h5>
 
-<h2>{{ result.summary.total-result.summary.missing_in }}</h2>
+            <h2>{{ result.summary.total - result.summary.missing_in }}</h2>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
-<div class="col-md-2">
+    <div class="col-lg-2 col-md-4">
 
-<div class="card-box late">
+        <div class="card-box late">
 
-<h5>Late Punch</h5>
+            <h5>Late Punch</h5>
 
-<h2>{{ result.summary.late_in }}</h2>
+            <h2>{{ result.summary.late_in }}</h2>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
-<div class="col-md-2">
+    <div class="col-lg-2 col-md-4">
 
-<div class="card-box early">
+        <div class="card-box early">
 
-<h5>Early Out</h5>
+            <h5>Early Out</h5>
 
-<h2>{{ result.summary.early_out }}</h2>
+            <h2>{{ result.summary.early_out }}</h2>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
-<div class="col-md-2">
+    <div class="col-lg-2 col-md-4">
 
-<div class="card-box missing">
+        <div class="card-box missing">
 
-<h5>Missing Out</h5>
+            <h5>Missing Out</h5>
 
-<h2>{{ result.summary.missing_out }}</h2>
+            <h2>{{ result.summary.missing_out }}</h2>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
-<div class="col-md-2">
+    <div class="col-lg-2 col-md-4">
 
-<div class="card-box ot">
+        <div class="card-box ot">
 
-<h5>Overtime</h5>
+            <h5>Overtime</h5>
 
-<h2>{{ result.summary.overtime }}</h2>
+            <h2>{{ result.summary.overtime }}</h2>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
 </div>
 
 <br>
 
+<!-- ========================================= -->
+<!-- Action Buttons -->
+<!-- ========================================= -->
+
 <div class="top-buttons">
 
-<button 
-class="btn btn-success btn-lg"
-onclick="sendHRReport()">
+    <button
+        class="btn btn-success btn-lg"
+        onclick="sendHRReport()">
 
-<i class="fa-brands fa-whatsapp"></i>
+        <i class="fa-brands fa-whatsapp"></i>
 
-Send HR Report
+        Send HR Report
 
-</button>
+    </button>
 
-<a href="/download" class="btn btn-primary btn-lg">
+    <button
+    class="btn btn-danger btn-lg"
+    onclick="sendLatePunchReport()">
 
-<i class="fa-solid fa-file-excel"></i>
+    <i class="fa-solid fa-clock"></i>
 
-Download Report
+    Late Punch Report
 
-</a>
+    </button>
 
-<button class="btn btn-danger btn-lg">
+    <form
+        action="/send_emails"
+        method="POST"
+        style="display:inline;">
 
-<i class="fa-solid fa-file-pdf"></i>
+        <button
+            class="btn btn-warning btn-lg"
+            type="submit">
 
-Download PDF
+            <i class="fa-solid fa-envelope"></i>
 
-</button>
+            Send Email Notifications
+
+        </button>
+
+    </form>
+
+    <a
+        href="/download"
+        class="btn btn-primary btn-lg">
+
+        <i class="fa-solid fa-file-excel"></i>
+
+        Download Excel Report
+
+    </a>
+
+    <button
+        class="btn btn-danger btn-lg">
+
+        <i class="fa-solid fa-file-pdf"></i>
+
+        Download PDF
+
+    </button>
 
 </div>
 
 <hr>
+<!-- ========================================= -->
 <!-- Employee Search -->
+<!-- ========================================= -->
 
 <div class="row mb-3">
 
-<div class="col-md-4">
+    <div class="col-md-4">
 
-<input
-type="text"
-id="employeeSearch"
-class="form-control form-control-lg"
-placeholder="🔍 Search Employee">
+        <input
+            type="text"
+            id="employeeSearch"
+            class="form-control form-control-lg"
+            placeholder="🔍 Search Employee">
+
+    </div>
+
+    <div class="col-md-8 text-end">
+
+        <button class="btn btn-outline-primary filter-btn" data-filter="All">
+            All
+        </button>
+
+        <button class="btn btn-outline-danger filter-btn" data-filter="Late">
+            Late
+        </button>
+
+        <button class="btn btn-outline-warning filter-btn" data-filter="Early">
+            Early Out
+        </button>
+
+        <button class="btn btn-outline-secondary filter-btn" data-filter="Missing">
+            Missing
+        </button>
+
+        <button class="btn btn-outline-success filter-btn" data-filter="Overtime">
+            OT
+        </button>
+
+    </div>
 
 </div>
 
-<div class="col-md-8 text-end">
-
-<button class="btn btn-outline-primary filter-btn" data-filter="All">All</button>
-
-<button class="btn btn-outline-danger filter-btn" data-filter="Late">Late</button>
-
-<button class="btn btn-outline-warning filter-btn" data-filter="Early">Early Out</button>
-
-<button class="btn btn-outline-secondary filter-btn" data-filter="Missing">Missing</button>
-
-<button class="btn btn-outline-success filter-btn" data-filter="Overtime">OT</button>
-
-</div>
-
-</div>
-
+<!-- ========================================= -->
 <!-- Employee Table -->
+<!-- ========================================= -->
 
 <div class="card shadow-lg">
 
-<div class="card-header bg-primary text-white">
+    <div class="card-header bg-primary text-white">
 
-<h4>
+        <h4>
 
-<i class="fa-solid fa-users"></i>
+            <i class="fa-solid fa-users"></i>
 
-Employee Attendance Details
+            Employee Attendance Details
 
-</h4>
+        </h4>
 
-</div>
+    </div>
 
-<div class="card-body">
+    <div class="card-body">
 
-<div class="table-responsive">
+        <div class="table-responsive">
 
-<table
-class="table table-hover table-bordered align-middle"
-id="employeeTable">
+            <table
+                class="table table-hover table-bordered align-middle"
+                id="employeeTable">
 
-<thead class="table-dark">
+                <thead class="table-dark">
 
-<tr>
+                    <tr>
 
-<th>Employee ID</th>
+                        <th>Employee ID</th>
 
-<th>Name</th>
+                        <th>Name</th>
 
-<th>Phone</th>
+                        <th>Phone</th>
 
-<th>Punch In</th>
+                        <th>Email</th>
 
-<th>Punch Out</th>
+                        <th>Punch In</th>
 
-<th>Status</th>
+                        <th>Punch Out</th>
 
-<th>Action</th>
+                        <th>Status</th>
 
-</tr>
+                        <th>Action</th>
 
-</thead>
+                    </tr>
 
-<tbody>
+                </thead>
 
-{% for emp in result.employees %}
+                <tbody>
 
-<tr>
+                {% for emp in result.employees %}
 
-<td>{{ emp.employee_id }}</td>
+                <tr>
 
-<td>{{ emp.name }}</td>
+                    <td>{{ emp.employee_id }}</td>
 
-<td>{{ emp.phone }}</td>
+                    <td>{{ emp.name }}</td>
 
-<td>{{ emp.punch_in }}</td>
+                    <td>{{ emp.phone }}</td>
 
-<td>{{ emp.punch_out }}</td>
+                    <td>{{ emp.email }}</td>
 
-<td>
+                    <td>{{ emp.punch_in }}</td>
 
-{% for status in emp.status %}
+                    <td>{{ emp.punch_out }}</td>
 
-{% if "Late" in status %}
+                    <td>
 
-<span class="badge bg-danger">{{ status }}</span>
+                        {% for status in emp.status %}
 
-{% elif "Early" in status %}
+                            {% if "Late" in status %}
 
-<span class="badge bg-warning text-dark">{{ status }}</span>
+                                <span class="badge bg-danger">
+                                    {{ status }}
+                                </span>
 
-{% elif "Missing" in status %}
+                            {% elif "Early" in status %}
 
-<span class="badge bg-secondary">{{ status }}</span>
+                                <span class="badge bg-warning text-dark">
+                                    {{ status }}
+                                </span>
 
-{% elif "Overtime" in status %}
+                            {% elif "Missing" in status %}
 
-<span class="badge bg-success">{{ status }}</span>
+                                <span class="badge bg-secondary">
+                                    {{ status }}
+                                </span>
 
-{% else %}
+                            {% elif "Overtime" in status %}
 
-<span class="badge bg-primary">{{ status }}</span>
+                                <span class="badge bg-success">
+                                    {{ status }}
+                                </span>
 
-{% endif %}
+                            {% else %}
 
-<br>
+                                <span class="badge bg-primary">
+                                    {{ status }}
+                                </span>
 
-{% endfor %}
+                            {% endif %}
 
-</td>
+                            <br>
 
-<td>
+                        {% endfor %}
 
-<button
-class="btn btn-primary btn-sm"
+                    </td>
 
-onclick="showEmployee(
+                    <td>
 
-'{{ emp.employee_id }}',
+                        <button
 
-'{{ emp.name }}',
+                            class="btn btn-primary btn-sm"
 
-'{{ emp.phone }}',
+                            onclick="showEmployee(
 
-'{{ emp.punch_in }}',
+                            '{{ emp.employee_id }}',
 
-'{{ emp.punch_out }}',
+                            '{{ emp.name }}',
 
-`{{ emp.notification }}`
+                            '{{ emp.phone }}',
 
-)">
+                            '{{ emp.email }}',
 
-<i class="fa-solid fa-eye"></i>
+                            '{{ emp.punch_in }}',
 
-View
+                            '{{ emp.punch_out }}',
 
-</button>
+                            `{{ emp.notification }}`
 
-</td>
+                            )">
 
-</tr>
+                            <i class="fa-solid fa-eye"></i>
 
-{% endfor %}
+                            View
 
-</tbody>
+                        </button>
 
-</table>
+                    </td>
 
-</div>
+                </tr>
 
-</div>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -386,165 +547,172 @@ View
 
 <div class="modal fade" id="employeeModal" tabindex="-1">
 
-<div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg">
 
-<div class="modal-content">
+        <div class="modal-content">
 
-<div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-primary text-white">
 
-<h4>
+                <h4>
 
-<i class="fa-solid fa-user"></i>
+                    <i class="fa-solid fa-user"></i>
 
-Employee Information
+                    Employee Information
 
-</h4>
+                </h4>
 
-<button
-type="button"
-class="btn-close btn-close-white"
-data-bs-dismiss="modal">
-</button>
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal">
+                </button>
 
-</div>
+            </div>
 
-<div class="modal-body">
+            <div class="modal-body">
 
-<div class="row">
+                <div class="row">
 
-<div class="col-md-6">
+                    <div class="col-md-6">
 
-<h5>Employee ID</h5>
+                        <h5>Employee ID</h5>
+                        <p id="mEmpId"></p>
 
-<p id="mEmpId"></p>
+                        <h5>Name</h5>
+                        <p id="mName"></p>
 
-<h5>Name</h5>
+                        <h5>Phone</h5>
+                        <p id="mPhone"></p>
 
-<p id="mName"></p>
+                        <h5>Email</h5>
+                        <p id="mEmail"></p>
 
-<h5>Phone</h5>
+                    </div>
 
-<p id="mPhone"></p>
+                    <div class="col-md-6">
 
-</div>
+                        <h5>Punch In</h5>
+                        <p id="mPunchIn"></p>
 
-<div class="col-md-6">
+                        <h5>Punch Out</h5>
+                        <p id="mPunchOut"></p>
 
-<h5>Punch In</h5>
+                    </div>
 
-<p id="mPunchIn"></p>
+                </div>
 
-<h5>Punch Out</h5>
+                <hr>
 
-<p id="mPunchOut"></p>
+                <h5>
 
-</div>
+                    Attendance Notification Preview
 
-</div>
+                </h5>
 
-<hr>
+                <textarea
+                    id="mNotification"
+                    class="form-control"
+                    rows="12"
+                    readonly>
+                </textarea>
 
-<h5>
+            </div>
 
-Attendance Notification Preview
+            <div class="modal-footer">
 
-</h5>
+                <button
+                    class="btn btn-secondary"
+                    onclick="copyNotification()">
 
-<textarea
+                    <i class="fa-solid fa-copy"></i>
 
-id="mNotification"
+                    Copy
 
-class="form-control"
+                </button>
 
-rows="10"
+                <button
+                    class="btn btn-success"
+                    onclick="addToReport()">
 
-readonly>
+                    <i class="fa-solid fa-plus"></i>
 
-</textarea>
+                    Add To HR Report
 
-</div>
+                </button>
 
-<div class="modal-footer">
+            </div>
 
-<button
+        </div>
 
-class="btn btn-secondary"
-
-onclick="copyNotification()">
-
-<i class="fa-solid fa-copy"></i>
-
-Copy
-
-</button>
-
-<button
-
-class="btn btn-success"
-
-onclick="addToReport()">
-
-<i class="fa-solid fa-plus"></i>
-
-Add To HR Report
-
-</button>
+    </div>
 
 </div>
 
-</div>
-
-</div>
-
-</div>
-
+<br>
 <!-- ========================================= -->
-<!-- HR Report Preview -->
+<!-- HR WhatsApp Report -->
 <!-- ========================================= -->
 
 <div class="card shadow-lg mt-4">
 
-<div class="card-header bg-success text-white">
+    <div class="card-header bg-success text-white">
 
-<h4>
+        <h4>
 
-<i class="fa-brands fa-whatsapp"></i>
+            <i class="fa-brands fa-whatsapp"></i>
 
-Today's HR WhatsApp Report
+            Today's HR WhatsApp Report
 
-</h4>
+        </h4>
+
+    </div>
+
+    <div class="card-body">
+
+        <textarea
+
+            id="hrReport"
+
+            class="form-control"
+
+            rows="18"
+
+            readonly>{{ hr_report }}</textarea>
+
+        <br>
+
+        <div class="d-flex flex-wrap gap-2">
+
+            <button
+
+                class="btn btn-success btn-lg"
+
+                onclick="copyHRReport()">
+
+                <i class="fa-brands fa-whatsapp"></i>
+
+                Copy HR Report
+
+            </button>
+
+            <button
+
+                class="btn btn-primary btn-lg"
+
+                onclick="sendHRReport()">
+
+                <i class="fa-brands fa-whatsapp"></i>
+
+                Open WhatsApp
+
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
-<div class="card-body">
-
-<textarea
-
-id="hrReport"
-
-class="form-control"
-
-rows="18"
-
-readonly>{{ hr_report }}</textarea>
-
-<br>
-
-<button
-
-class="btn btn-success btn-lg"
-
-onclick="copyHRReport()">
-
-<i class="fa-brands fa-whatsapp"></i>
-
-Copy HR Report
-
-</button>
-
-</div>
-
-</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -555,76 +723,122 @@ function showEmployee(
 id,
 name,
 phone,
+email,
 pin,
 pout,
 notification
 ){
 
-document.getElementById("mEmpId").innerHTML=id;
+    document.getElementById("mEmpId").innerHTML = id;
 
-document.getElementById("mName").innerHTML=name;
+    document.getElementById("mName").innerHTML = name;
 
-document.getElementById("mPhone").innerHTML=phone;
+    document.getElementById("mPhone").innerHTML = phone;
 
-document.getElementById("mPunchIn").innerHTML=pin;
+    document.getElementById("mEmail").innerHTML = email;
 
-document.getElementById("mPunchOut").innerHTML=pout;
+    document.getElementById("mPunchIn").innerHTML = pin;
 
-document.getElementById("mNotification").value=notification;
+    document.getElementById("mPunchOut").innerHTML = pout;
 
-new bootstrap.Modal(
-document.getElementById("employeeModal")
-).show();
+    document.getElementById("mNotification").value = notification;
+
+    new bootstrap.Modal(
+        document.getElementById("employeeModal")
+    ).show();
 
 }
 
 function copyNotification(){
 
-navigator.clipboard.writeText(
+    navigator.clipboard.writeText(
+        document.getElementById("mNotification").value
+    );
 
-document.getElementById("mNotification").value
-
-);
-
-alert("Notification Copied");
+    alert("Notification copied successfully.");
 
 }
 
 function addToReport(){
 
-reportText +=
+    reportText +=
 
-document.getElementById("mNotification").value
+    document.getElementById("mNotification").value +
 
-+"\n\n--------------------------------\n\n";
+    "\n\n--------------------------------\n\n";
 
-document.getElementById("hrReport").value=reportText;
+    document.getElementById("hrReport").value = reportText;
 
-alert("Added to HR Report");
+    alert("Added to HR Report.");
 
 }
 
 function copyHRReport(){
 
-navigator.clipboard.writeText(
+    navigator.clipboard.writeText(
+        document.getElementById("hrReport").value
+    );
 
-document.getElementById("hrReport").value
-
-);
-
-alert("HR Report Copied");
+    alert("HR Report copied successfully.");
 
 }
-function sendHRReport() {
+
+function sendHRReport(){
 
     const report = document.getElementById("hrReport").value;
 
-    // Encode the report for a URL
     const message = encodeURIComponent(report);
 
-    // Opens WhatsApp with the report pre-filled
     window.open(
+
         "https://wa.me/?text=" + message,
+
+        "_blank"
+
+    );
+
+}
+
+function sendLatePunchReport() {
+
+    let report = "🔴 LATE PUNCH REPORT\n";
+    report += "🏢 ADISTHAM VENTURES PRIVATE LIMITED\n\n";
+
+    let rows = document.querySelectorAll("#employeeTable tbody tr");
+
+    let count = 1;
+
+    rows.forEach(function(row){
+
+        let status = row.cells[6].innerText;
+
+        if(status.includes("Late")){
+
+            report += count + ")\n";
+            report += "👤 Name : " + row.cells[1].innerText + "\n";
+            report += "🆔 Emp ID : " + row.cells[0].innerText + "\n";
+            report += "📞 Phone : " + row.cells[2].innerText + "\n";
+            report += "📧 Email : " + row.cells[3].innerText + "\n";
+            report += "🕘 Punch In : " + row.cells[4].innerText + "\n";
+            report += "⚠️ Status : " + status + "\n";
+            report += "────────────────────────\n\n";
+
+            count++;
+
+        }
+
+    });
+
+    if(count == 1){
+
+        alert("No Late Punch Employees.");
+
+        return;
+
+    }
+
+    window.open(
+        "https://wa.me/?text=" + encodeURIComponent(report),
         "_blank"
     );
 

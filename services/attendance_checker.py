@@ -9,7 +9,11 @@ Developed by Maharajan
 from datetime import datetime
 import pandas as pd
 
-from config import SHIFT_IN, SHIFT_OUT
+from config import(
+    SHIFT_IN,
+    SHIFT_OUT,
+    GRACE_TIME
+)
 
 
 class AttendanceChecker:
@@ -23,6 +27,11 @@ class AttendanceChecker:
 
         self.shift_out = datetime.strptime(
             SHIFT_OUT,
+            "%H:%M"
+        )
+        
+        self.grace_time = datetime.strptime(
+            GRACE_TIME,
             "%H:%M"
         )
 
@@ -186,6 +195,10 @@ class AttendanceChecker:
             employee["phone"] = str(
                 row.get("Phone", "")
             ).strip()
+            
+            employee["email"] = str(
+                row.get("Email", "")
+            ).strip()
 
             raw_in = row.get("Punch In", "")
 
@@ -238,7 +251,7 @@ class AttendanceChecker:
             # Late Punch In
             # =====================================
 
-            elif in_time > self.shift_in:
+            elif in_time >= self.grace_time:
 
                 late = self.minutes_between(
                     self.shift_in,

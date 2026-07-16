@@ -1,14 +1,13 @@
 """
 =========================================================
-Attendance Notification System
+Attendance Notification System Pro
 Main Flask Application
-Version : 1.0
+Version : 2.0
+Developed by Maharajan
 =========================================================
 """
 
 import os
-
-print("Application Started")
 
 from flask import (
     Flask,
@@ -33,6 +32,8 @@ from config import (
 from services.attendance_checker import AttendanceChecker
 from services.report_generator import ReportGenerator
 from services.hr_report import HRReportGenerator
+from services.email_service import EmailService
+
 
 # =========================================================
 # Flask Application
@@ -41,10 +42,13 @@ from services.hr_report import HRReportGenerator
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = SECRET_KEY
-
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
 app.config["REPORT_FOLDER"] = REPORT_FOLDER
+
+
+# =========================================================
+# Services
+# =========================================================
 
 attendance_checker = AttendanceChecker()
 
@@ -52,13 +56,18 @@ report_generator = ReportGenerator()
 
 hr_report_generator = HRReportGenerator()
 
+email_service = EmailService()
+
+
+# =========================================================
+# Global Variables
+# =========================================================
+
 analysis_result = None
 
 report_path = None
 
 hr_report = ""
-
-
 # =========================================================
 # Utility Functions
 # =========================================================
@@ -71,6 +80,8 @@ def allowed_file(filename):
     extension = filename.rsplit(".", 1)[1].lower()
 
     return extension in ALLOWED_EXTENSIONS
+
+
 # =========================================================
 # Home Page
 # =========================================================
@@ -82,9 +93,7 @@ def home():
         "index.html",
         app_name=APP_NAME
     )
-
-
-# =========================================================
+    # =========================================================
 # Upload Attendance Excel
 # =========================================================
 
@@ -93,6 +102,7 @@ def upload_file():
 
     global analysis_result
     global report_path
+    global hr_report
 
     if "attendance_file" not in request.files:
 
@@ -114,7 +124,9 @@ def upload_file():
 
         return redirect(url_for("home"))
 
-    filename = secure_filename(file.filename)
+    filename = secure_filename(
+        file.filename
+    )
 
     filepath = os.path.join(
         app.config["UPLOAD_FOLDER"],
@@ -125,32 +137,70 @@ def upload_file():
 
     try:
 
+        # ==========================================
+        # Process Attendance
+        # ==========================================
+
         analysis_result = attendance_checker.process_excel(
             filepath
         )
+
+        # ==========================================
+        # Generate Excel Report
+        # ==========================================
 
         report_path = report_generator.generate_report(
             analysis_result,
             filename
         )
-        
-        global hr_report
+
+        # ==========================================
+        # Generate HR WhatsApp Report
+        # ==========================================
 
         hr_report = hr_report_generator.generate(
             analysis_result["employees"],
             analysis_result["summary"]
         )
 
-        flash("Attendance processed successfully.")
+        # ==========================================
+        # Send Email Notifications
+        # ==========================================
 
-        return redirect(url_for("dashboard"))
+        sent = 0
+        failed = 0
+
+        for employee in analysis_result["employees"]:
+
+            email = employee.get("email", "").strip()
+
+            if email:
+
+                if email_service.send_email(employee):
+
+                    sent += 1
+
+                else:
+
+                    failed += 1
+
+        flash(
+            f"Attendance processed successfully. "
+            f"Emails Sent : {sent} | Failed : {failed}"
+        )
+
+        return redirect(
+            url_for("dashboard")
+        )
 
     except Exception as e:
 
         flash(str(e))
 
-        return redirect(url_for("home"))
-    # =========================================================
+        return redirect(
+            url_for("home")
+        )
+        # =========================================================
 # Dashboard
 # =========================================================
 
@@ -158,23 +208,33 @@ def upload_file():
 def dashboard():
 
     global analysis_result
+    global hr_report
 
     if analysis_result is None:
 
-        flash("Please upload an attendance Excel file first.")
+        flash(
+            "Please upload an attendance Excel file first."
+        )
 
-        return redirect(url_for("home"))
+        return redirect(
+            url_for("home")
+        )
 
     return render_template(
+
         "dashboard.html",
+
         app_name=APP_NAME,
+
         result=analysis_result,
-        hr_report = hr_report 
+
+        hr_report=hr_report
+
     )
 
 
 # =========================================================
-# Download Report
+# Download Excel Report
 # =========================================================
 
 @app.route("/download")
@@ -184,13 +244,20 @@ def download_report():
 
     if report_path is None:
 
-        flash("No report available.")
+        flash(
+            "No report available."
+        )
 
-        return redirect(url_for("dashboard"))
+        return redirect(
+            url_for("dashboard")
+        )
 
     return send_file(
+
         report_path,
+
         as_attachment=True
+
     )
 
 
@@ -202,8 +269,11 @@ def download_report():
 def page_not_found(error):
 
     return render_template(
+
         "404.html",
+
         app_name=APP_NAME
+
     ), 404
 
 
@@ -214,7 +284,11 @@ def page_not_found(error):
 if __name__ == "__main__":
 
     app.run(
+
         host="0.0.0.0",
+
         port=5000,
+
         debug=True
+
     )
