@@ -2,5 +2,5 @@ services:
   - type: web
     name: attendance-notification-system
     runtime: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: gunicorn app:app
