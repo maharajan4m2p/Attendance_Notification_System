@@ -33,6 +33,8 @@ body{
 }
 
 /* ============================== */
+/* Navbar */
+/* ============================== */
 
 .navbar{
 
@@ -42,7 +44,7 @@ body{
 
 .navbar-brand{
 
-    color:white!important;
+    color:#fff !important;
 
     font-size:28px;
 
@@ -52,19 +54,21 @@ body{
 
 .developer{
 
-    color:white;
+    color:#fff;
 
     font-size:14px;
 
 }
 
 /* ============================== */
+/* Dashboard Cards */
+/* ============================== */
 
 .card-box{
 
     border-radius:15px;
 
-    color:white;
+    color:#fff;
 
     padding:20px;
 
@@ -122,7 +126,13 @@ body{
 
     margin-top:10px;
 
+    font-weight:bold;
+
 }
+
+/* ============================== */
+/* Buttons */
+/* ============================== */
 
 .top-buttons .btn{
 
@@ -132,15 +142,51 @@ body{
 
 }
 
+/* ============================== */
+/* Table */
+/* ============================== */
+
 .table td{
 
     vertical-align:middle;
 
 }
 
+/* ============================== */
+/* Textareas */
+/* ============================== */
+
+textarea{
+
+    font-size:15px;
+
+    resize:none;
+
+}
+
 .modal textarea{
 
     font-size:15px;
+
+}
+
+/* ============================== */
+/* Responsive */
+/* ============================== */
+
+@media(max-width:768px){
+
+.card-box{
+
+margin-bottom:15px;
+
+}
+
+.top-buttons .btn{
+
+width:100%;
+
+}
 
 }
 
@@ -241,7 +287,7 @@ Developed by Maharajan
 
         <div class="card-box early">
 
-            <h5>Early Out</h5>
+            <h5>Early Punch Out</h5>
 
             <h2>{{ result.summary.early_out }}</h2>
 
@@ -253,7 +299,7 @@ Developed by Maharajan
 
         <div class="card-box missing">
 
-            <h5>Missing Out</h5>
+            <h5>Missing Punch Out</h5>
 
             <h2>{{ result.summary.missing_out }}</h2>
 
@@ -276,13 +322,13 @@ Developed by Maharajan
 </div>
 
 <br>
-
 <!-- ========================================= -->
 <!-- Action Buttons -->
 <!-- ========================================= -->
 
 <div class="top-buttons">
 
+    <!-- HR Report -->
     <button
         class="btn btn-success btn-lg"
         onclick="sendHRReport()">
@@ -293,16 +339,18 @@ Developed by Maharajan
 
     </button>
 
+    <!-- Late Punch Report -->
     <button
-    class="btn btn-danger btn-lg"
-    onclick="sendLatePunchReport()">
+        class="btn btn-danger btn-lg"
+        onclick="sendLatePunchReport()">
 
-    <i class="fa-solid fa-clock"></i>
+        <i class="fa-solid fa-clock"></i>
 
-    Late Punch Report
+        Late Punch Report
 
     </button>
 
+    <!-- Send Emails -->
     <form
         action="/send_emails"
         method="POST"
@@ -320,6 +368,7 @@ Developed by Maharajan
 
     </form>
 
+    <!-- Download Excel -->
     <a
         href="/download"
         class="btn btn-primary btn-lg">
@@ -330,12 +379,15 @@ Developed by Maharajan
 
     </a>
 
+    <!-- Download PDF -->
     <button
-        class="btn btn-danger btn-lg">
+        class="btn btn-secondary btn-lg"
+        disabled>
 
         <i class="fa-solid fa-file-pdf"></i>
 
         Download PDF
+        <small>(Coming Soon)</small>
 
     </button>
 
@@ -354,38 +406,57 @@ Developed by Maharajan
             type="text"
             id="employeeSearch"
             class="form-control form-control-lg"
-            placeholder="🔍 Search Employee">
+            placeholder="🔍 Search Employee by ID, Name, Phone or Email">
 
     </div>
 
     <div class="col-md-8 text-end">
 
-        <button class="btn btn-outline-primary filter-btn" data-filter="All">
+        <button
+            class="btn btn-outline-primary filter-btn"
+            data-filter="All">
+
             All
+
         </button>
 
-        <button class="btn btn-outline-danger filter-btn" data-filter="Late">
-            Late
+        <button
+            class="btn btn-outline-danger filter-btn"
+            data-filter="Late">
+
+            Late Punch
+
         </button>
 
-        <button class="btn btn-outline-warning filter-btn" data-filter="Early">
+        <button
+            class="btn btn-outline-warning filter-btn"
+            data-filter="Early">
+
             Early Out
+
         </button>
 
-        <button class="btn btn-outline-secondary filter-btn" data-filter="Missing">
+        <button
+            class="btn btn-outline-secondary filter-btn"
+            data-filter="Missing">
+
             Missing
+
         </button>
 
-        <button class="btn btn-outline-success filter-btn" data-filter="Overtime">
-            OT
+        <button
+            class="btn btn-outline-success filter-btn"
+            data-filter="Overtime">
+
+            Overtime
+
         </button>
 
     </div>
 
 </div>
-
 <!-- ========================================= -->
-<!-- Employee Table -->
+<!-- Employee Attendance Table -->
 <!-- ========================================= -->
 
 <div class="card shadow-lg">
@@ -497,7 +568,6 @@ Developed by Maharajan
                     <td>
 
                         <button
-
                             class="btn btn-primary btn-sm"
 
                             onclick="showEmployee(
@@ -545,7 +615,9 @@ Developed by Maharajan
 <!-- Employee Details Modal -->
 <!-- ========================================= -->
 
-<div class="modal fade" id="employeeModal" tabindex="-1">
+<div class="modal fade"
+     id="employeeModal"
+     tabindex="-1">
 
     <div class="modal-dialog modal-lg">
 
@@ -626,7 +698,7 @@ Developed by Maharajan
 
                     <i class="fa-solid fa-copy"></i>
 
-                    Copy
+                    Copy Notification
 
                 </button>
 
@@ -637,6 +709,16 @@ Developed by Maharajan
                     <i class="fa-solid fa-plus"></i>
 
                     Add To HR Report
+
+                </button>
+
+                <button
+                    class="btn btn-danger"
+                    data-bs-dismiss="modal">
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                    Close
 
                 </button>
 
@@ -689,7 +771,7 @@ Developed by Maharajan
 
                 onclick="copyHRReport()">
 
-                <i class="fa-brands fa-whatsapp"></i>
+                <i class="fa-solid fa-copy"></i>
 
                 Copy HR Report
 
@@ -713,20 +795,90 @@ Developed by Maharajan
 
 </div>
 
+<br>
+<!-- ========================================= -->
+<!-- Late Punch & Missing Punch Out Report -->
+<!-- ========================================= -->
+
+<div class="card shadow-lg mt-4">
+
+    <div class="card-header bg-danger text-white">
+
+        <h4>
+
+            <i class="fa-solid fa-clock"></i>
+
+            Late Punch & Missing Punch Out Report
+
+        </h4>
+
+    </div>
+
+    <div class="card-body">
+
+        <textarea
+
+            id="latePunchReport"
+
+            class="form-control"
+
+            rows="18"
+
+            readonly>{{ late_punch_report }}</textarea>
+
+        <br>
+
+        <div class="d-flex flex-wrap gap-2">
+
+            <button
+
+                class="btn btn-danger btn-lg"
+
+                onclick="copyLatePunchReport()">
+
+                <i class="fa-solid fa-copy"></i>
+
+                Copy Late Punch Report
+
+            </button>
+
+            <button
+
+                class="btn btn-success btn-lg"
+
+                onclick="sendLatePunchReport()">
+
+                <i class="fa-brands fa-whatsapp"></i>
+
+                Open WhatsApp
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<br>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 
 let reportText = "";
 
+// =========================================
+// Employee Modal
+// =========================================
+
 function showEmployee(
-id,
-name,
-phone,
-email,
-pin,
-pout,
-notification
+    id,
+    name,
+    phone,
+    email,
+    pin,
+    pout,
+    notification
 ){
 
     document.getElementById("mEmpId").innerHTML = id;
@@ -749,23 +901,35 @@ notification
 
 }
 
+
+// =========================================
+// Copy Notification
+// =========================================
+
 function copyNotification(){
 
     navigator.clipboard.writeText(
+
         document.getElementById("mNotification").value
+
     );
 
     alert("Notification copied successfully.");
 
 }
 
+
+// =========================================
+// Add Notification to HR Report
+// =========================================
+
 function addToReport(){
 
     reportText +=
 
-    document.getElementById("mNotification").value +
+        document.getElementById("mNotification").value +
 
-    "\n\n--------------------------------\n\n";
+        "\n\n══════════════════════════════\n\n";
 
     document.getElementById("hrReport").value = reportText;
 
@@ -773,25 +937,56 @@ function addToReport(){
 
 }
 
+
+// =========================================
+// Copy HR Report
+// =========================================
+
 function copyHRReport(){
 
     navigator.clipboard.writeText(
+
         document.getElementById("hrReport").value
+
     );
 
     alert("HR Report copied successfully.");
 
 }
 
+
+// =========================================
+// Copy Late Punch Report
+// =========================================
+
+function copyLatePunchReport(){
+
+    navigator.clipboard.writeText(
+
+        document.getElementById("latePunchReport").value
+
+    );
+
+    alert("Late Punch Report copied successfully.");
+
+}
+
+
+// =========================================
+// Send HR Report
+// =========================================
+
 function sendHRReport(){
 
-    const report = document.getElementById("hrReport").value;
+    const report =
 
-    const message = encodeURIComponent(report);
+        document.getElementById("hrReport").value;
 
     window.open(
 
-        "https://wa.me/?text=" + message,
+        "https://wa.me/?text=" +
+
+        encodeURIComponent(report),
 
         "_blank"
 
@@ -799,50 +994,112 @@ function sendHRReport(){
 
 }
 
-function sendLatePunchReport() {
 
-    let report = "🔴 LATE PUNCH REPORT\n";
-    report += "🏢 ADISTHAM VENTURES PRIVATE LIMITED\n\n";
+// =========================================
+// Send Late Punch Report
+// =========================================
 
-    let rows = document.querySelectorAll("#employeeTable tbody tr");
+function sendLatePunchReport(){
 
-    let count = 1;
+    const report =
 
-    rows.forEach(function(row){
+        document.getElementById("latePunchReport").value;
 
-        let status = row.cells[6].innerText;
+    window.open(
 
-        if(status.includes("Late")){
+        "https://wa.me/?text=" +
 
-            report += count + ")\n";
-            report += "👤 Name : " + row.cells[1].innerText + "\n";
-            report += "🆔 Emp ID : " + row.cells[0].innerText + "\n";
-            report += "📞 Phone : " + row.cells[2].innerText + "\n";
-            report += "📧 Email : " + row.cells[3].innerText + "\n";
-            report += "🕘 Punch In : " + row.cells[4].innerText + "\n";
-            report += "⚠️ Status : " + status + "\n";
-            report += "────────────────────────\n\n";
+        encodeURIComponent(report),
 
-            count++;
+        "_blank"
 
-        }
+    );
 
-    });
+}
 
-    if(count == 1){
+</script>
+<script>
 
-        alert("No Late Punch Employees.");
+// =========================================
+// Employee Search
+// =========================================
 
-        return;
+document.getElementById("employeeSearch").addEventListener(
+
+    "keyup",
+
+    function(){
+
+        let value = this.value.toLowerCase();
+
+        let rows = document.querySelectorAll(
+            "#employeeTable tbody tr"
+        );
+
+        rows.forEach(function(row){
+
+            let text = row.innerText.toLowerCase();
+
+            if(text.includes(value)){
+
+                row.style.display = "";
+
+            }
+
+            else{
+
+                row.style.display = "none";
+
+            }
+
+        });
 
     }
 
-    window.open(
-        "https://wa.me/?text=" + encodeURIComponent(report),
-        "_blank"
-    );
+);
 
-}
+
+// =========================================
+// Employee Status Filter
+// =========================================
+
+document.querySelectorAll(".filter-btn").forEach(function(button){
+
+    button.addEventListener("click", function(){
+
+        let filter = this.dataset.filter;
+
+        let rows = document.querySelectorAll(
+            "#employeeTable tbody tr"
+        );
+
+        rows.forEach(function(row){
+
+            let status = row.cells[6].innerText;
+
+            if(filter === "All"){
+
+                row.style.display = "";
+
+            }
+
+            else if(status.includes(filter)){
+
+                row.style.display = "";
+
+            }
+
+            else{
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+    });
+
+});
 
 </script>
 

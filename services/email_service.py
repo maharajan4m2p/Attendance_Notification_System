@@ -28,7 +28,15 @@ class EmailService:
 
     def send_email(self, employee):
 
+        server = None
+
         try:
+
+            email = employee.get("email", "").strip()
+
+            if not email:
+
+                return False
 
             subject, body = self.template.generate(employee)
 
@@ -36,7 +44,7 @@ class EmailService:
 
             message["From"] = EMAIL_ADDRESS
 
-            message["To"] = employee["email"]
+            message["To"] = email
 
             message["Subject"] = subject
 
@@ -46,7 +54,8 @@ class EmailService:
 
             server = smtplib.SMTP(
                 SMTP_SERVER,
-                SMTP_PORT
+                SMTP_PORT,
+                timeout=30
             )
 
             server.starttls()
@@ -58,17 +67,23 @@ class EmailService:
 
             server.sendmail(
                 EMAIL_ADDRESS,
-                employee["email"],
+                email,
                 message.as_string()
             )
-
-            server.quit()
 
             return True
 
         except Exception as e:
 
-            print(e)
+            print(f"Email Error ({employee.get('employee_id','Unknown')}): {e}")
 
             return False
-        
+
+        finally:
+
+            if server:
+
+                try:
+                    server.quit()
+                except Exception:
+                    pass

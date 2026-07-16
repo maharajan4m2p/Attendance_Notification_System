@@ -42,7 +42,9 @@ from services.email_service import EmailService
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = SECRET_KEY
+
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 app.config["REPORT_FOLDER"] = REPORT_FOLDER
 
 
@@ -68,6 +70,8 @@ analysis_result = None
 report_path = None
 
 hr_report = ""
+
+late_punch_report = ""
 # =========================================================
 # Utility Functions
 # =========================================================
@@ -103,26 +107,39 @@ def upload_file():
     global analysis_result
     global report_path
     global hr_report
+    global late_punch_report
 
     if "attendance_file" not in request.files:
 
-        flash("Please select an Excel file.")
+        flash(
+            "Please select an Excel file."
+        )
 
-        return redirect(url_for("home"))
+        return redirect(
+            url_for("home")
+        )
 
     file = request.files["attendance_file"]
 
     if file.filename == "":
 
-        flash("No file selected.")
+        flash(
+            "No file selected."
+        )
 
-        return redirect(url_for("home"))
+        return redirect(
+            url_for("home")
+        )
 
     if not allowed_file(file.filename):
 
-        flash("Only Excel (.xlsx or .xls) files are allowed.")
+        flash(
+            "Only Excel (.xlsx or .xls) files are allowed."
+        )
 
-        return redirect(url_for("home"))
+        return redirect(
+            url_for("home")
+        )
 
     filename = secure_filename(
         file.filename
@@ -138,7 +155,7 @@ def upload_file():
     try:
 
         # ==========================================
-        # Process Attendance
+        # Process Attendance Excel
         # ==========================================
 
         analysis_result = attendance_checker.process_excel(
@@ -155,24 +172,31 @@ def upload_file():
         )
 
         # ==========================================
-        # Generate HR WhatsApp Report
+        # Generate WhatsApp Reports
         # ==========================================
 
-        hr_report = hr_report_generator.generate(
+        reports = hr_report_generator.generate(
             analysis_result["employees"],
             analysis_result["summary"]
         )
 
+        hr_report = reports["hr_report"]
+
+        late_punch_report = reports["late_punch_report"]
         # ==========================================
         # Send Email Notifications
         # ==========================================
 
         sent = 0
+
         failed = 0
 
         for employee in analysis_result["employees"]:
 
-            email = employee.get("email", "").strip()
+            email = employee.get(
+                "email",
+                ""
+            ).strip()
 
             if email:
 
@@ -184,21 +208,35 @@ def upload_file():
 
                     failed += 1
 
+        # ==========================================
+        # Success Message
+        # ==========================================
+
         flash(
+
             f"Attendance processed successfully. "
             f"Emails Sent : {sent} | Failed : {failed}"
+
         )
 
         return redirect(
+
             url_for("dashboard")
+
         )
 
     except Exception as e:
 
-        flash(str(e))
+        flash(
+
+            f"Error : {str(e)}"
+
+        )
 
         return redirect(
+
             url_for("home")
+
         )
         # =========================================================
 # Dashboard
@@ -209,6 +247,7 @@ def dashboard():
 
     global analysis_result
     global hr_report
+    global late_punch_report
 
     if analysis_result is None:
 
@@ -228,12 +267,12 @@ def dashboard():
 
         result=analysis_result,
 
-        hr_report=hr_report
+        hr_report=hr_report,
+
+        late_punch_report=late_punch_report
 
     )
-
-
-# =========================================================
+    # =========================================================
 # Download Excel Report
 # =========================================================
 
@@ -258,6 +297,58 @@ def download_report():
 
         as_attachment=True
 
+    )
+
+
+# =========================================================
+# Send Email Notifications Manually
+# =========================================================
+
+@app.route("/send_emails", methods=["POST"])
+def send_emails():
+
+    global analysis_result
+
+    if analysis_result is None:
+
+        flash(
+            "Please upload an attendance file first."
+        )
+
+        return redirect(
+            url_for("home")
+        )
+
+    sent = 0
+
+    failed = 0
+
+    for employee in analysis_result["employees"]:
+
+        email = employee.get(
+            "email",
+            ""
+        ).strip()
+
+        if email:
+
+            if email_service.send_email(employee):
+
+                sent += 1
+
+            else:
+
+                failed += 1
+
+    flash(
+
+        f"Email Notifications Sent Successfully! "
+        f"Success : {sent} | Failed : {failed}"
+
+    )
+
+    return redirect(
+        url_for("dashboard")
     )
 
 
