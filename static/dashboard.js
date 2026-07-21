@@ -2,569 +2,1071 @@
 =========================================================
 Attendance Notification System Pro
 Dashboard JavaScript
-Version : 5.0 Enterprise
+Version : 8.0 Enterprise (Ultra Performance)
 Developed by Maharajan
 =========================================================
 */
 
+"use strict";
+
 let hrReportText = "";
 
 let employeeModal = null;
+
+// =====================================================
+// Show Employee Details
+// =====================================================
+
 function showEmployee(
 
-id,
+    id,
 
-name,
+    name,
 
-department,
+    department,
 
-designation,
+    designation,
 
-date,
+    date,
 
-punchIn,
+    punchIn,
 
-punchOut,
+    punchOut,
 
-dailyOT,
+    dailyOT,
 
-monthlyOT,
+    monthlyOT,
 
-remainingOT,
+    remainingOT,
 
-dailyStatus,
+    dailyStatus,
 
-monthlyStatus,
+    monthlyStatus,
 
-notification
+    notification
 
 ){
 
-document.getElementById("mEmpId").innerHTML=id;
+    document.getElementById("mEmpId").textContent = id;
 
-document.getElementById("mName").innerHTML=name;
+    document.getElementById("mName").textContent = name;
 
-document.getElementById("mDepartment").innerHTML=department;
+    document.getElementById("mDepartment").textContent = department;
 
-document.getElementById("mDesignation").innerHTML=designation;
+    document.getElementById("mDesignation").textContent = designation;
 
-document.getElementById("mDate").innerHTML=date;
+    document.getElementById("mDate").textContent = date;
 
-document.getElementById("mPunchIn").innerHTML=punchIn;
+    document.getElementById("mPunchIn").textContent = punchIn;
 
-document.getElementById("mPunchOut").innerHTML=punchOut;
+    document.getElementById("mPunchOut").textContent = punchOut;
 
-document.getElementById("mDailyOT").innerHTML=dailyOT;
+    document.getElementById("mDailyOT").textContent = dailyOT || "00:00";
 
-document.getElementById("mMonthlyOT").innerHTML=monthlyOT;
+    document.getElementById("mMonthlyOT").textContent = monthlyOT || "00:00";
 
-document.getElementById("mRemainingOT").innerHTML=remainingOT;
+    document.getElementById("mRemainingOT").textContent = remainingOT || "00:00";
 
-document.getElementById("mDailyStatus").innerHTML=dailyStatus;
+    document.getElementById("mDailyStatus").textContent = dailyStatus || "Normal";
 
-document.getElementById("mMonthlyStatus").innerHTML=monthlyStatus;
+    document.getElementById("mMonthlyStatus").textContent = monthlyStatus || "Normal";
 
-document.getElementById("mNotification").value=notification;
+    document.getElementById("mNotification").value = notification || "";
 
-const daily=document.getElementById("mDailyStatus");
+    // -----------------------------------------
+    // Daily Status Badge
+    // -----------------------------------------
 
-daily.className="badge";
+    const daily = document.getElementById("mDailyStatus");
 
-if(dailyStatus==="Allowed"){
+    daily.className = "badge";
 
-daily.classList.add("bg-success");
+    if(dailyStatus === "Normal"){
+
+        daily.classList.add("bg-success");
+
+    }
+
+    else if(dailyStatus === "Warning"){
+
+        daily.classList.add("bg-warning","text-dark");
+
+    }
+
+    else if(dailyStatus === "Limit Reached"){
+
+        daily.classList.add("bg-dark");
+
+    }
+
+    else{
+
+        daily.classList.add("bg-danger");
+
+    }
+
+    // -----------------------------------------
+    // Monthly Status Badge
+    // -----------------------------------------
+
+    const monthly = document.getElementById("mMonthlyStatus");
+
+    monthly.className = "badge";
+
+    if(monthlyStatus === "Normal"){
+
+        monthly.classList.add("bg-success");
+
+    }
+
+    else if(monthlyStatus === "Warning"){
+
+        monthly.classList.add("bg-warning","text-dark");
+
+    }
+
+    else if(monthlyStatus === "Limit Reached"){
+
+        monthly.classList.add("bg-dark");
+
+    }
+
+    else{
+
+        monthly.classList.add("bg-danger");
+
+    }
+
+    employeeModal = new bootstrap.Modal(
+
+        document.getElementById("employeeModal")
+
+    );
+
+    employeeModal.show();
 
 }
+// =====================================================
+// Copy Employee Notification
+// =====================================================
 
-else if(dailyStatus==="Limit Reached"){
-
-daily.classList.add("bg-warning","text-dark");
-
-}
-
-else{
-
-daily.classList.add("bg-danger");
-
-}
-
-const monthly=document.getElementById("mMonthlyStatus");
-
-monthly.className="badge";
-
-if(monthlyStatus==="Normal"){
-
-monthly.classList.add("bg-success");
-
-}
-
-else if(monthlyStatus==="Warning"){
-
-monthly.classList.add("bg-warning","text-dark");
-
-}
-
-else if(monthlyStatus==="Limit Reached"){
-
-monthly.classList.add("bg-dark");
-
-}
-
-else{
-
-monthly.classList.add("bg-danger");
-
-}
-
-employeeModal=new bootstrap.Modal(
-
-document.getElementById("employeeModal")
-
-);
-
-employeeModal.show();
-
-}
 function copyNotification(){
 
-navigator.clipboard.writeText(
+    const notification = document.getElementById("mNotification");
 
-document.getElementById("mNotification").value
+    if(!notification){
 
-);
+        return;
 
-alert("Notification copied.");
+    }
+
+    navigator.clipboard.writeText(
+
+        notification.value
+
+    );
+
+    alert("Notification copied successfully.");
 
 }
+
+// =====================================================
+// Add Employee Notification to HR Report
+// =====================================================
+
 function addToReport(){
 
-const notification=
+    const notification = document.getElementById(
 
-document.getElementById("mNotification").value;
+        "mNotification"
 
-hrReportText+=notification+"\n\n-------------------------\n\n";
+    );
 
-document.getElementById("hrReport").value=hrReportText;
+    const hrReport = document.getElementById(
 
-alert("Added to HR Report.");
+        "hrReport"
+
+    );
+
+    if(
+
+        !notification ||
+
+        !hrReport
+
+    ){
+
+        return;
+
+    }
+
+    if(hrReportText.length > 0){
+
+        hrReportText +=
+
+        "\n\n========================================\n\n";
+
+    }
+
+    hrReportText += notification.value;
+
+    hrReport.value = hrReportText;
+
+    alert(
+
+        "Employee added to HR Report."
+
+    );
 
 }
+
 // =====================================================
 // Copy HR Report
 // =====================================================
 
 function copyHRReport(){
 
-const report=document.getElementById("hrReport");
+    const report = document.getElementById(
 
-if(!report)return;
+        "hrReport"
 
-navigator.clipboard.writeText(report.value);
+    );
 
-alert("HR Report copied successfully.");
+    if(!report){
+
+        return;
+
+    }
+
+    navigator.clipboard.writeText(
+
+        report.value
+
+    );
+
+    alert(
+
+        "HR Report copied successfully."
+
+    );
 
 }
+
 // =====================================================
-// Send HR Report
+// Send HR Report to WhatsApp
 // =====================================================
 
 function sendHRReport(){
 
-const report=document.getElementById("hrReport");
+    const report = document.getElementById(
 
-if(!report)return;
+        "hrReport"
 
-window.open(
+    );
 
-"https://wa.me/?text="+
+    if(!report){
 
-encodeURIComponent(report.value),
+        return;
 
-"_blank"
+    }
 
-);
+    window.open(
+
+        "https://wa.me/?text=" +
+
+        encodeURIComponent(
+
+            report.value
+
+        ),
+
+        "_blank"
+
+    );
 
 }
+
 // =====================================================
 // Copy Late Punch Report
 // =====================================================
 
 function copyLatePunchReport(){
 
-const report=document.getElementById("latePunchReport");
+    const report = document.getElementById(
 
-if(!report)return;
+        "latePunchReport"
 
-navigator.clipboard.writeText(report.value);
+    );
 
-alert("Late Punch Report copied.");
+    if(!report){
+
+        return;
+
+    }
+
+    navigator.clipboard.writeText(
+
+        report.value
+
+    );
+
+    alert(
+
+        "Late / Missing Punch Report copied."
+
+    );
 
 }
+
 // =====================================================
 // Send Late Punch Report
 // =====================================================
 
 function sendLatePunchReport(){
 
-const report=document.getElementById("latePunchReport");
+    const report = document.getElementById(
 
-if(!report)return;
+        "latePunchReport"
 
-window.open(
+    );
 
-"https://wa.me/?text="+
+    if(!report){
 
-encodeURIComponent(report.value),
+        return;
 
-"_blank"
+    }
 
-);
+    window.open(
+
+        "https://wa.me/?text=" +
+
+        encodeURIComponent(
+
+            report.value
+
+        ),
+
+        "_blank"
+
+    );
 
 }
 // =====================================================
 // Employee Search
 // =====================================================
 
-const employeeSearch=document.getElementById(
+const employeeSearch = document.getElementById(
 
-"employeeSearch"
+    "employeeSearch"
 
 );
 
 if(employeeSearch){
 
-employeeSearch.addEventListener(
+    employeeSearch.addEventListener(
 
-"keyup",
+        "keyup",
 
-function(){
+        function(){
 
-const value=this.value.toLowerCase();
+            const keyword = this.value
 
-document.querySelectorAll(
+                .toLowerCase()
 
-"#employeeTable tbody tr"
+                .trim();
 
-).forEach(function(row){
+            const rows = document.querySelectorAll(
 
-row.style.display=
+                "#employeeTable tbody tr"
 
-row.innerText.toLowerCase().includes(value)
+            );
 
-?
+            rows.forEach(function(row){
 
-""
+                const text = row.innerText.toLowerCase();
 
-:
+                row.style.display =
 
-"none";
+                    text.includes(keyword)
 
-});
+                    ? ""
+
+                    : "none";
+
+            });
+
+        }
+
+    );
 
 }
+
+// =====================================================
+// Employee Filters
+// =====================================================
+
+const filterButtons = document.querySelectorAll(
+
+    ".filter-btn"
 
 );
 
-}
-// =====================================================
-// Employee Filter
-// =====================================================
+filterButtons.forEach(function(button){
 
-document.querySelectorAll(
+    button.addEventListener(
 
-".filter-btn"
+        "click",
 
-).forEach(function(button){
+        function(){
 
-button.addEventListener(
+            // Remove Active Button
 
-"click",
+            filterButtons.forEach(function(btn){
 
-function(){
+                btn.classList.remove(
 
-const filter=this.dataset.filter;
+                    "active"
 
-document.querySelectorAll(
+                );
 
-"#employeeTable tbody tr"
+            });
 
-).forEach(function(row){
+            this.classList.add(
 
-if(filter==="All"){
+                "active"
 
-row.style.display="";
+            );
 
-return;
+            const filter = this.dataset.filter;
 
-}
+            const rows = document.querySelectorAll(
 
-row.style.display=
+                "#employeeTable tbody tr"
 
-row.innerText.includes(filter)
+            );
 
-?
+            rows.forEach(function(row){
 
-""
+                if(filter === "All"){
 
-:
+                    row.style.display = "";
 
-"none";
+                    return;
+
+                }
+
+                const text = row.innerText.toLowerCase();
+
+                row.style.display =
+
+                    text.includes(
+
+                        filter.toLowerCase()
+
+                    )
+
+                    ? ""
+
+                    : "none";
+
+            });
+
+        }
+
+    );
 
 });
 
+// =====================================================
+// Reset Search
+// =====================================================
+
+function clearSearch(){
+
+    if(!employeeSearch){
+
+        return;
+
+    }
+
+    employeeSearch.value = "";
+
+    document.querySelectorAll(
+
+        "#employeeTable tbody tr"
+
+    ).forEach(function(row){
+
+        row.style.display = "";
+
+    });
+
 }
-
-);
-
-});
 // =====================================================
 // Dashboard Charts
 // =====================================================
 
 window.addEventListener(
 
-"load",
+    "load",
 
-function(){
+    function(){
 
-const summary=window.dashboardData.summary;
+        const summary = window.dashboardData.summary || {};
 
-const employees=window.dashboardData.employees;
+        const employees = window.dashboardData.employees || [];
 
+        // =============================================
+        // Attendance Pie Chart
+        // =============================================
 
-// =============================================
-// Attendance Pie
-// =============================================
+        const attendanceCanvas = document.getElementById(
 
-new Chart(
+            "attendanceChart"
 
-document.getElementById("attendanceChart"),
+        );
 
-{
+        if(attendanceCanvas){
 
-type:"pie",
+            new Chart(
 
-data:{
+                attendanceCanvas,
 
-labels:[
+                {
 
-"Present",
+                    type: "pie",
 
-"Late",
+                    data: {
 
-"Early Out",
+                        labels: [
 
-"Missing In",
+                            "Present",
 
-"Missing Out"
+                            "Late Punch",
 
-],
+                            "Early Out",
 
-datasets:[{
+                            "Missing In",
 
-data:[
+                            "Missing Out"
 
-summary.present,
+                        ],
 
-summary.late_in,
+                        datasets: [{
 
-summary.early_out,
+                            data: [
 
-summary.missing_in,
+                                summary.present || 0,
 
-summary.missing_out
+                                summary.late_in || 0,
 
-],
+                                summary.early_out || 0,
 
-backgroundColor:[
+                                summary.missing_in || 0,
 
-"#198754",
+                                summary.missing_out || 0
 
-"#dc3545",
+                            ],
 
-"#fd7e14",
+                            backgroundColor: [
 
-"#6c757d",
+                                "#198754",
 
-"#212529"
+                                "#dc3545",
 
-]
+                                "#fd7e14",
 
-}]
+                                "#6c757d",
+
+                                "#212529"
+
+                            ]
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        plugins: {
+
+                            legend: {
+
+                                position: "bottom"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+        }
+
+        // =============================================
+        // Attendance Statistics
+        // =============================================
+
+        const statisticsCanvas = document.getElementById(
+
+            "statisticsChart"
+
+        );
+
+        if(statisticsCanvas){
+
+            new Chart(
+
+                statisticsCanvas,
+
+                {
+
+                    type: "bar",
+
+                    data: {
+
+                        labels: [
+
+                            "Present",
+
+                            "Late",
+
+                            "Early",
+
+                            "Overtime"
+
+                        ],
+
+                        datasets: [{
+
+                            label: "Employees",
+
+                            data: [
+
+                                summary.present || 0,
+
+                                summary.late_in || 0,
+
+                                summary.early_out || 0,
+
+                                summary.overtime || 0
+
+                            ]
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        plugins: {
+
+                            legend: {
+
+                                display: false
+
+                            }
+
+                        },
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero: true
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+        }
+
+        // =============================================
+        // Monthly OT Status
+        // =============================================
+
+        const monthlyCanvas = document.getElementById(
+
+            "monthlyOTChart"
+
+        );
+
+        if(monthlyCanvas){
+
+            const warning = summary.warning || 0;
+
+            const limit = summary.limit_reached || 0;
+
+            const exceeded = summary.monthly_ot_exceeded || 0;
+
+            const normal =
+
+                (summary.total || 0)
+
+                -
+
+                warning
+
+                -
+
+                limit
+
+                -
+
+                exceeded;
+
+            new Chart(
+
+                monthlyCanvas,
+
+                {
+
+                    type: "doughnut",
+
+                    data: {
+
+                        labels: [
+
+                            "Normal",
+
+                            "Warning",
+
+                            "Limit Reached",
+
+                            "Exceeded"
+
+                        ],
+
+                        datasets: [{
+
+                            data: [
+
+                                normal,
+
+                                warning,
+
+                                limit,
+
+                                exceeded
+
+                            ],
+
+                            backgroundColor: [
+
+                                "#198754",
+
+                                "#ffc107",
+
+                                "#212529",
+
+                                "#dc3545"
+
+                            ]
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        plugins: {
+
+                            legend: {
+
+                                position: "bottom"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+        }
+
+        // =============================================
+        // Top Monthly OT Employees
+        // =============================================
+
+        const topCanvas = document.getElementById(
+
+            "topOTChart"
+
+        );
+
+        if(topCanvas){
+
+            const sorted = [...employees]
+
+                .sort(
+
+                    (a, b) =>
+
+                    (b.monthly_ot_minutes || 0)
+
+                    -
+
+                    (a.monthly_ot_minutes || 0)
+
+                )
+
+                .slice(0, 10);
+
+            new Chart(
+
+                topCanvas,
+
+                {
+
+                    type: "bar",
+
+                    data: {
+
+                        labels: sorted.map(
+
+                            emp => emp.name
+
+                        ),
+
+                        datasets: [{
+
+                            label: "Monthly OT (Minutes)",
+
+                            data: sorted.map(
+
+                                emp => emp.monthly_ot_minutes || 0
+
+                            )
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        indexAxis: "y",
+
+                        scales: {
+
+                            x: {
+
+                                beginAtZero: true
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+        }
+
+    }
+
+);
+// =====================================================
+// Utility Functions
+// =====================================================
+
+// Escape HTML
+
+function escapeHtml(text){
+
+    if(text === null || text === undefined){
+
+        return "";
+
+    }
+
+    return String(text)
+
+        .replace(/&/g,"&amp;")
+
+        .replace(/</g,"&lt;")
+
+        .replace(/>/g,"&gt;")
+
+        .replace(/"/g,"&quot;")
+
+        .replace(/'/g,"&#039;");
 
 }
 
-});
+// =====================================================
+// Initialize Dashboard
+// =====================================================
 
+document.addEventListener(
 
-// =============================================
-// Statistics
-// =============================================
+    "DOMContentLoaded",
 
-new Chart(
+    function(){
 
-document.getElementById("statisticsChart"),
+        console.log("==========================================");
 
-{
+        console.log(
 
-type:"bar",
+            "Attendance Notification System Pro"
 
-data:{
+        );
 
-labels:[
+        console.log(
 
-"Present",
+            "Dashboard Loaded Successfully"
 
-"Late",
+        );
 
-"Early",
+        console.log("==========================================");
 
-"Daily OT"
+        // Initialize HR Report Text
 
-],
+        const report = document.getElementById(
 
-datasets:[{
+            "hrReport"
 
-data:[
+        );
 
-summary.present,
+        if(report){
 
-summary.late_in,
+            hrReportText = report.value || "";
 
-summary.early_out,
+        }
 
-summary.overtime
+    }
 
-]
+);
 
-}]
+// =====================================================
+// Keyboard Shortcuts
+// =====================================================
 
-},
+document.addEventListener(
 
-options:{
+    "keydown",
 
-plugins:{
+    function(event){
 
-legend:{
+        // Ctrl + F -> Employee Search
 
-display:false
+        if(
 
-}
+            event.ctrlKey &&
 
-}
+            event.key.toLowerCase() === "f"
 
-}
+        ){
 
-});
+            event.preventDefault();
 
+            const search = document.getElementById(
 
-// =============================================
-// Monthly OT Status
-// =============================================
+                "employeeSearch"
 
-new Chart(
+            );
 
-document.getElementById("monthlyOTChart"),
+            if(search){
 
-{
+                search.focus();
 
-type:"doughnut",
+            }
 
-data:{
+        }
 
-labels:[
+        // ESC -> Close Modal
 
-"Normal",
+        if(
 
-"Warning",
+            event.key === "Escape" &&
 
-"Limit Reached",
+            employeeModal
 
-"Exceeded"
+        ){
 
-],
+            employeeModal.hide();
 
-datasets:[{
+        }
 
-data:[
+    }
 
-summary.total-
+);
 
-summary.monthly_warning-
+// =====================================================
+// Refresh Dashboard
+// =====================================================
 
-summary.monthly_limit_reached-
+function refreshDashboard(){
 
-summary.monthly_ot_exceeded,
-
-summary.monthly_warning,
-
-summary.monthly_limit_reached,
-
-summary.monthly_ot_exceeded
-
-]
-
-}]
+    location.reload();
 
 }
 
-});
+// =====================================================
+// Export Table (Future Support)
+// =====================================================
 
+function exportEmployeeTable(){
 
-// =============================================
-// Top Monthly OT
-// =============================================
+    alert(
 
-const sorted=[...employees]
+        "Use the Download Excel button to export the report."
 
-.sort(
-
-(a,b)=>
-
-b.monthly_ot_minutes-
-
-a.monthly_ot_minutes
-
-)
-
-.slice(0,10);
-
-new Chart(
-
-document.getElementById("topOTChart"),
-
-{
-
-type:"bar",
-
-data:{
-
-labels:sorted.map(
-
-e=>e.name
-
-),
-
-datasets:[{
-
-label:"Monthly OT (Minutes)",
-
-data:sorted.map(
-
-e=>e.monthly_ot_minutes
-
-)
-
-}]
-
-},
-
-options:{
-
-indexAxis:"y"
+    );
 
 }
 
-});
+// =====================================================
+// Print Dashboard
+// =====================================================
 
-});
+function printDashboard(){
+
+    window.print();
+
+}
+
+// =====================================================
+// Cleanup
+// =====================================================
+
+window.addEventListener(
+
+    "beforeunload",
+
+    function(){
+
+        employeeModal = null;
+
+        hrReportText = "";
+
+    }
+
+);
+
+console.log(
+
+    "Dashboard JavaScript Initialized Successfully."
+
+);

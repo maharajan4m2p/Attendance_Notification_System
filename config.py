@@ -1,77 +1,87 @@
 """
 =========================================================
 Attendance Notification System Pro
-Enterprise Version 5.0
+Enterprise Configuration
+Version : 8.0 Enterprise (Ultra Performance)
 Developed by Maharajan
-
-Features
----------------------------------------------------------
-✔ Daily Attendance Analysis
-✔ Late Punch Detection
-✔ Early Out Detection
-✔ Missing Punch Detection
-✔ Daily Overtime Calculation
-✔ Monthly Overtime Tracking
-✔ Monthly OT History Database
-✔ Warning Notifications
-✔ 25 Hours Monthly OT Limit
-✔ Dashboard Analytics
-✔ Excel Report Generation
 =========================================================
 """
 
 import os
+
 # =====================================================
-# Application Configuration
+# Application Information
 # =====================================================
 
 APP_NAME = "Attendance Notification System Pro"
 
-VERSION = "5.0 Enterprise"
+VERSION = "8.0 Enterprise"
+
+AUTHOR = "Maharajan"
 
 SECRET_KEY = "attendance_notification_secret_key"
 
 DEBUG = True
+
 # =====================================================
 # Base Directory
 # =====================================================
 
 BASE_DIR = os.path.abspath(
+
     os.path.dirname(__file__)
+
 )
+
 # =====================================================
 # Folder Configuration
 # =====================================================
 
 UPLOAD_FOLDER = os.path.join(
+
     BASE_DIR,
+
     "uploads"
+
 )
 
 REPORT_FOLDER = os.path.join(
+
     BASE_DIR,
+
     "reports"
+
 )
 
 DATABASE_FOLDER = os.path.join(
+
     BASE_DIR,
+
     "database"
+
 )
 
 LOG_FOLDER = os.path.join(
+
     BASE_DIR,
+
     "logs"
+
 )
 
 BACKUP_FOLDER = os.path.join(
+
     DATABASE_FOLDER,
+
     "backup"
+
 )
+
 # =====================================================
-# Create Required Folders Automatically
+# Create Required Folders
 # =====================================================
 
-for folder in [
+for folder in (
 
     UPLOAD_FOLDER,
 
@@ -83,7 +93,7 @@ for folder in [
 
     BACKUP_FOLDER
 
-]:
+):
 
     os.makedirs(
 
@@ -92,7 +102,8 @@ for folder in [
         exist_ok=True
 
     )
-    # =====================================================
+
+# =====================================================
 # Database Files
 # =====================================================
 
@@ -135,8 +146,9 @@ BACKUP_DATABASE = os.path.join(
     "monthly_ot_backup.xlsx"
 
 )
+
 # =====================================================
-# Upload Settings
+# Upload Configuration
 # =====================================================
 
 ALLOWED_EXTENSIONS = {
@@ -149,7 +161,7 @@ ALLOWED_EXTENSIONS = {
 
 }
 
-MAX_CONTENT_LENGTH = 20 * 1024 * 1024      # 20 MB
+MAX_CONTENT_LENGTH = 20 * 1024 * 1024
 
 SUPPORTED_ENCODINGS = [
 
@@ -162,7 +174,6 @@ SUPPORTED_ENCODINGS = [
     "cp1252"
 
 ]
-
 # =====================================================
 # Company Shift Configuration
 # =====================================================
@@ -182,6 +193,7 @@ STANDARD_WORKING_HOURS = 8
 STANDARD_WORKING_MINUTES = 480
 
 WORKING_DAYS_PER_MONTH = 25
+
 # =====================================================
 # Attendance Rules
 # =====================================================
@@ -205,6 +217,7 @@ ALLOW_HOLIDAY_OT = True
 AUTO_CALCULATE_WORKING_HOURS = True
 
 AUTO_GENERATE_NOTIFICATION = True
+
 # =====================================================
 # Enterprise Overtime Rules
 # =====================================================
@@ -225,7 +238,9 @@ MONTHLY_OT_LIMIT = 25
 
 MONTHLY_OT_MAX = 999
 
+# =====================================================
 # Monthly Status
+# =====================================================
 
 NORMAL_STATUS = "Normal"
 
@@ -235,7 +250,9 @@ LIMIT_REACHED_STATUS = "Limit Reached"
 
 EXCEEDED_STATUS = "Exceeded"
 
-# Monthly History
+# =====================================================
+# Monthly Database Rules
+# =====================================================
 
 STORE_MONTHLY_HISTORY = True
 
@@ -243,7 +260,15 @@ AUTO_MONTH_RESET = True
 
 AUTO_BACKUP_DATABASE = True
 
+REMOVE_DUPLICATE_DATE = True
+
+UPDATE_EXISTING_RECORD = True
+
+KEEP_ALL_HISTORY = True
+
+# =====================================================
 # Notification Rules
+# =====================================================
 
 SEND_WARNING_AT_21_HOURS = True
 
@@ -253,25 +278,20 @@ SEND_EXCEEDED_NOTIFICATION = True
 
 SEND_NOTIFICATION_ONCE = True
 
-# Dashboard
+AUTO_SEND_NOTIFICATION = True
 
-SHOW_REMAINING_OT = True
+SEND_TO_EMPLOYEE = True
 
-SHOW_LIMIT_REACHED = True
+SEND_TO_HR = True
 
-SHOW_OT_EXCEEDED = True
+ENABLE_EMAIL = True
 
-SHOW_PROGRESS_BAR = True
+ENABLE_WHATSAPP = True
 
-SHOW_MONTHLY_HISTORY = True
+ENABLE_SMS = False
 
-# Employee History
+ENABLE_TEAMS = False
 
-KEEP_ALL_HISTORY = True
-
-REMOVE_DUPLICATE_DATE = True
-
-UPDATE_EXISTING_RECORD = True
 # =====================================================
 # Date & Time Format
 # =====================================================
@@ -286,41 +306,6 @@ DATABASE_DATE_FORMAT = "%Y-%m-%d"
 
 DATABASE_MONTH_FORMAT = "%Y-%m"
 
-# =====================================================
-# Notification Settings
-# =====================================================
-
-ENABLE_EMAIL = True
-
-ENABLE_WHATSAPP = True
-
-ENABLE_SMS = False
-
-ENABLE_TEAMS = False
-
-AUTO_SEND_NOTIFICATION = True
-
-SEND_DAILY_NOTIFICATION = True
-
-SEND_MONTHLY_NOTIFICATION = True
-
-SEND_WARNING_EMAIL = True
-
-SEND_LIMIT_EMAIL = True
-
-SEND_EXCEEDED_EMAIL = True
-
-SEND_WARNING_WHATSAPP = True
-
-SEND_LIMIT_WHATSAPP = True
-
-SEND_EXCEEDED_WHATSAPP = True
-
-SEND_TO_HR = True
-
-SEND_TO_EMPLOYEE = True
-
-NOTIFY_ONLY_ON_STATUS_CHANGE = True
 # =====================================================
 # Company Information
 # =====================================================
@@ -342,21 +327,15 @@ SMTP_SERVER = "smtp.gmail.com"
 
 SMTP_PORT = 587
 
-EMAIL_ADDRESS = "adishtam.hr@gmail.com"
+SMTP_USERNAME = "adishtam.hr@gmail.com"
 
-EMAIL_PASSWORD = os.getenv(
+SMTP_PASSWORD = os.getenv(
 
     "EMAIL_PASSWORD",
 
     ""
 
 )
-
-USE_TLS = True
-
-EMAIL_TIMEOUT = 30
-
-EMAIL_RETRY_COUNT = 3
 
 EMAIL_SUBJECT = "Attendance Notification"
 
@@ -367,6 +346,13 @@ WARNING_SUBJECT = "Monthly Overtime Warning"
 LIMIT_SUBJECT = "Monthly Overtime Limit Reached"
 
 EXCEEDED_SUBJECT = "Monthly Overtime Exceeded"
+
+USE_TLS = True
+
+EMAIL_TIMEOUT = 30
+
+EMAIL_RETRY_COUNT = 3
+
 # =====================================================
 # Report Settings
 # =====================================================
@@ -394,6 +380,7 @@ GENERATE_LIMIT_REPORT = True
 GENERATE_EXCEEDED_REPORT = True
 
 SAVE_REPORT_HISTORY = True
+
 # =====================================================
 # Dashboard Settings
 # =====================================================
@@ -423,16 +410,33 @@ SHOW_EMPLOYEE_SEARCH = True
 SHOW_FILTER_BUTTONS = True
 
 SHOW_EXPORT_BUTTON = True
+
+# =====================================================
+# Performance Settings
+# =====================================================
+
+MAX_EMPLOYEES_PER_BATCH = 500
+
+DATABASE_CACHE = True
+
+ENABLE_MEMORY_OPTIMIZATION = True
+
+ENABLE_PROGRESS_LOG = True
+
+ENABLE_DATABASE_BACKUP = True
+
+ENABLE_AUTO_CLEANUP = True
+
 # =====================================================
 # Application Information
 # =====================================================
-
-VERSION = "5.0 Enterprise"
-
-AUTHOR = "Maharajan"
 
 COPYRIGHT = "Attendance Notification System Pro"
 
 LAST_UPDATED = "2026"
 
 BUILD = "Enterprise Release"
+
+# =====================================================
+# End of Configuration
+# =====================================================

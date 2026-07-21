@@ -4,7 +4,6 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>{{ app_name }}</title>
@@ -27,29 +26,19 @@ body{
 /* ========================================= */
 
 .navbar{
-
     background:linear-gradient(90deg,#0d6efd,#3b82f6);
-
     box-shadow:0 3px 12px rgba(0,0,0,.15);
-
 }
 
 .navbar-brand{
-
     color:white!important;
-
     font-size:28px;
-
     font-weight:bold;
-
 }
 
 .developer{
-
     color:white;
-
     font-size:14px;
-
 }
 
 /* ========================================= */
@@ -57,173 +46,113 @@ body{
 /* ========================================= */
 
 .summary-card{
-
     border:none;
-
     border-radius:16px;
-
     color:white;
-
     padding:22px;
-
     transition:.25s;
-
     box-shadow:0 8px 20px rgba(0,0,0,.12);
-
+    height:100%;
 }
 
 .summary-card:hover{
-
     transform:translateY(-5px);
-
 }
 
 .summary-card i{
-
     font-size:34px;
-
 }
 
 .summary-card h6{
-
     margin-top:15px;
-
     opacity:.95;
-
 }
 
 .summary-card h2{
-
     margin-top:10px;
-
     font-size:34px;
-
     font-weight:bold;
-
 }
 
-/* Card Colors */
+.blue{
+    background:#0d6efd;
+}
 
-.blue{background:#0d6efd;}
+.green{
+    background:#198754;
+}
 
-.green{background:#198754;}
+.red{
+    background:#dc3545;
+}
 
-.red{background:#dc3545;}
+.orange{
+    background:#fd7e14;
+}
 
-.orange{background:#fd7e14;}
+.purple{
+    background:#6f42c1;
+}
 
-.purple{background:#6f42c1;}
+.teal{
+    background:#20c997;
+}
 
-.teal{background:#20c997;}
-
-.dark{background:#212529;}
+.dark{
+    background:#212529;
+}
 
 .warning-card{
-
     background:#ffc107;
-
     color:#000;
-
 }
 
 .limit-card{
-
     background:#ff9800;
-
     color:white;
-
 }
 
 .exceeded-card{
-
     background:#b71c1c;
-
     color:white;
-
 }
-
-/* ========================================= */
-/* Cards */
-/* ========================================= */
 
 .card{
-
     border:none;
-
     border-radius:16px;
-
     box-shadow:0 6px 18px rgba(0,0,0,.08);
-
 }
 
-/* ========================================= */
-/* Table */
-/* ========================================= */
-
 .table thead{
-
     background:#0d6efd;
-
     color:white;
-
 }
 
 .table td{
-
     vertical-align:middle;
-
 }
-
-/* ========================================= */
-/* Buttons */
-/* ========================================= */
 
 .btn{
-
     border-radius:10px;
-
 }
-
-/* ========================================= */
-/* Badges */
-/* ========================================= */
 
 .badge{
-
     font-size:13px;
-
     padding:8px 10px;
-
 }
-
-/* ========================================= */
-/* Footer */
-/* ========================================= */
 
 .footer{
-
     margin-top:40px;
-
     padding:18px;
-
     text-align:center;
-
     color:#777;
-
     font-size:14px;
-
 }
-
-/* ========================================= */
-/* Responsive */
-/* ========================================= */
 
 @media(max-width:768px){
 
 .summary-card{
-
-margin-bottom:15px;
-
+    margin-bottom:15px;
 }
 
 }
@@ -231,6 +160,7 @@ margin-bottom:15px;
 </style>
 
 </head>
+
 <body>
 
 <!-- ========================================= -->
@@ -258,7 +188,6 @@ Developed by Maharajan
 </div>
 
 </nav>
-
 
 <!-- ========================================= -->
 <!-- Dashboard Header -->
@@ -290,7 +219,9 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
 <span class="badge bg-primary fs-6">
 
-{{ result.summary.total }} Employees
+{{ result.summary.total }}
+
+Employees
 
 </span>
 
@@ -298,9 +229,8 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
 </div>
 
-
 <!-- ========================================= -->
-<!-- Dashboard Summary -->
+<!-- Summary Cards -->
 <!-- ========================================= -->
 
 <div class="row g-4">
@@ -319,7 +249,6 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
 </div>
 
-
 <div class="col-xl-3 col-md-6">
 
 <div class="summary-card green">
@@ -333,7 +262,6 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 </div>
 
 </div>
-
 
 <div class="col-xl-3 col-md-6">
 
@@ -349,7 +277,6 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
 </div>
 
-
 <div class="col-xl-3 col-md-6">
 
 <div class="summary-card orange">
@@ -364,10 +291,63 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
 </div>
 
+<div class="col-xl-3 col-md-6">
+
+<div class="summary-card purple">
+
+<i class="fa-solid fa-business-time"></i>
+
+<h6>Overtime Employees</h6>
+
+<h2>{{ result.summary.overtime }}</h2>
+
+</div>
+
+</div>
 
 <div class="col-xl-3 col-md-6">
 
-<div
+<div class="summary-card warning-card">
+
+<i class="fa-solid fa-triangle-exclamation"></i>
+
+<h6>OT Warning</h6>
+
+<h2>{{ result.summary.warning|default(0) }}</h2>
+
+</div>
+
+</div>
+
+<div class="col-xl-3 col-md-6">
+
+<div class="summary-card limit-card">
+
+<i class="fa-solid fa-hourglass-half"></i>
+
+<h6>Limit Reached</h6>
+
+<h2>{{ result.summary.limit_reached|default(0) }}</h2>
+
+</div>
+
+</div>
+
+<div class="col-xl-3 col-md-6">
+
+<div class="summary-card exceeded-card">
+
+<i class="fa-solid fa-ban"></i>
+
+<h6>OT Exceeded</h6>
+
+<h2>{{ result.summary.exceeded|default(0) }}</h2>
+
+</div>
+
+</div>
+
+</div>
 <!-- ========================================= -->
 <!-- Dashboard Analytics -->
 <!-- ========================================= -->
@@ -382,7 +362,7 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
             <div class="card-header bg-primary text-white">
 
-                <h5>
+                <h5 class="mb-0">
 
                     <i class="fa-solid fa-chart-pie"></i>
 
@@ -394,7 +374,7 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
             <div class="card-body">
 
-                <canvas id="attendanceChart" height="250"></canvas>
+                <canvas id="attendanceChart" height="260"></canvas>
 
             </div>
 
@@ -410,7 +390,7 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
             <div class="card-header bg-success text-white">
 
-                <h5>
+                <h5 class="mb-0">
 
                     <i class="fa-solid fa-chart-column"></i>
 
@@ -422,7 +402,7 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
             <div class="card-body">
 
-                <canvas id="statisticsChart" height="250"></canvas>
+                <canvas id="statisticsChart" height="260"></canvas>
 
             </div>
 
@@ -440,13 +420,13 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
         <div class="card">
 
-            <div class="card-header bg-warning text-dark">
+            <div class="card-header bg-warning">
 
-                <h5>
+                <h5 class="mb-0">
 
                     <i class="fa-solid fa-business-time"></i>
 
-                    Monthly OT Status
+                    Monthly Overtime Status
 
                 </h5>
 
@@ -454,7 +434,7 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
             <div class="card-body">
 
-                <canvas id="monthlyOTChart" height="250"></canvas>
+                <canvas id="monthlyOTChart" height="260"></canvas>
 
             </div>
 
@@ -462,7 +442,7 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
     </div>
 
-    <!-- Top Monthly OT -->
+    <!-- Top OT Employees -->
 
     <div class="col-lg-6 mb-4">
 
@@ -470,7 +450,7 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
             <div class="card-header bg-danger text-white">
 
-                <h5>
+                <h5 class="mb-0">
 
                     <i class="fa-solid fa-ranking-star"></i>
 
@@ -482,7 +462,7 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
             <div class="card-body">
 
-                <canvas id="topOTChart" height="250"></canvas>
+                <canvas id="topOTChart" height="260"></canvas>
 
             </div>
 
@@ -492,16 +472,15 @@ Daily Attendance | Monthly Overtime Tracking | Notifications
 
 </div>
 
-<br>
 <!-- ========================================= -->
-<!-- Dashboard Actions -->
+<!-- Action Buttons -->
 <!-- ========================================= -->
 
 <div class="card mb-4">
 
 <div class="card-body">
 
-<div class="row g-3">
+<div class="row g-3 align-items-center">
 
 <div class="col-lg-4">
 
@@ -513,7 +492,7 @@ id="employeeSearch"
 
 class="form-control form-control-lg"
 
-placeholder="🔍 Search Employee ID, Name, Department">
+placeholder="🔍 Search Employee ID, Name or Department">
 
 </div>
 
@@ -537,13 +516,13 @@ action="{{ url_for('send_emails') }}"
 
 method="POST"
 
-style="display:inline;">
+class="d-inline">
 
 <button
 
-class="btn btn-warning"
+type="submit"
 
-type="submit">
+class="btn btn-warning">
 
 <i class="fa-solid fa-envelope"></i>
 
@@ -584,389 +563,322 @@ WhatsApp HR
 </div>
 
 </div>
-
-
 <!-- ========================================= -->
 <!-- Employee Filters -->
 <!-- ========================================= -->
 
 <div class="card mb-4">
 
-<div class="card-body">
+    <div class="card-body">
 
-<div class="d-flex flex-wrap gap-2">
+        <div class="d-flex flex-wrap gap-2">
 
-<button
+            <button class="btn btn-primary filter-btn" data-filter="All">
+                All
+            </button>
 
-class="btn btn-primary filter-btn"
+            <button class="btn btn-danger filter-btn" data-filter="Late">
+                Late Punch
+            </button>
 
-data-filter="All">
+            <button class="btn btn-warning filter-btn" data-filter="Early">
+                Early Out
+            </button>
 
-All
+            <button class="btn btn-secondary filter-btn" data-filter="Missing">
+                Missing Punch
+            </button>
 
-</button>
+            <button class="btn btn-success filter-btn" data-filter="Daily OT">
+                Daily OT
+            </button>
 
-<button
+            <button class="btn btn-info filter-btn" data-filter="Warning">
+                OT Warning
+            </button>
 
-class="btn btn-danger filter-btn"
+            <button class="btn btn-dark filter-btn" data-filter="Limit Reached">
+                Limit Reached
+            </button>
 
-data-filter="Late">
+            <button class="btn btn-danger filter-btn" data-filter="Exceeded">
+                Exceeded
+            </button>
 
-Late Punch
+        </div>
 
-</button>
-
-<button
-
-class="btn btn-warning filter-btn"
-
-data-filter="Early">
-
-Early Out
-
-</button>
-
-<button
-
-class="btn btn-secondary filter-btn"
-
-data-filter="Missing">
-
-Missing Punch
-
-</button>
-
-<button
-
-class="btn btn-success filter-btn"
-
-data-filter="Overtime">
-
-Daily OT
-
-</button>
-
-<button
-
-class="btn btn-warning filter-btn"
-
-data-filter="Warning">
-
-OT Warning
-
-</button>
-
-<button
-
-class="btn btn-dark filter-btn"
-
-data-filter="Limit Reached">
-
-Limit Reached
-
-</button>
-
-<button
-
-class="btn btn-danger filter-btn"
-
-data-filter="Exceeded">
-
-Exceeded
-
-</button>
+    </div>
 
 </div>
 
-</div>
-
-</div>
 <!-- ========================================= -->
 <!-- Employee Attendance Table -->
 <!-- ========================================= -->
 
 <div class="card shadow-lg mb-4">
 
-<div class="card-header bg-primary text-white">
+    <div class="card-header bg-primary text-white">
 
-<div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center">
 
-<h4 class="mb-0">
+            <h4 class="mb-0">
 
-<i class="fa-solid fa-users"></i>
+                <i class="fa-solid fa-users"></i>
 
-Employee Attendance Details
+                Employee Attendance Details
 
-</h4>
+            </h4>
 
-<span class="badge bg-light text-dark fs-6">
+            <span class="badge bg-light text-dark fs-6">
 
-{{ result.summary.total }} Employees
+                {{ result.summary.total }}
 
-</span>
+                Employees
 
-</div>
+            </span>
 
-</div>
+        </div>
 
-<div class="card-body">
+    </div>
 
-<div class="table-responsive">
+    <div class="card-body">
 
-<table
+        <div class="table-responsive">
 
-class="table table-hover table-striped align-middle"
+            <table
+                class="table table-hover table-bordered align-middle"
+                id="employeeTable">
 
-id="employeeTable">
+                <thead class="table-dark">
 
-<thead class="table-dark">
+                <tr>
 
-<tr>
+                    <th>ID</th>
 
-<th>ID</th>
+                    <th>Name</th>
 
-<th>Name</th>
+                    <th>Department</th>
 
-<th>Department</th>
+                    <th>Designation</th>
 
-<th>Designation</th>
+                    <th>Date</th>
 
-<th>Date</th>
+                    <th>Punch In</th>
 
-<th>Punch In</th>
+                    <th>Punch Out</th>
 
-<th>Punch Out</th>
+                    <th>Daily OT</th>
 
-<th>Daily OT</th>
+                    <th>Monthly OT</th>
 
-<th>Monthly OT</th>
+                    <th>Remaining OT</th>
 
-<th>Remaining OT</th>
+                    <th>Daily Status</th>
 
-<th>Daily Status</th>
+                    <th>Monthly Status</th>
 
-<th>Monthly Status</th>
+                    <th>View</th>
 
-<th>Action</th>
+                </tr>
 
-</tr>
+                </thead>
 
-</thead>
+                <tbody>
 
-<tbody>
+                {% for emp in result.employees %}
 
-{% for emp in result.employees %}
+                <tr>
 
-<tr>
+                    <td>{{ emp.employee_id }}</td>
 
-<td>{{ emp.employee_id }}</td>
+                    <td><strong>{{ emp.name }}</strong></td>
 
-<td>
+                    <td>{{ emp.department }}</td>
 
-<strong>{{ emp.name }}</strong>
+                    <td>{{ emp.designation }}</td>
 
-</td>
+                    <td>{{ emp.attendance_date }}</td>
 
-<td>{{ emp.department }}</td>
+                    <td>{{ emp.punch_in }}</td>
 
-<td>{{ emp.designation }}</td>
+                    <td>{{ emp.punch_out }}</td>
 
-<td>{{ emp.attendance_date }}</td>
+                    <td>
 
-<td>{{ emp.punch_in }}</td>
+                        <span class="badge bg-success">
 
-<td>{{ emp.punch_out }}</td>
+                            {{ emp.daily_ot or "00:00" }}
 
-<td>
+                        </span>
 
-<span class="badge bg-success">
+                    </td>
 
-{{ emp.daily_ot }}
+                    <td>
 
-</span>
+                        <span class="badge bg-info text-dark">
 
-</td>
+                            {{ emp.monthly_ot or "00:00" }}
 
-<td>
+                        </span>
 
-<span class="badge bg-info text-dark">
+                    </td>
 
-{{ emp.monthly_ot }}
+                    <td>
 
-</span>
+                        <span class="badge bg-primary">
 
-</td>
+                            {{ emp.remaining_ot or "00:00" }}
 
-<td>
+                        </span>
 
-{% if emp.remaining_ot %}
+                    </td>
 
-<span class="badge bg-primary">
+                    <td>
 
-{{ emp.remaining_ot }}
+                        {% if emp.daily_status == "Normal" %}
 
-</span>
+                            <span class="badge bg-success">
 
-{% else %}
+                                Normal
 
-<span class="badge bg-dark">
+                            </span>
 
-00:00
+                        {% elif emp.daily_status == "Warning" %}
 
-</span>
+                            <span class="badge bg-warning text-dark">
 
-{% endif %}
+                                Warning
 
-</td>
+                            </span>
 
-<td>
+                        {% elif emp.daily_status == "Limit Reached" %}
 
-{% if emp.daily_ot_status=="Allowed" %}
+                            <span class="badge bg-dark">
 
-<span class="badge bg-success">
+                                Limit Reached
 
-Allowed
+                            </span>
 
-</span>
+                        {% else %}
 
-{% elif emp.daily_ot_status=="Limit Reached" %}
+                            <span class="badge bg-danger">
 
-<span class="badge bg-warning text-dark">
+                                Exceeded
 
-Limit Reached
+                            </span>
 
-</span>
+                        {% endif %}
 
-{% else %}
+                    </td>
 
-<span class="badge bg-danger">
+                    <td>
 
-Exceeded
+                        {% if emp.monthly_status == "Normal" %}
 
-</span>
+                            <span class="badge bg-success">
 
-{% endif %}
+                                Normal
 
-</td>
+                            </span>
 
-<td>
+                        {% elif emp.monthly_status == "Warning" %}
 
-{% if emp.monthly_status=="Normal" %}
+                            <span class="badge bg-warning text-dark">
 
-<span class="badge bg-success">
+                                Warning
 
-Normal
+                            </span>
 
-</span>
+                        {% elif emp.monthly_status == "Limit Reached" %}
 
-{% elif emp.monthly_status=="Warning" %}
+                            <span class="badge bg-dark">
 
-<span class="badge bg-warning text-dark">
+                                Limit Reached
 
-Warning
+                            </span>
 
-</span>
+                        {% else %}
 
-{% elif emp.monthly_status=="Limit Reached" %}
+                            <span class="badge bg-danger">
 
-<span class="badge bg-dark">
+                                Exceeded
 
-Limit Reached
+                            </span>
 
-</span>
+                        {% endif %}
 
-{% else %}
+                    </td>
 
-<span class="badge bg-danger">
+                    <td>
 
-Exceeded
+                        <button
 
-</span>
+                            class="btn btn-primary btn-sm"
 
-{% endif %}
+                            onclick="showEmployee(
 
-</td>
+                            '{{ emp.employee_id }}',
 
-<td>
+                            '{{ emp.name }}',
 
-<button
+                            '{{ emp.department }}',
 
-class="btn btn-primary btn-sm"
+                            '{{ emp.designation }}',
 
-onclick="showEmployee(
+                            '{{ emp.attendance_date }}',
 
-'{{ emp.employee_id }}',
+                            '{{ emp.punch_in }}',
 
-'{{ emp.name }}',
+                            '{{ emp.punch_out }}',
 
-'{{ emp.department }}',
+                            '{{ emp.daily_ot or '00:00' }}',
 
-'{{ emp.designation }}',
+                            '{{ emp.monthly_ot or '00:00' }}',
 
-'{{ emp.attendance_date }}',
+                            '{{ emp.remaining_ot or '00:00' }}',
 
-'{{ emp.punch_in }}',
+                            '{{ emp.daily_status }}',
 
-'{{ emp.punch_out }}',
+                            '{{ emp.monthly_status }}',
 
-'{{ emp.daily_ot }}',
+                            `{{ emp.notification }}`
 
-'{{ emp.monthly_ot }}',
+                            )">
 
-'{{ emp.remaining_ot }}',
+                            <i class="fa-solid fa-eye"></i>
 
-'{{ emp.daily_ot_status }}',
+                            View
 
-'{{ emp.monthly_status }}',
+                        </button>
 
-`{{ emp.notification }}`
+                    </td>
 
-)">
+                </tr>
 
-<i class="fa-solid fa-eye"></i>
+                {% endfor %}
 
-View
+                </tbody>
 
-</button>
+            </table>
 
-</td>
+        </div>
 
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
+    </div>
 
 </div>
 <!-- ========================================= -->
 <!-- Employee Details Modal -->
 <!-- ========================================= -->
 
-<div
+<div class="modal fade" id="employeeModal" tabindex="-1">
 
-class="modal fade"
-
-id="employeeModal"
-
-tabindex="-1"
-
-aria-hidden="true">
-
-<div
-
-class="modal-dialog modal-xl modal-dialog-centered">
+<div class="modal-dialog modal-xl modal-dialog-centered">
 
 <div class="modal-content">
 
 <div class="modal-header bg-primary text-white">
 
-<h4>
+<h4 class="mb-0">
 
 <i class="fa-solid fa-user"></i>
 
@@ -975,13 +887,9 @@ Employee Attendance Details
 </h4>
 
 <button
-
 type="button"
-
 class="btn-close btn-close-white"
-
 data-bs-dismiss="modal">
-
 </button>
 
 </div>
@@ -990,7 +898,7 @@ data-bs-dismiss="modal">
 
 <div class="row">
 
-<!-- Employee Information -->
+<!-- Employee Details -->
 
 <div class="col-lg-6">
 
@@ -1007,43 +915,28 @@ data-bs-dismiss="modal">
 <table class="table table-borderless">
 
 <tr>
-
 <th width="40%">Employee ID</th>
-
 <td id="mEmpId"></td>
-
 </tr>
 
 <tr>
-
 <th>Name</th>
-
 <td id="mName"></td>
-
 </tr>
 
 <tr>
-
 <th>Department</th>
-
 <td id="mDepartment"></td>
-
 </tr>
 
 <tr>
-
 <th>Designation</th>
-
 <td id="mDesignation"></td>
-
 </tr>
 
 <tr>
-
 <th>Attendance Date</th>
-
 <td id="mDate"></td>
-
 </tr>
 
 </table>
@@ -1054,7 +947,7 @@ data-bs-dismiss="modal">
 
 </div>
 
-<!-- Attendance Information -->
+<!-- Attendance -->
 
 <div class="col-lg-6">
 
@@ -1071,109 +964,38 @@ data-bs-dismiss="modal">
 <table class="table table-borderless">
 
 <tr>
-
 <th width="45%">Punch In</th>
-
 <td id="mPunchIn"></td>
-
 </tr>
 
 <tr>
-
 <th>Punch Out</th>
-
 <td id="mPunchOut"></td>
-
 </tr>
 
 <tr>
-
 <th>Daily OT</th>
-
-<td>
-
-<span
-
-id="mDailyOT"
-
-class="badge bg-success">
-
-</span>
-
-</td>
-
+<td><span id="mDailyOT" class="badge bg-success"></span></td>
 </tr>
 
 <tr>
-
 <th>Monthly OT</th>
-
-<td>
-
-<span
-
-id="mMonthlyOT"
-
-class="badge bg-info text-dark">
-
-</span>
-
-</td>
-
+<td><span id="mMonthlyOT" class="badge bg-info text-dark"></span></td>
 </tr>
 
 <tr>
-
 <th>Remaining OT</th>
-
-<td>
-
-<span
-
-id="mRemainingOT"
-
-class="badge bg-primary">
-
-</span>
-
-</td>
-
+<td><span id="mRemainingOT" class="badge bg-primary"></span></td>
 </tr>
 
 <tr>
-
 <th>Daily Status</th>
-
-<td>
-
-<span
-
-id="mDailyStatus"
-
-class="badge">
-
-</span>
-
-</td>
-
+<td><span id="mDailyStatus" class="badge"></span></td>
 </tr>
 
 <tr>
-
 <th>Monthly Status</th>
-
-<td>
-
-<span
-
-id="mMonthlyStatus"
-
-class="badge">
-
-</span>
-
-</td>
-
+<td><span id="mMonthlyStatus" class="badge"></span></td>
 </tr>
 
 </table>
@@ -1203,16 +1025,10 @@ Attendance Notification
 <div class="card-body">
 
 <textarea
-
 id="mNotification"
-
 class="form-control"
-
 rows="10"
-
-readonly>
-
-</textarea>
+readonly></textarea>
 
 </div>
 
@@ -1223,9 +1039,7 @@ readonly>
 <div class="modal-footer">
 
 <button
-
 class="btn btn-primary"
-
 onclick="copyNotification()">
 
 <i class="fa-solid fa-copy"></i>
@@ -1235,9 +1049,7 @@ Copy
 </button>
 
 <button
-
 class="btn btn-success"
-
 onclick="addToReport()">
 
 <i class="fa-solid fa-plus"></i>
@@ -1247,9 +1059,7 @@ Add To HR Report
 </button>
 
 <button
-
 class="btn btn-secondary"
-
 data-bs-dismiss="modal">
 
 Close
@@ -1263,11 +1073,14 @@ Close
 </div>
 
 </div>
+
 <!-- ========================================= -->
 <!-- HR Reports -->
 <!-- ========================================= -->
 
 <div class="row mt-4">
+
+<!-- HR Report -->
 
 <div class="col-lg-6 mb-4">
 
@@ -1288,21 +1101,15 @@ HR WhatsApp Report
 <div class="card-body">
 
 <textarea
-
 id="hrReport"
-
 class="form-control"
-
 rows="16"
-
 readonly>{{ hr_report }}</textarea>
 
 <div class="mt-3">
 
 <button
-
 class="btn btn-success"
-
 onclick="copyHRReport()">
 
 <i class="fa-solid fa-copy"></i>
@@ -1312,9 +1119,7 @@ Copy Report
 </button>
 
 <button
-
 class="btn btn-primary"
-
 onclick="sendHRReport()">
 
 <i class="fa-brands fa-whatsapp"></i>
@@ -1331,6 +1136,7 @@ WhatsApp HR
 
 </div>
 
+<!-- Late Report -->
 
 <div class="col-lg-6 mb-4">
 
@@ -1351,21 +1157,15 @@ Late / Missing Punch Report
 <div class="card-body">
 
 <textarea
-
 id="latePunchReport"
-
 class="form-control"
-
 rows="16"
-
 readonly>{{ late_punch_report }}</textarea>
 
 <div class="mt-3">
 
 <button
-
 class="btn btn-danger"
-
 onclick="copyLatePunchReport()">
 
 Copy Report
@@ -1373,9 +1173,7 @@ Copy Report
 </button>
 
 <button
-
 class="btn btn-success"
-
 onclick="sendLatePunchReport()">
 
 WhatsApp
@@ -1397,112 +1195,101 @@ WhatsApp
 
 <div class="card shadow mb-4">
 
-<div class="card-header bg-info text-white">
+    <div class="card-header bg-info text-white">
 
-<h5>
+        <h5 class="mb-0">
 
-Monthly Overtime Summary
+            Monthly Overtime Summary
 
-</h5>
+        </h5>
 
-</div>
+    </div>
 
-<div class="card-body">
+    <div class="card-body">
 
-<div class="table-responsive">
+        <div class="table-responsive">
 
-<table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped">
 
-<thead class="table-dark">
+                <thead class="table-dark">
 
-<tr>
+                    <tr>
 
-<th>ID</th>
+                        <th>ID</th>
 
-<th>Name</th>
+                        <th>Name</th>
 
-<th>Monthly OT</th>
+                        <th>Monthly OT</th>
 
-<th>Remaining OT</th>
+                        <th>Remaining OT</th>
 
-<th>Status</th>
+                        <th>Status</th>
 
-</tr>
+                    </tr>
 
-</thead>
+                </thead>
 
-<tbody>
+                <tbody>
 
-{% for emp in result.employees %}
+                {% for emp in result.employees %}
 
-<tr>
+                    <tr>
 
-<td>{{ emp.employee_id }}</td>
+                        <td>{{ emp.employee_id }}</td>
 
-<td>{{ emp.name }}</td>
+                        <td>{{ emp.name }}</td>
 
-<td>{{ emp.monthly_ot }}</td>
+                        <td>{{ emp.monthly_ot or "00:00" }}</td>
 
-<td>{{ emp.remaining_ot }}</td>
+                        <td>{{ emp.remaining_ot or "00:00" }}</td>
 
-<td>
+                        <td>
 
-{% if emp.monthly_status=="Normal" %}
+                            {% if emp.monthly_status=="Normal" %}
 
-<span class="badge bg-success">
+                                <span class="badge bg-success">Normal</span>
 
-Normal
+                            {% elif emp.monthly_status=="Warning" %}
 
-</span>
+                                <span class="badge bg-warning text-dark">Warning</span>
 
-{% elif emp.monthly_status=="Warning" %}
+                            {% elif emp.monthly_status=="Limit Reached" %}
 
-<span class="badge bg-warning text-dark">
+                                <span class="badge bg-dark">Limit Reached</span>
 
-Warning
+                            {% else %}
 
-</span>
+                                <span class="badge bg-danger">Exceeded</span>
 
-{% elif emp.monthly_status=="Limit Reached" %}
+                            {% endif %}
 
-<span class="badge bg-dark">
+                        </td>
 
-Limit Reached
+                    </tr>
 
-</span>
+                {% endfor %}
 
-{% else %}
+                </tbody>
 
-<span class="badge bg-danger">
+            </table>
 
-Exceeded
+        </div>
 
-</span>
-
-{% endif %}
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
+    </div>
 
 </div>
 
-</div>
+<!-- ========================================= -->
+<!-- Footer -->
+<!-- ========================================= -->
 
-</div>
 <hr>
 
 <div class="footer">
 
 <strong>
 
-Attendance Notification System Pro Enterprise v5.0
+Attendance Notification System Pro Enterprise v8.0
 
 </strong>
 
@@ -1511,17 +1298,19 @@ Attendance Notification System Pro Enterprise v5.0
 Developed by Maharajan
 
 </div>
+
 <script>
 
 window.dashboardData = {
 
-summary: {{ result.summary|tojson }},
+summary: {{ result.summary | default({}) | tojson }},
 
-employees: {{ result.employees|tojson }}
+employees: {{ result.employees | default([]) | tojson }}
 
 };
 
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

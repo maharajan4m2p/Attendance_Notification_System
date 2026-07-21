@@ -2,12 +2,14 @@
 =========================================================
 Attendance Notification System Pro
 Attendance Checker
-Version : 5.0 Enterprise
+Version : 8.0 Enterprise (Ultra Performance)
 Developed by Maharajan
 =========================================================
 """
 
+import gc
 import os
+import time
 from datetime import datetime
 
 import pandas as pd
@@ -19,18 +21,29 @@ from config import (
     CHECK_LATE_IN,
     CHECK_EARLY_OUT,
     CHECK_MISSING_IN,
-    CHECK_MISSING_OUT,
+    CHECK_MISSING_OUT
 )
 
 from services.database_manager import DatabaseManager
 from services.overtime_checker import OvertimeManager
 from services.hr_report import HRReportGenerator
+from services.notification_service import NotificationService
 
 
 class AttendanceChecker:
     """
     Enterprise Attendance Processing Engine
+
+    Features
+    --------
+    • High-performance attendance processing
+    • Single database load/save
+    • Optimized for large Excel/CSV files
+    • Low memory usage
+    • HR report generation
+    • Employee notification generation
     """
+
     # =====================================================
     # Initialize
     # =====================================================
@@ -52,16 +65,80 @@ class AttendanceChecker:
             "%H:%M"
         )
 
+        # ---------------------------------------------
+        # Shared Services
+        # ---------------------------------------------
+
         self.database = DatabaseManager()
 
-        self.ot_manager = OvertimeManager()
+        self.ot_manager = OvertimeManager(
+            self.database
+        )
 
         self.hr_generator = HRReportGenerator()
-        # =====================================================
+
+        self.notification_service = NotificationService()
+
+        # ---------------------------------------------
+        # Required Columns
+        # ---------------------------------------------
+
+        self.required_columns = (
+
+            "Employee No",
+
+            "Employee Name",
+
+            "Attendance Date",
+
+            "IN Time",
+
+            "OUT Time"
+
+        )
+
+        # ---------------------------------------------
+        # Invalid Time Values
+        # ---------------------------------------------
+
+        self.empty_time_values = {
+
+            "",
+
+            "-",
+
+            "--",
+
+            "0",
+
+            "0.0",
+
+            "00:00",
+
+            "00:00:00",
+
+            "nan",
+
+            "NaN",
+
+            "None",
+
+            "N/A"
+
+        }
+
+    # =====================================================
     # Read Attendance File
     # =====================================================
 
-    def read_file(self, filepath):
+    def read_file(
+        self,
+        filepath
+    ):
+
+        print("=" * 60)
+        print("Reading Attendance File...")
+        print("=" * 60)
 
         extension = os.path.splitext(
             filepath
@@ -73,31 +150,33 @@ class AttendanceChecker:
 
                 dataframe = pd.read_csv(
                     filepath,
-                    encoding="utf-8"
+                    encoding="utf-8",
+                    low_memory=False
                 )
 
-            except Exception:
+            except UnicodeDecodeError:
 
                 dataframe = pd.read_csv(
                     filepath,
-                    encoding="latin1"
+                    encoding="latin1",
+                    low_memory=False
                 )
 
-        elif extension in [".xlsx", ".xls"]:
+        elif extension in (
+            ".xlsx",
+            ".xls"
+        ):
 
             dataframe = pd.read_excel(
-                filepath
+                filepath,
+                engine="openpyxl"
             )
 
         else:
 
             raise ValueError(
-                "Unsupported file format."
+                f"Unsupported file format : {extension}"
             )
-
-        # ---------------------------------------
-        # Remove extra spaces from column names
-        # ---------------------------------------
 
         dataframe.columns = [
 
@@ -106,10 +185,6 @@ class AttendanceChecker:
             for column in dataframe.columns
 
         ]
-
-        # ---------------------------------------
-        # Remove completely empty rows
-        # ---------------------------------------
 
         dataframe.dropna(
             how="all",
@@ -121,46 +196,63 @@ class AttendanceChecker:
             inplace=True
         )
 
+        print(
+            f"Employees Found : {len(dataframe)}"
+        )
+
+        print("=" * 60)
+
         return dataframe
+
     # =====================================================
     # Convert Time
     # =====================================================
 
-    def convert_time(self, value):
-
-        if pd.isna(value):
-            return None
+    def convert_time(
+        self,
+        value
+    ):
 
         if value is None:
+
             return None
+
+        if pd.isna(value):
+
+            return None
+
+        if isinstance(
+            value,
+            datetime
+        ):
+
+            return value
 
         value = str(value).strip()
 
-        if value in [
-            "",
-            "-",
-            "--",
-            "nan",
-            "NaN",
-            "None"
-        ]:
+        if value in self.empty_time_values:
+
             return None
 
-        # ---------------------------------------
-        # Supported Time Formats
-        # ---------------------------------------
+        value = (
+            value
+            .replace(".", ":")
+            .replace("-", ":")
+        )
 
-        formats = [
+        for fmt in (
 
             "%H:%M",
+
             "%H:%M:%S",
+
             "%I:%M %p",
+
             "%I:%M:%S %p",
+
             "%I:%M%p"
 
-        ]
-
-        for fmt in formats:
+        ):
 
             try:
 
@@ -169,38 +261,29 @@ class AttendanceChecker:
                     fmt
                 )
 
-            except Exception:
+            except ValueError:
 
                 continue
 
-        # ---------------------------------------
-        # Normalize separators
-        # ---------------------------------------
+        return None
 
-        value = value.replace(".", ":")
-        value = value.replace("-", ":")
-
-        try:
-
-            return datetime.strptime(
-                value,
-                "%H:%M"
-            )
-
-        except Exception:
-
-            return None
-        # =====================================================
+    # =====================================================
     # Format Time
     # =====================================================
 
-    def format_time(self, value):
+    def format_time(
+        self,
+        value
+    ):
 
         if value is None:
 
             return "--"
 
-        if not isinstance(value, datetime):
+        if not isinstance(
+            value,
+            datetime
+        ):
 
             return "--"
 
@@ -216,9 +299,11 @@ class AttendanceChecker:
         attendance_file
     ):
 
-        # -----------------------------------------
-        # Read Attendance File
-        # -----------------------------------------
+        start_time = time.perf_counter()
+
+        print("=" * 60)
+        print("Attendance Processing Started")
+        print("=" * 60)
 
         dataframe = self.read_file(
             attendance_file
@@ -230,29 +315,15 @@ class AttendanceChecker:
                 "Attendance file is empty."
             )
 
-        # -----------------------------------------
+        # =====================================================
         # Required Columns
-        # -----------------------------------------
-
-        required_columns = [
-
-            "Employee No",
-
-            "Employee Name",
-
-            "Attendance Date",
-
-            "IN Time",
-
-            "OUT Time"
-
-        ]
+        # =====================================================
 
         missing_columns = [
 
             column
 
-            for column in required_columns
+            for column in self.required_columns
 
             if column not in dataframe.columns
 
@@ -262,15 +333,17 @@ class AttendanceChecker:
 
             raise ValueError(
 
-                "Missing required columns: "
+                "Missing Required Columns : "
 
                 + ", ".join(missing_columns)
 
             )
 
-        # -----------------------------------------
+        print("Required Columns Verified")
+
+        # =====================================================
         # Initialize
-        # -----------------------------------------
+        # =====================================================
 
         employees = []
 
@@ -298,198 +371,334 @@ class AttendanceChecker:
 
         }
 
-        # -----------------------------------------
-        # Process Employees
-        # -----------------------------------------
+        total_rows = len(dataframe)
 
-        for _, row in dataframe.iterrows():
+        print("=" * 60)
+        print(
+            f"Employees Found : {total_rows}"
+        )
+        print("=" * 60)
+
+        # =====================================================
+        # Performance Cache
+        # =====================================================
+
+        convert_time = self.convert_time
+
+        format_time = self.format_time
+
+        process_ot = self.ot_manager.process
+
+        generate_notification = (
+
+            self.notification_service.generate_message
+
+        )
+
+        employees_append = employees.append
+
+        empty_time_values = self.empty_time_values
+
+        # =====================================================
+        # Process Employees
+        # =====================================================
+
+        for index, row in enumerate(
+
+            dataframe.itertuples(index=False),
+
+            start=1
+
+        ):
+
+            if index % 250 == 0 or index == total_rows:
+
+                progress = round(
+
+                    (index / total_rows) * 100,
+
+                    1
+
+                )
+
+                print(
+
+                    f"Processed {index}/{total_rows} ({progress}%)"
+
+                )
 
             summary["total"] += 1
 
-            employee = {}
+            # =====================================================
+            # Employee Information
+            # =====================================================
 
-            employee["employee_id"] = str(
-                row.get("Employee No", "")
-            ).strip()
+            employee = {
 
-            employee["name"] = str(
-                row.get("Employee Name", "")
-            ).strip()
+                "employee_id": str(
+                    getattr(
+                        row,
+                        "Employee_No",
+                        ""
+                    )
+                ).strip(),
 
-            employee["unit"] = str(
-                row.get("Unit", "")
-            ).strip()
+                "name": str(
+                    getattr(
+                        row,
+                        "Employee_Name",
+                        ""
+                    )
+                ).strip(),
 
-            employee["department"] = str(
-                row.get("Department", "")
-            ).strip()
+                "unit": str(
+                    getattr(
+                        row,
+                        "Unit",
+                        ""
+                    )
+                ).strip(),
 
-            employee["designation"] = str(
-                row.get("Designation", "")
-            ).strip()
+                "department": str(
+                    getattr(
+                        row,
+                        "Department",
+                        ""
+                    )
+                ).strip(),
 
-            employee["attendance_date"] = str(
-                row.get("Attendance Date", "")
-            ).strip()
+                "designation": str(
+                    getattr(
+                        row,
+                        "Designation",
+                        ""
+                    )
+                ).strip(),
 
-            employee["approval_status"] = str(
-                row.get("Approval Status", "")
-            ).strip()
+                "attendance_date": str(
+                    getattr(
+                        row,
+                        "Attendance_Date",
+                        ""
+                    )
+                ).strip(),
 
-            employee["remarks"] = str(
-                row.get("Remarks", "")
-            ).strip()
+                "approval_status": str(
+                    getattr(
+                        row,
+                        "Approval_Status",
+                        ""
+                    )
+                ).strip(),
 
-            employee["email"] = str(
-                row.get("Email", "")
-            ).strip()
+                "remarks": str(
+                    getattr(
+                        row,
+                        "Remarks",
+                        ""
+                    )
+                ).strip(),
 
-            employee["status"] = []
+                "email": str(
+                    getattr(
+                        row,
+                        "Email",
+                        ""
+                    )
+                ).strip(),
 
-            employee["notification"] = ""
+                "status": [],
+
+                "notification": ""
+
+            }
+
+            status = employee["status"]
+
+            status_append = status.append
+
             # =====================================================
             # Punch Details
             # =====================================================
 
-            in_time = self.convert_time(
-                row.get("IN Time", "")
+            in_time = convert_time(
+
+                getattr(
+                    row,
+                    "IN_Time",
+                    ""
+                )
+
             )
 
-            out_time = self.convert_time(
-                row.get("OUT Time", "")
+            out_time = convert_time(
+
+                getattr(
+                    row,
+                    "OUT_Time",
+                    ""
+                )
+
             )
 
-            employee["punch_in"] = self.format_time(
+            employee["punch_in"] = format_time(
                 in_time
             )
 
-            employee["punch_out"] = self.format_time(
+            employee["punch_out"] = format_time(
                 out_time
             )
 
             late = str(
-                row.get("Late IN(HH:MM)", "")
+
+                getattr(
+                    row,
+                    "Late_IN_HH_MM",
+                    ""
+                )
+
             ).strip()
 
             early = str(
-                row.get("Early OUT(HH:MM)", "")
+
+                getattr(
+                    row,
+                    "Early_OUT_HH_MM",
+                    ""
+                )
+
             ).strip()
 
             employee["daily_ot"] = str(
-                row.get("OT HRS", "00:00")
-            ).strip()
 
+                getattr(
+                    row,
+                    "OT_HRS",
+                    "00:00"
+
+                )
+
+            ).strip()
             # =====================================================
-            # Missing Punch In
+            # Attendance Validation
             # =====================================================
 
             if CHECK_MISSING_IN and in_time is None:
 
-                employee["status"].append(
+                status_append(
                     "Missing Punch In"
                 )
 
                 summary["missing_in"] += 1
 
-            # =====================================================
-            # Missing Punch Out
-            # =====================================================
-
             if CHECK_MISSING_OUT and out_time is None:
 
-                employee["status"].append(
+                status_append(
                     "Missing Punch Out"
                 )
 
                 summary["missing_out"] += 1
 
-            # =====================================================
-            # Late Punch
-            # =====================================================
-
             if (
+
                 CHECK_LATE_IN
-                and late not in [
-                    "",
-                    "-",
-                    "--",
-                    "00:00",
-                    "00:00:00",
-                    "0",
-                    "0.0",
-                    "nan",
-                    "NaN"
-                ]
+
+                and late not in empty_time_values
+
             ):
 
-                employee["status"].append(
+                status_append(
+
                     f"Late Punch ({late})"
+
                 )
 
                 summary["late_in"] += 1
 
-            # =====================================================
-            # Early Out
-            # =====================================================
-
             if (
+
                 CHECK_EARLY_OUT
-                and early not in [
-                    "",
-                    "-",
-                    "--",
-                    "00:00",
-                    "00:00:00",
-                    "0",
-                    "0.0",
-                    "nan",
-                    "NaN"
-                ]
+
+                and early not in empty_time_values
+
             ):
 
-                employee["status"].append(
+                status_append(
+
                     f"Early Out ({early})"
+
                 )
 
                 summary["early_out"] += 1
 
             # =====================================================
-            # Daily & Monthly Overtime
+            # Overtime Processing
             # =====================================================
 
-            employee = self.ot_manager.process(
+            employee = process_ot(
+
                 employee,
+
                 out_time
+
             )
+            print("=" * 60)
+            print(employee["employee_id"])
+            print("Daily OT :", employee.get("daily_ot"))
+            print("Monthly OT :", employee.get("monthly_ot"))
+            print("Remaining OT :", employee.get("remaining_ot"))
+            print("=" * 60)
 
-            if employee["daily_ot_minutes"] > 0:
+            if employee.get(
 
-                employee["status"].append(
+                "daily_ot_minutes",
+
+                0
+
+            ) > 0:
+
+                status_append(
+
                     f"Daily OT ({employee['daily_ot']})"
+
                 )
 
                 summary["overtime"] += 1
 
-            if employee["monthly_status"] == "Warning":
+            monthly_status = employee.get(
 
-                employee["status"].append(
+                "monthly_status",
+
+                "Normal"
+
+            )
+
+            if monthly_status == "Warning":
+
+                status_append(
+
                     "Monthly OT Warning"
+
                 )
 
                 summary["warning"] += 1
 
-            elif employee["monthly_status"] == "Limit Reached":
+            elif monthly_status == "Limit Reached":
 
-                employee["status"].append(
+                status_append(
+
                     "Monthly OT Limit Reached"
+
                 )
 
                 summary["limit_reached"] += 1
 
-            elif employee["monthly_status"] == "Exceeded":
+            elif monthly_status == "Exceeded":
 
-                employee["status"].append(
+                status_append(
+
                     "Monthly OT Exceeded"
+
                 )
 
                 summary["monthly_ot_exceeded"] += 1
@@ -498,205 +707,137 @@ class AttendanceChecker:
             # Present Employee
             # =====================================================
 
-            if len(employee["status"]) == 0:
+            if not status:
 
-                employee["status"].append(
+                status_append(
+
                     "On Time"
+
                 )
 
                 summary["present"] += 1
-                # =====================================================
-            # Employee Notification
+
+            # =====================================================
+            # Generate Notification
             # =====================================================
 
-            notification = []
+            employee["notification"] = (
 
-            notification.append(
-                f"👤 Employee : {employee['name']}"
-            )
+                generate_notification(
 
-            notification.append(
-                f"🆔 Employee ID : {employee['employee_id']}"
-            )
+                    employee
 
-            notification.append(
-                f"🏢 Department : {employee['department']}"
-            )
-
-            notification.append(
-                f"💼 Designation : {employee['designation']}"
-            )
-
-            notification.append("")
-
-            notification.append(
-                f"📅 Attendance Date : {employee['attendance_date']}"
-            )
-
-            notification.append(
-                f"🕘 Punch In : {employee['punch_in']}"
-            )
-
-            notification.append(
-                f"🕔 Punch Out : {employee['punch_out']}"
-            )
-
-            notification.append("")
-
-            # ==========================================
-            # Attendance Alerts
-            # ==========================================
-
-            if "Missing Punch In" in employee["status"]:
-
-                notification.append(
-                    "❌ Missing Punch In."
                 )
 
-            if "Missing Punch Out" in employee["status"]:
-
-                notification.append(
-                    "❌ Missing Punch Out."
-                )
-
-            if any(
-                "Late Punch" in status
-                for status in employee["status"]
-            ):
-
-                notification.append(
-                    "⚠️ Late Punch Detected."
-                )
-
-            if any(
-                "Early Out" in status
-                for status in employee["status"]
-            ):
-
-                notification.append(
-                    "⚠️ Early Punch Out."
-                )
-
-            notification.append("")
-
-            # ==========================================
-            # Overtime Details
-            # ==========================================
-
-            notification.append(
-                f"🕒 Daily OT : {employee['daily_ot']}"
             )
 
-            notification.append(
-                f"📅 Monthly OT : {employee['monthly_ot']}"
-            )
+            # =====================================================
+            # Store Employee
+            # =====================================================
 
-            notification.append(
-                f"⏳ Remaining Monthly OT : {employee['remaining_ot']}"
-            )
+            employees_append(
 
-            notification.append("")
-
-            # ==========================================
-            # Monthly OT Status
-            # ==========================================
-
-            if employee["monthly_status"] == "Warning":
-
-                notification.append(
-                    "⚠️ Your monthly overtime has crossed the warning limit."
-                )
-
-            elif employee["monthly_status"] == "Limit Reached":
-
-                notification.append(
-                    "🚨 Monthly OT Limit Reached (25 Hours)."
-                )
-
-                notification.append(
-                    "Further overtime requires HR approval."
-                )
-
-            elif employee["monthly_status"] == "Exceeded":
-
-                notification.append(
-                    "❌ Monthly OT Limit Exceeded."
-                )
-
-                notification.append(
-                    "Please contact the HR Department."
-                )
-
-            else:
-
-                notification.append(
-                    "✅ Monthly OT is within the permitted limit."
-                )
-
-            notification.append("")
-            notification.append("Regards,")
-            notification.append("HR Department")
-
-            employee["notification"] = "\n".join(
-                notification
-            )
-
-            employees.append(
                 employee
+
             )
+            # =====================================================
+        # Finalize Database
+        # =====================================================
+
+        print("=" * 60)
+        print("Saving Monthly OT Database...")
+        print("=" * 60)
+
+        self.database.finalize()
+
+        print("=" * 60)
+        print("Database Saved Successfully")
+        print("=" * 60)
 
         # =====================================================
         # Generate HR Report
         # =====================================================
 
+        print("=" * 60)
+        print("Generating HR Report...")
+        print("=" * 60)
+
         reports = self.hr_generator.generate(
+
             employees,
+
             summary
+
         )
 
         hr_report = reports.get(
+
             "hr_report",
+
             ""
+
         )
 
         late_punch_report = reports.get(
+
             "late_punch_report",
+
             ""
+
         )
+
+        print("=" * 60)
+        print("HR Report Generated Successfully")
+        print("=" * 60)
+
+        # =====================================================
+        # Processing Time
+        # =====================================================
+
+        processing_time = round(
+
+            time.perf_counter() - start_time,
+
+            2
+
+        )
+
+        print("=" * 60)
+        print(
+            f"Processing Time : {processing_time} Seconds"
+        )
+        print("=" * 60)
+
+        # =====================================================
+        # Attendance Processing Completed
+        # =====================================================
+
+        print("=" * 60)
+        print("Attendance Processing Completed Successfully")
+        print("=" * 60)
+
         # =====================================================
         # Return Result
         # =====================================================
 
-        return {
+        result = {
 
-            "summary": {
-
-                "total": summary["total"],
-
-                "present": summary["present"],
-
-                "late_in": summary["late_in"],
-
-                "early_out": summary["early_out"],
-
-                "missing_in": summary["missing_in"],
-
-                "missing_out": summary["missing_out"],
-
-                "overtime": summary["overtime"],
-
-                "warning": summary["warning"],
-
-                "limit_reached": summary["limit_reached"],
-
-                "monthly_ot_exceeded": summary["monthly_ot_exceeded"]
-
-            },
+            "summary": summary,
 
             "employees": employees,
 
             "hr_report": hr_report,
 
-            "late_punch_report": late_punch_report
+            "late_punch_report": late_punch_report,
+
+            "processing_time": processing_time
 
         }
+
+        # =====================================================
+        # Memory Cleanup
+        # =====================================================
+
+        gc.collect()
+
+        return result

@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+content="width=device-width, initial-scale=1.0">
 
 <title>{{ app_name }}</title>
 
@@ -30,25 +30,25 @@ font-family:'Segoe UI',Arial,sans-serif;
 
 .navbar{
 
-background:linear-gradient(90deg,#0d6efd,#3b82f6);
+background:linear-gradient(90deg,#0d6efd,#2563eb);
 
-box-shadow:0 3px 12px rgba(0,0,0,.15);
+box-shadow:0 4px 15px rgba(0,0,0,.15);
 
 }
 
 .navbar-brand{
 
-color:white!important;
+color:#fff!important;
 
 font-size:28px;
 
-font-weight:bold;
+font-weight:700;
 
 }
 
 .developer{
 
-color:white;
+color:#fff;
 
 font-size:14px;
 
@@ -60,15 +60,15 @@ font-size:14px;
 
 .upload-card{
 
-background:white;
+background:#fff;
 
 border-radius:20px;
 
 padding:40px;
 
-box-shadow:0 8px 25px rgba(0,0,0,.10);
-
 margin-top:50px;
+
+box-shadow:0 8px 25px rgba(0,0,0,.12);
 
 }
 
@@ -82,43 +82,73 @@ margin-bottom:20px;
 
 }
 
+.upload-box{
+
+border:2px dashed #0d6efd;
+
+border-radius:15px;
+
+padding:35px;
+
+background:#f8fbff;
+
+transition:.3s;
+
+cursor:pointer;
+
+}
+
+.upload-box:hover{
+
+background:#eef5ff;
+
+}
+
 .btn-upload{
 
-padding:12px 30px;
+padding:12px 35px;
 
 font-size:18px;
 
-border-radius:10px;
+border-radius:12px;
 
 }
 
 /* ========================================= */
-/* Features */
+/* Feature Cards */
 /* ========================================= */
 
 .feature-card{
 
-background:white;
+background:#fff;
+
+border-radius:18px;
 
 padding:25px;
 
-border-radius:15px;
-
-box-shadow:0 5px 15px rgba(0,0,0,.08);
+height:100%;
 
 text-align:center;
 
-height:100%;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+transition:.25s;
+
+}
+
+.feature-card:hover{
+
+transform:translateY(-5px);
 
 }
 
 .feature-card i{
 
-font-size:40px;
-
-margin-bottom:15px;
+font-size:42px;
 
 color:#0d6efd;
+
+margin-bottom:15px;
 
 }
 
@@ -134,15 +164,16 @@ padding:20px;
 
 text-align:center;
 
-color:#666;
-
 font-size:14px;
+
+color:#666;
 
 }
 
 </style>
 
 </head>
+
 <body>
 
 <!-- ========================================= -->
@@ -170,7 +201,6 @@ Developed by Maharajan
 </div>
 
 </nav>
-
 <!-- ========================================= -->
 <!-- Upload Section -->
 <!-- ========================================= -->
@@ -191,17 +221,19 @@ Developed by Maharajan
 
 <h2 class="fw-bold">
 
-Upload Attendance Excel
+Upload Attendance File
 
 </h2>
 
 <p class="text-muted">
 
-Upload today's attendance report to generate notifications, overtime calculations, HR reports, and Excel reports.
+Upload today's attendance Excel or CSV file to generate attendance analysis, overtime reports, HR reports, notifications and Excel reports automatically.
 
 </p>
 
+<!-- ========================================= -->
 <!-- Flash Messages -->
+<!-- ========================================= -->
 
 {% with messages = get_flashed_messages() %}
 
@@ -214,9 +246,14 @@ Upload today's attendance report to generate notifications, overtime calculation
 {{ message }}
 
 <button
+
 type="button"
+
 class="btn-close"
-data-bs-dismiss="alert"></button>
+
+data-bs-dismiss="alert">
+
+</button>
 
 </div>
 
@@ -226,9 +263,13 @@ data-bs-dismiss="alert"></button>
 
 {% endwith %}
 
+<!-- ========================================= -->
 <!-- Upload Form -->
+<!-- ========================================= -->
 
 <form
+
+id="uploadForm"
 
 action="{{ url_for('upload_file') }}"
 
@@ -238,21 +279,43 @@ enctype="multipart/form-data"
 
 class="mt-4">
 
-<div class="mb-4">
+<label
+
+for="attendance_file"
+
+class="upload-box d-block">
+
+<i class="fa-solid fa-file-excel fa-3x text-success mb-3"></i>
+
+<h5>
+
+Choose Attendance File
+
+</h5>
+
+<p class="text-muted mb-3">
+
+Drag & Drop your Excel/CSV file here or click to browse
+
+</p>
 
 <input
+
+id="attendance_file"
 
 type="file"
 
 name="attendance_file"
 
-class="form-control form-control-lg"
+class="form-control"
 
 accept=".xlsx,.xls,.csv"
 
 required>
 
-</div>
+</label>
+
+<div class="mt-4">
 
 <button
 
@@ -266,9 +329,37 @@ Upload & Process
 
 </button>
 
+</div>
+
 </form>
 
-<hr class="my-4">
+<!-- ========================================= -->
+<!-- Progress Bar -->
+<!-- ========================================= -->
+
+<div
+
+class="progress mt-4"
+
+style="height:22px; display:none;"
+
+id="progressContainer">
+
+<div
+
+class="progress-bar progress-bar-striped progress-bar-animated"
+
+id="progressBar"
+
+style="width:0%">
+
+0%
+
+</div>
+
+</div>
+
+<hr class="my-5">
 
 <div class="row text-start">
 
@@ -310,9 +401,9 @@ Instructions
 
 <li>Click <b>Upload & Process</b>.</li>
 
-<li>Dashboard will open automatically.</li>
+<li>Wait until processing completes.</li>
 
-<li>Reports and notifications will be generated.</li>
+<li>Dashboard opens automatically.</li>
 
 </ul>
 
@@ -327,10 +418,8 @@ Instructions
 </div>
 
 </div>
-
-<br>
 <!-- ========================================= -->
-<!-- Features -->
+<!-- Enterprise Features -->
 <!-- ========================================= -->
 
 <div class="container mb-5">
@@ -347,7 +436,7 @@ Instructions
 
 <p>
 
-Automatically calculates daily overtime, stores it in the database, maintains monthly totals, and monitors the 25-hour monthly limit.
+Automatically calculates daily overtime, updates the monthly OT database, monitors warning limits, limit reached employees, exceeded employees and remaining overtime.
 
 </p>
 
@@ -361,11 +450,11 @@ Automatically calculates daily overtime, stores it in the database, maintains mo
 
 <i class="fa-solid fa-chart-line"></i>
 
-<h5>Interactive Dashboard</h5>
+<h5>Enterprise Dashboard</h5>
 
 <p>
 
-View attendance statistics, overtime summaries, warning employees, limit reached employees, exceeded employees, and charts in one dashboard.
+Interactive dashboard with attendance summary, charts, employee search, employee filters, HR reports, late punch reports and overtime analytics.
 
 </p>
 
@@ -383,7 +472,65 @@ View attendance statistics, overtime summaries, warning employees, limit reached
 
 <p>
 
-Generate employee notifications, HR WhatsApp reports, email alerts, and downloadable Excel reports automatically.
+Generate employee notifications, HR WhatsApp reports, email alerts and downloadable Excel reports automatically after attendance processing.
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row g-4 mt-2">
+
+<div class="col-lg-4">
+
+<div class="feature-card">
+
+<i class="fa-solid fa-database"></i>
+
+<h5>Monthly OT Database</h5>
+
+<p>
+
+Stores monthly overtime history automatically with duplicate protection and backup support for every employee.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-4">
+
+<div class="feature-card">
+
+<i class="fa-solid fa-users"></i>
+
+<h5>Employee Management</h5>
+
+<p>
+
+View employee attendance, overtime status, remaining OT, notification history and monthly status in a single dashboard.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-4">
+
+<div class="feature-card">
+
+<i class="fa-solid fa-file-excel"></i>
+
+<h5>Professional Reports</h5>
+
+<p>
+
+Generate beautifully formatted Excel reports with colors, filters, automatic column widths and HR summaries.
 
 </p>
 
@@ -401,4 +548,234 @@ Generate employee notifications, HR WhatsApp reports, email alerts, and download
 
 <div class="footer">
 
-<strong
+<strong>
+
+Attendance Notification System Pro
+
+Version 8.0 Enterprise
+
+</strong>
+
+<br>
+
+Developed by Maharajan
+
+<br>
+
+<small class="text-muted">
+
+Daily Attendance • Monthly OT • HR Reports • Email Notifications
+
+</small>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+// =====================================================
+// Attendance Upload Page
+// Enterprise Version 8.0
+// =====================================================
+
+const uploadForm = document.getElementById(
+
+    "uploadForm"
+
+);
+
+const fileInput = document.getElementById(
+
+    "attendance_file"
+
+);
+
+const progressContainer = document.getElementById(
+
+    "progressContainer"
+
+);
+
+const progressBar = document.getElementById(
+
+    "progressBar"
+
+);
+
+// =====================================================
+// File Validation
+// =====================================================
+
+if(fileInput){
+
+    fileInput.addEventListener(
+
+        "change",
+
+        function(){
+
+            if(this.files.length === 0){
+
+                return;
+
+            }
+
+            const file = this.files[0];
+
+            const allowed = [
+
+                "xlsx",
+
+                "xls",
+
+                "csv"
+
+            ];
+
+            const extension = file.name
+
+                .split(".")
+
+                .pop()
+
+                .toLowerCase();
+
+            if(!allowed.includes(extension)){
+
+                alert(
+
+                    "Please select a valid Excel or CSV file."
+
+                );
+
+                this.value = "";
+
+                return;
+
+            }
+
+            console.log(
+
+                "Selected File:",
+
+                file.name
+
+            );
+
+        }
+
+    );
+
+}
+
+// =====================================================
+// Upload Progress
+// =====================================================
+
+if(uploadForm){
+
+    uploadForm.addEventListener(
+
+        "submit",
+
+        function(){
+
+            progressContainer.style.display = "block";
+
+            let progress = 0;
+
+            const timer = setInterval(function(){
+
+                progress += 5;
+
+                if(progress > 95){
+
+                    progress = 95;
+
+                    clearInterval(timer);
+
+                }
+
+                progressBar.style.width = progress + "%";
+
+                progressBar.innerHTML = progress + "%";
+
+            },120);
+
+        }
+
+    );
+
+}
+
+// =====================================================
+// Drag & Drop
+// =====================================================
+
+const uploadBox = document.querySelector(
+
+    ".upload-box"
+
+);
+
+if(uploadBox){
+
+    uploadBox.addEventListener(
+
+        "dragover",
+
+        function(event){
+
+            event.preventDefault();
+
+            uploadBox.style.background = "#dbeafe";
+
+        }
+
+    );
+
+    uploadBox.addEventListener(
+
+        "dragleave",
+
+        function(){
+
+            uploadBox.style.background = "#f8fbff";
+
+        }
+
+    );
+
+    uploadBox.addEventListener(
+
+        "drop",
+
+        function(event){
+
+            event.preventDefault();
+
+            uploadBox.style.background = "#f8fbff";
+
+            if(event.dataTransfer.files.length){
+
+                fileInput.files = event.dataTransfer.files;
+
+            }
+
+        }
+
+    );
+
+}
+
+console.log(
+
+    "Attendance Upload Page Loaded Successfully."
+
+);
+
+</script>
+
+</body>
+
+</html>
