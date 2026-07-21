@@ -1,22 +1,37 @@
 """
 =========================================================
 Attendance Notification System Pro
-Configuration File
-Version : 2.0
+Enterprise Version 5.0
 Developed by Maharajan
+
+Features
+---------------------------------------------------------
+✔ Daily Attendance Analysis
+✔ Late Punch Detection
+✔ Early Out Detection
+✔ Missing Punch Detection
+✔ Daily Overtime Calculation
+✔ Monthly Overtime Tracking
+✔ Monthly OT History Database
+✔ Warning Notifications
+✔ 25 Hours Monthly OT Limit
+✔ Dashboard Analytics
+✔ Excel Report Generation
 =========================================================
 """
 
 import os
-
 # =====================================================
-# Application
+# Application Configuration
 # =====================================================
 
 APP_NAME = "Attendance Notification System Pro"
 
+VERSION = "5.0 Enterprise"
+
 SECRET_KEY = "attendance_notification_secret_key"
 
+DEBUG = True
 # =====================================================
 # Base Directory
 # =====================================================
@@ -24,9 +39,8 @@ SECRET_KEY = "attendance_notification_secret_key"
 BASE_DIR = os.path.abspath(
     os.path.dirname(__file__)
 )
-
 # =====================================================
-# Folder Paths
+# Folder Configuration
 # =====================================================
 
 UPLOAD_FOLDER = os.path.join(
@@ -39,138 +53,290 @@ REPORT_FOLDER = os.path.join(
     "reports"
 )
 
+DATABASE_FOLDER = os.path.join(
+    BASE_DIR,
+    "database"
+)
+
+LOG_FOLDER = os.path.join(
+    BASE_DIR,
+    "logs"
+)
+
+BACKUP_FOLDER = os.path.join(
+    DATABASE_FOLDER,
+    "backup"
+)
 # =====================================================
-# Allowed Upload Extensions
+# Create Required Folders Automatically
+# =====================================================
+
+for folder in [
+
+    UPLOAD_FOLDER,
+
+    REPORT_FOLDER,
+
+    DATABASE_FOLDER,
+
+    LOG_FOLDER,
+
+    BACKUP_FOLDER
+
+]:
+
+    os.makedirs(
+
+        folder,
+
+        exist_ok=True
+
+    )
+    # =====================================================
+# Database Files
+# =====================================================
+
+MONTHLY_OT_DATABASE = os.path.join(
+
+    DATABASE_FOLDER,
+
+    "monthly_ot.xlsx"
+
+)
+
+EMPLOYEE_DATABASE = os.path.join(
+
+    DATABASE_FOLDER,
+
+    "employee_database.xlsx"
+
+)
+
+DAILY_HISTORY_DATABASE = os.path.join(
+
+    DATABASE_FOLDER,
+
+    "daily_history.xlsx"
+
+)
+
+MONTHLY_HISTORY_DATABASE = os.path.join(
+
+    DATABASE_FOLDER,
+
+    "monthly_history.xlsx"
+
+)
+
+BACKUP_DATABASE = os.path.join(
+
+    BACKUP_FOLDER,
+
+    "monthly_ot_backup.xlsx"
+
+)
+# =====================================================
+# Upload Settings
 # =====================================================
 
 ALLOWED_EXTENSIONS = {
 
     "xlsx",
 
-    "xls"
+    "xls",
+
+    "csv"
 
 }
+
+MAX_CONTENT_LENGTH = 20 * 1024 * 1024      # 20 MB
+
+SUPPORTED_ENCODINGS = [
+
+    "utf-8",
+
+    "utf-8-sig",
+
+    "latin1",
+
+    "cp1252"
+
+]
+
 # =====================================================
-# Company Shift Timings
+# Company Shift Configuration
 # =====================================================
 
-SHIFT_IN = "09:00"
+SHIFT_START = "08:30"
 
-SHIFT_OUT = "18:00"
+SHIFT_END = "17:30"
 
-# Grace Time
-# Employees punching after this time
-# are considered Late.
+GRACE_TIME = "08:41"
 
-GRACE_TIME = "09:11"
+LUNCH_START = "13:00"
 
-# Early Punch Out Threshold
+LUNCH_END = "13:30"
 
-EARLY_OUT_TIME = "18:00"
+STANDARD_WORKING_HOURS = 8
 
-# Overtime starts after this time
+STANDARD_WORKING_MINUTES = 480
 
-OVERTIME_AFTER = "18:00"
-
-
+WORKING_DAYS_PER_MONTH = 25
 # =====================================================
 # Attendance Rules
 # =====================================================
 
-ALLOW_EARLY_IN = True
+CHECK_LATE_IN = True
 
-CALCULATE_OVERTIME = True
+CHECK_EARLY_OUT = True
 
 CHECK_MISSING_IN = True
 
 CHECK_MISSING_OUT = True
 
-CHECK_EARLY_OUT = True
+CALCULATE_OVERTIME = True
 
-CHECK_LATE_IN = True
+ALLOW_EARLY_IN = True
 
+ALLOW_WEEKEND_OT = True
+
+ALLOW_HOLIDAY_OT = True
+
+AUTO_CALCULATE_WORKING_HOURS = True
+
+AUTO_GENERATE_NOTIFICATION = True
 # =====================================================
-# Attendance Status Labels
+# Enterprise Overtime Rules
 # =====================================================
 
-STATUS_PRESENT = "Present"
+# Daily OT (Minutes)
 
-STATUS_LATE = "Late Punch In"
+DAILY_OT_WARNING = 45
 
-STATUS_EARLY = "Early Punch Out"
+DAILY_OT_LIMIT = 60
 
-STATUS_MISSING_IN = "Missing Punch In"
+MAX_DAILY_OT = 300
 
-STATUS_MISSING_OUT = "Missing Punch Out"
+# Monthly OT (Hours)
 
-STATUS_OVERTIME = "Overtime"
+MONTHLY_OT_WARNING = 21
+
+MONTHLY_OT_LIMIT = 25
+
+MONTHLY_OT_MAX = 999
+
+# Monthly Status
+
+NORMAL_STATUS = "Normal"
+
+WARNING_STATUS = "Warning"
+
+LIMIT_REACHED_STATUS = "Limit Reached"
+
+EXCEEDED_STATUS = "Exceeded"
+
+# Monthly History
+
+STORE_MONTHLY_HISTORY = True
+
+AUTO_MONTH_RESET = True
+
+AUTO_BACKUP_DATABASE = True
+
+# Notification Rules
+
+SEND_WARNING_AT_21_HOURS = True
+
+SEND_LIMIT_REACHED_AT_25_HOURS = True
+
+SEND_EXCEEDED_NOTIFICATION = True
+
+SEND_NOTIFICATION_ONCE = True
+
+# Dashboard
+
+SHOW_REMAINING_OT = True
+
+SHOW_LIMIT_REACHED = True
+
+SHOW_OT_EXCEEDED = True
+
+SHOW_PROGRESS_BAR = True
+
+SHOW_MONTHLY_HISTORY = True
+
+# Employee History
+
+KEEP_ALL_HISTORY = True
+
+REMOVE_DUPLICATE_DATE = True
+
+UPDATE_EXISTING_RECORD = True
+# =====================================================
+# Date & Time Format
+# =====================================================
+
+DATE_FORMAT = "%d-%b-%Y"
+
+TIME_FORMAT = "%I:%M %p"
+
+DATETIME_FORMAT = "%d-%b-%Y %I:%M %p"
+
+DATABASE_DATE_FORMAT = "%Y-%m-%d"
+
+DATABASE_MONTH_FORMAT = "%Y-%m"
+
 # =====================================================
 # Notification Settings
 # =====================================================
 
 ENABLE_EMAIL = True
 
-ENABLE_SMS = False
-
 ENABLE_WHATSAPP = True
+
+ENABLE_SMS = False
 
 ENABLE_TEAMS = False
 
+AUTO_SEND_NOTIFICATION = True
 
+SEND_DAILY_NOTIFICATION = True
+
+SEND_MONTHLY_NOTIFICATION = True
+
+SEND_WARNING_EMAIL = True
+
+SEND_LIMIT_EMAIL = True
+
+SEND_EXCEEDED_EMAIL = True
+
+SEND_WARNING_WHATSAPP = True
+
+SEND_LIMIT_WHATSAPP = True
+
+SEND_EXCEEDED_WHATSAPP = True
+
+SEND_TO_HR = True
+
+SEND_TO_EMPLOYEE = True
+
+NOTIFY_ONLY_ON_STATUS_CHANGE = True
 # =====================================================
-# Report Settings
-# =====================================================
-
-GENERATE_EXCEL_REPORT = True
-
-GENERATE_SUMMARY = True
-
-GENERATE_HR_REPORT = True
-
-GENERATE_LATE_PUNCH_REPORT = True
-
-AUTO_SEND_EMAIL = True
-
-AUTO_OPEN_WHATSAPP = False
-
-
-# =====================================================
-# Dashboard Settings
-# =====================================================
-
-SHOW_EMPLOYEE_EMAIL = True
-
-SHOW_EMPLOYEE_PHONE = True
-
-SHOW_NOTIFICATION_PREVIEW = True
-
-SHOW_SUMMARY_CARDS = True
-
-
-# =====================================================
-# Automatic Folder Creation
+# Company Information
 # =====================================================
 
-os.makedirs(
+COMPANY_NAME = "ADISTHAM VENTURES PRIVATE LIMITED"
 
-    UPLOAD_FOLDER,
+HR_NAME = "HR Department"
 
-    exist_ok=True
+COMPANY_ADDRESS = "Tirupur, Tamil Nadu"
 
-)
+HR_EMAIL = "adishtam.hr@gmail.com"
 
-os.makedirs(
-
-    REPORT_FOLDER,
-
-    exist_ok=True
-
-)
+SUPPORT_EMAIL = "adishtam.hr@gmail.com"
 # =====================================================
 # Email Configuration
 # =====================================================
-
-EMAIL_ENABLED = True
 
 SMTP_SERVER = "smtp.gmail.com"
 
@@ -178,41 +344,95 @@ SMTP_PORT = 587
 
 EMAIL_ADDRESS = "adishtam.hr@gmail.com"
 
-# Gmail App Password
-# Recommended:
-# Store this in an environment variable for production.
-
 EMAIL_PASSWORD = os.getenv(
+
     "EMAIL_PASSWORD",
-    "abcd efgh ijkl mnop"
+
+    ""
+
 )
 
-SMTP_TIMEOUT = 30
+USE_TLS = True
 
+EMAIL_TIMEOUT = 30
 
+EMAIL_RETRY_COUNT = 3
+
+EMAIL_SUBJECT = "Attendance Notification"
+
+HR_REPORT_SUBJECT = "Daily Attendance Report"
+
+WARNING_SUBJECT = "Monthly Overtime Warning"
+
+LIMIT_SUBJECT = "Monthly Overtime Limit Reached"
+
+EXCEEDED_SUBJECT = "Monthly Overtime Exceeded"
 # =====================================================
-# Company Information
+# Report Settings
 # =====================================================
 
-COMPANY_NAME = "ADISTHAM VENTURES PRIVATE LIMITED"
+GENERATE_EXCEL_REPORT = True
 
-COMPANY_SHORT_NAME = "ADISTHAM"
+GENERATE_PDF_REPORT = False
 
-HR_NAME = "HR Department"
+GENERATE_SUMMARY = True
 
-COMPANY_EMAIL = EMAIL_ADDRESS
+GENERATE_DAILY_OT_REPORT = True
 
-COMPANY_WEBSITE = ""
+GENERATE_MONTHLY_OT_REPORT = True
 
-COMPANY_PHONE = ""
+GENERATE_EMPLOYEE_HISTORY = True
 
+GENERATE_HR_REPORT = True
 
+GENERATE_LATE_REPORT = True
+
+GENERATE_WARNING_REPORT = True
+
+GENERATE_LIMIT_REPORT = True
+
+GENERATE_EXCEEDED_REPORT = True
+
+SAVE_REPORT_HISTORY = True
+# =====================================================
+# Dashboard Settings
+# =====================================================
+
+SHOW_DAILY_OT = True
+
+SHOW_MONTHLY_OT = True
+
+SHOW_EMPLOYEE_HISTORY = True
+
+SHOW_OT_WARNING = True
+
+SHOW_LIMIT_REACHED = True
+
+SHOW_OT_EXCEEDED = True
+
+SHOW_REMAINING_OT = True
+
+SHOW_PROGRESS_BAR = True
+
+SHOW_DASHBOARD_CHARTS = True
+
+SHOW_MONTHLY_HISTORY = True
+
+SHOW_EMPLOYEE_SEARCH = True
+
+SHOW_FILTER_BUTTONS = True
+
+SHOW_EXPORT_BUTTON = True
 # =====================================================
 # Application Information
 # =====================================================
 
-APP_VERSION = "2.0"
+VERSION = "5.0 Enterprise"
 
-DEVELOPER = "Maharajan"
+AUTHOR = "Maharajan"
 
-COPYRIGHT = "© ADISTHAM VENTURES PRIVATE LIMITED"
+COPYRIGHT = "Attendance Notification System Pro"
+
+LAST_UPDATED = "2026"
+
+BUILD = "Enterprise Release"

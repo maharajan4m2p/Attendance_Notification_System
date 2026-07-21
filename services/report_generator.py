@@ -1,40 +1,21 @@
 """
 =========================================================
 Attendance Notification System Pro
-Excel Report Generator
-Version : 2.0
+Report Generator
+Version : 5.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
 
 import os
 
-import pandas as pd
-
 from datetime import datetime
 
-from openpyxl.styles import (
-
-    Font,
-
-    PatternFill,
-
-    Alignment,
-
-    Border,
-
-    Side
-
-)
-
-from openpyxl.utils import get_column_letter
+import pandas as pd
 
 from config import (
-
     REPORT_FOLDER,
-
-    COMPANY_NAME
-
+    MONTHLY_OT_LIMIT
 )
 
 
@@ -48,480 +29,126 @@ class ReportGenerator:
 
         self.report_folder = REPORT_FOLDER
 
-        # Header Style
-
-        self.header_fill = PatternFill(
-
-            start_color="0D6EFD",
-
-            end_color="0D6EFD",
-
-            fill_type="solid"
-
+        os.makedirs(
+            self.report_folder,
+            exist_ok=True
         )
 
-        self.header_font = Font(
-
-            bold=True,
-
-            color="FFFFFF"
-
-        )
-
-        self.center = Alignment(
-
-            horizontal="center",
-
-            vertical="center"
-
-        )
-
-        thin = Side(style="thin")
-
-        self.border = Border(
-
-            left=thin,
-
-            right=thin,
-
-            top=thin,
-
-            bottom=thin
-
-        )
-
-        self.title_font = Font(
-
-            bold=True,
-
-            size=16
-
-        )
-
-        self.summary_fill = PatternFill(
-
-            start_color="D9EAD3",
-
-            end_color="D9EAD3",
-
-            fill_type="solid"
-
-        )
-        # =====================================================
+    # =====================================================
     # Generate Excel Report
     # =====================================================
 
-    def generate_report(
-
+    def generate_excel(
         self,
-
-        result,
-
-        original_filename
-
+        employees,
+        filename="Attendance_Report.xlsx"
     ):
 
-        summary = result["summary"]
+        report_data = []
 
-        employees = result["employees"]
+        for emp in employees:
 
-        # ==========================================
-        # Employee Report Data
-        # ==========================================
+            remaining = (
+                MONTHLY_OT_LIMIT * 60
+            ) - emp.get(
+                "monthly_ot_minutes",
+                0
+            )
 
-        report_rows = []
+            if remaining < 0:
+                remaining = 0
 
-        for employee in employees:
+            remaining_hours = (
+                f"{remaining//60:02d}:{remaining%60:02d}"
+            )
 
-            report_rows.append({
+            report_data.append({
 
-                "Employee ID": employee.get(
-                    "employee_id", ""
-                ),
+                "Employee ID": emp["employee_id"],
 
-                "Employee Name": employee.get(
-                    "name", ""
-                ),
+                "Employee Name": emp["name"],
 
-                "Phone": employee.get(
-                    "phone", ""
-                ),
+                "Department": emp["department"],
 
-                "Email": employee.get(
-                    "email", ""
-                ),
+                "Designation": emp["designation"],
 
-                "Punch In": employee.get(
-                    "punch_in", ""
-                ),
+                "Attendance Date": emp["attendance_date"],
 
-                "Punch Out": employee.get(
-                    "punch_out", ""
-                ),
+                "Punch In": emp["punch_in"],
 
-                "Status": ", ".join(
-                    employee.get("status", [])
-                ),
+                "Punch Out": emp["punch_out"],
 
-                "Remark": employee.get(
-                    "remark", ""
-                ),
+                "Daily OT": emp["daily_ot"],
 
-                "Late Minutes": employee.get(
-                    "late_minutes", 0
-                ),
+                "Monthly OT": emp["monthly_ot"],
 
-                "Early Minutes": employee.get(
-                    "early_minutes", 0
-                ),
+                "Remaining OT": remaining_hours,
 
-                "Overtime Minutes": employee.get(
-                    "overtime_minutes", 0
-                ),
+                "Daily Status": emp["daily_ot_status"],
 
-                "Notification": employee.get(
-                    "notification", ""
-                )
+                "Monthly Status": emp["monthly_status"],
+
+                "Notification": emp["notification"]
 
             })
 
-        employee_df = pd.DataFrame(report_rows)
-
-        # ==========================================
-        # Summary Sheet
-        # ==========================================
-
-        present = (
-            summary["total"]
-            - summary["missing_in"]
-        )
-
-        summary_df = pd.DataFrame([{
-
-            "Company": COMPANY_NAME,
-
-            "Total Employees": summary["total"],
-
-            "Present": present,
-
-            "Late Punch": summary["late_in"],
-
-            "Early Punch Out": summary["early_out"],
-
-            "Missing Punch In": summary["missing_in"],
-
-            "Missing Punch Out": summary["missing_out"],
-
-            "Overtime": summary["overtime"]
-
-        }])
-
-        # ==========================================
-        # Individual Report Sheets
-        # ==========================================
-
-        late_df = employee_df[
-            employee_df["Status"].str.contains(
-                "Late",
-                case=False,
-                na=False
-            )
-        ]
-
-        missing_in_df = employee_df[
-            employee_df["Status"].str.contains(
-                "Missing Punch In",
-                case=False,
-                na=False
-            )
-        ]
-
-        missing_out_df = employee_df[
-            employee_df["Status"].str.contains(
-                "Missing Punch Out",
-                case=False,
-                na=False
-            )
-        ]
-
-        early_df = employee_df[
-            employee_df["Status"].str.contains(
-                "Early",
-                case=False,
-                na=False
-            )
-        ]
-
-        overtime_df = employee_df[
-            employee_df["Status"].str.contains(
-                "Overtime",
-                case=False,
-                na=False
-            )
-        ]
-
-        # ==========================================
-        # File Name
-        # ==========================================
+        dataframe = pd.DataFrame(report_data)
 
         timestamp = datetime.now().strftime(
             "%Y%m%d_%H%M%S"
         )
 
-        report_name = (
-            f"Attendance_Report_{timestamp}.xlsx"
-        )
-
-        report_path = os.path.join(
-
+        filepath = os.path.join(
             self.report_folder,
-
-            report_name
-
+            f"{timestamp}_{filename}"
         )
-        # ==========================================
-        # Create Excel Workbook
-        # ==========================================
 
         with pd.ExcelWriter(
-
-            report_path,
-
+            filepath,
             engine="openpyxl"
-
         ) as writer:
 
-            # ======================================
-            # Summary Sheet
-            # ======================================
-
-            summary_df.to_excel(
-
+            dataframe.to_excel(
                 writer,
-
-                sheet_name="Summary",
-
+                sheet_name="Attendance Report",
                 index=False
-
             )
 
-            # ======================================
-            # Employee Sheet
-            # ======================================
-
-            employee_df.to_excel(
-
-                writer,
-
-                sheet_name="Employees",
-
-                index=False
-
-            )
-
-            # ======================================
-            # Late Punch Sheet
-            # ======================================
-
-            late_df.to_excel(
-
-                writer,
-
-                sheet_name="Late Punch",
-
-                index=False
-
-            )
-
-            # ======================================
-            # Missing Punch In
-            # ======================================
-
-            missing_in_df.to_excel(
-
-                writer,
-
-                sheet_name="Missing Punch In",
-
-                index=False
-
-            )
-
-            # ======================================
-            # Missing Punch Out
-            # ======================================
-
-            missing_out_df.to_excel(
-
-                writer,
-
-                sheet_name="Missing Punch Out",
-
-                index=False
-
-            )
-
-            # ======================================
-            # Early Punch Out
-            # ======================================
-
-            early_df.to_excel(
-
-                writer,
-
-                sheet_name="Early Punch Out",
-
-                index=False
-
-            )
-
-            # ======================================
-            # Overtime
-            # ======================================
-
-            overtime_df.to_excel(
-
-                writer,
-
-                sheet_name="Overtime",
-
-                index=False
-
-            )
-
-            workbook = writer.book
-
-            # ======================================
-            # Format Every Sheet
-            # ======================================
-
-            for sheet_name in workbook.sheetnames:
-
-                sheet = workbook[sheet_name]
-
-                # Header Style
-
-                for cell in sheet[1]:
-
-                    cell.fill = self.header_fill
-
-                    cell.font = self.header_font
-
-                    cell.alignment = self.center
-
-                    cell.border = self.border
-
-                # Data Style
-
-                for row in sheet.iter_rows(min_row=2):
-
-                    for cell in row:
-
-                        cell.border = self.border
-
-                        cell.alignment = self.center
-
-                # Auto Column Width
-
-                for column_cells in sheet.iter_cols():
-
-                    length = max(
-                        len(str(cell.value)) if cell.value else 0
-                        for cell in column_cells
-                    )
-
-                    column_index = column_cells[0].column
-
-                    sheet.column_dimensions[
-                        get_column_letter(int(column_index))
-                        
-                    ].width = min(length + 5, 50)
-                    # ======================================
-            # Summary Sheet Formatting
-            # ======================================
-
-            summary_sheet = workbook["Summary"]
-
-            summary_sheet.insert_rows(1, 4)
-
-            summary_sheet["A1"] = COMPANY_NAME
-            summary_sheet["A2"] = "Attendance Notification System Pro"
-            summary_sheet["A3"] = "Daily Attendance Report"
-            summary_sheet["A4"] = datetime.now().strftime(
-                "Generated On : %d-%b-%Y %I:%M %p"
-            )
-
-            summary_sheet["A1"].font = Font(
-                size=18,
-                bold=True
-            )
-
-            summary_sheet["A2"].font = Font(
-                size=14,
-                bold=True
-            )
-
-            summary_sheet["A3"].font = Font(
-                size=13,
-                bold=True
-            )
-
-            summary_sheet["A4"].font = Font(
-                italic=True
-            )
-
-            # ======================================
-            # Color Summary Table
-            # ======================================
-
-            for cell in summary_sheet[5]:
-
-                cell.fill = self.summary_fill
-
-                cell.font = Font(
-                    bold=True
+            worksheet = writer.sheets["Attendance Report"]
+
+            # =====================================
+            # Auto Fit Columns
+            # =====================================
+
+            for column_cells in worksheet.columns:
+
+                length = max(
+                    len(str(cell.value))
+                    if cell.value is not None
+                    else 0
+                    for cell in column_cells
                 )
 
-                cell.alignment = self.center
+                worksheet.column_dimensions[
+                    column_cells[0].column_letter
+                ].width = min(
+                    length + 5,
+                    50
+                )
 
-                cell.border = self.border
+        return filepath
 
-            for row in summary_sheet.iter_rows(
-                min_row=6
-            ):
+    # =====================================================
+    # Compatibility Wrapper
+    # =====================================================
 
-                for cell in row:
+    def generate_report(
+        self,
+        result,
+        filename="Attendance_Report.xlsx"
+    ):
 
-                    cell.border = self.border
-
-                    cell.alignment = self.center
-
-            summary_sheet.freeze_panes = "A6"
-
-            # ======================================
-            # Freeze Employee Sheet
-            # ======================================
-
-            workbook["Employees"].freeze_panes = "A2"
-
-            workbook["Late Punch"].freeze_panes = "A2"
-
-            workbook["Missing Punch In"].freeze_panes = "A2"
-
-            workbook["Missing Punch Out"].freeze_panes = "A2"
-
-            workbook["Early Punch Out"].freeze_panes = "A2"
-
-            workbook["Overtime"].freeze_panes = "A2"
-            # ==========================================
-        # Workbook Saved Automatically
-        # ==========================================
-
-        # ExcelWriter automatically saves the workbook
-        # when exiting the 'with' block.
-
-        # ==========================================
-        # Return Report Path
-        # ==========================================
-
-        return report_path
+        return self.generate_excel(
+            result["employees"],
+            filename
+        )

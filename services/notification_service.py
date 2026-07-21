@@ -1,89 +1,217 @@
 """
 =========================================================
-Attendance Notification System
+Attendance Notification System Pro
 Notification Service
-Version : 1.0
+Version : 5.0 Enterprise
+Developed by Maharajan
 =========================================================
 """
 
 
 class NotificationService:
+    # =====================================================
+    # Initialize
+    # =====================================================
 
     def __init__(self):
 
         pass
-
     # =====================================================
-    # Generate Notification
+    # Generate Employee Notification
     # =====================================================
 
-    def generate_message(self, employee):
+    def generate_message(
+
+        self,
+
+        employee
+
+    ):
 
         message = []
 
         message.append(
+
             f"Hello {employee['name']},"
+
         )
 
         message.append("")
 
         message.append(
+
             "Attendance Notification"
+
         )
 
-        message.append("---------------------------")
+        message.append(
 
-        # Late Punch In
+            "--------------------------------"
 
-        if "late_minutes" in employee:
+        )
 
-            message.append(
-                f"Late Punch In : {employee['late_minutes']} minute(s)"
-            )
+        message.append(
 
-        # Missing Punch In
+            f"Employee ID : {employee['employee_id']}"
+
+        )
+
+        message.append(
+
+            f"Department : {employee['department']}"
+
+        )
+
+        message.append("")
+        # =====================================================
+        # Attendance Status
+        # =====================================================
 
         if "Missing Punch In" in employee["status"]:
 
             message.append(
-                "Missing Punch In"
-            )
 
-        # Missing Punch Out
+                "❌ Missing Punch In"
+
+            )
 
         if "Missing Punch Out" in employee["status"]:
 
             message.append(
-                "Missing Punch Out"
+
+                "❌ Missing Punch Out"
+
             )
 
-        # Early Punch Out
+        if any(
 
-        if "early_minutes" in employee:
+            "Late" in status
+
+            for status in employee["status"]
+
+        ):
 
             message.append(
-                f"Early Punch Out : {employee['early_minutes']} minute(s)"
+
+                "⚠️ Late Punch"
+
             )
 
-        # Overtime
+        if any(
 
-        if "overtime_minutes" in employee:
+            "Early" in status
+
+            for status in employee["status"]
+
+        ):
 
             message.append(
-                f"Overtime : {employee['overtime_minutes']} minute(s)"
+
+                "⚠️ Early Punch Out"
+
             )
 
         message.append("")
-        message.append("Thank You")
-        message.append("HR Department")
+        # =====================================================
+        # Overtime Details
+        # =====================================================
+
+        message.append(
+
+            f"🕒 Today's OT : {employee['daily_ot']}"
+
+        )
+
+        message.append(
+
+            f"📅 Monthly OT : {employee['monthly_ot']}"
+
+        )
+
+        message.append(
+
+            f"⏳ Remaining OT : {employee['remaining_ot']}"
+
+        )
+
+        message.append("")
+        # =====================================================
+        # Monthly OT Status
+        # =====================================================
+
+        if employee["monthly_status"] == "Warning":
+
+            message.append(
+
+                "⚠️ Warning: Monthly OT has crossed 21 hours."
+
+            )
+
+        elif employee["monthly_status"] == "Limit Reached":
+
+            message.append(
+
+                "🚨 Monthly OT Limit Reached (25:00 Hours)."
+
+            )
+
+            message.append(
+
+                "Further overtime requires HR approval."
+
+            )
+
+        elif employee["monthly_status"] == "Exceeded":
+
+            message.append(
+
+                "❌ Monthly OT Limit Exceeded."
+
+            )
+
+            message.append(
+
+                "Please contact HR immediately."
+
+            )
+
+        else:
+
+            message.append(
+
+                "✅ Monthly OT is within the allowed limit."
+
+            )
+
+        message.append("")
+        # =====================================================
+        # Closing Message
+        # =====================================================
+
+        message.append(
+
+            "Thank you."
+
+        )
+
+        message.append(
+
+            "HR Department"
+
+        )
 
         return "\n".join(message)
-
     # =====================================================
-    # Generate All Messages
+    # Generate All Notifications
     # =====================================================
 
-    def generate_all(self, employees):
+    def generate_all(
+
+        self,
+
+        employees
+
+    ):
 
         notifications = []
 
@@ -91,37 +219,107 @@ class NotificationService:
 
             notifications.append({
 
-                "name": employee["name"],
+                "employee_id": employee.get(
 
-                "phone": employee["phone"],
+                    "employee_id",
 
-                "message": self.generate_message(employee)
+                    ""
+
+                ),
+
+                "name": employee.get(
+
+                    "name",
+
+                    ""
+
+                ),
+
+                "phone": employee.get(
+
+                    "phone",
+
+                    ""
+
+                ),
+
+                "email": employee.get(
+
+                    "email",
+
+                    ""
+
+                ),
+
+                "message": self.generate_message(
+
+                    employee
+
+                )
 
             })
 
         return notifications
-
     # =====================================================
     # Display Notifications
     # =====================================================
 
-    def print_notifications(self, employees):
+    def print_notifications(
+
+        self,
+
+        employees
+
+    ):
 
         notifications = self.generate_all(
+
             employees
+
         )
 
         for item in notifications:
 
-            print("=" * 60)
+            print("=" * 70)
 
-            print("Employee :", item["name"])
+            print(
 
-            print("Phone    :", item["phone"])
+                "Employee ID :",
+
+                item["employee_id"]
+
+            )
+
+            print(
+
+                "Employee    :",
+
+                item["name"]
+
+            )
+
+            print(
+
+                "Phone       :",
+
+                item["phone"]
+
+            )
+
+            print(
+
+                "Email       :",
+
+                item["email"]
+
+            )
 
             print()
 
-            print(item["message"])
+            print(
+
+                item["message"]
+
+            )
 
             print()
-            

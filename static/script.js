@@ -1,19 +1,23 @@
-/*=========================================================
- Attendance Notification System
- Developed by Maharajan
-=========================================================*/
+/*
+=========================================================
+Attendance Notification System Pro
+JavaScript
+Version : 5.0
+Developed by Maharajan
+=========================================================
+*/
 
 document.addEventListener("DOMContentLoaded", function () {
 
     //------------------------------------------------------
-    // Glass Card 3D Effect
+    // Glass Card Animation
     //------------------------------------------------------
 
     const card = document.querySelector(".glass-card");
 
     if (card) {
 
-        document.addEventListener("mousemove", (e) => {
+        document.addEventListener("mousemove", function (e) {
 
             const x =
                 (window.innerWidth / 2 - e.pageX) / 40;
@@ -26,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         });
 
-        document.addEventListener("mouseleave", () => {
+        document.addEventListener("mouseleave", function () {
 
             card.style.transform =
                 "rotateX(0deg) rotateY(0deg)";
@@ -36,31 +40,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     //------------------------------------------------------
-    // Upload Box
+    // Upload File Name
     //------------------------------------------------------
 
-    const uploadBox =
-        document.querySelector(".upload-box");
+    const uploadInput =
+        document.querySelector("input[type='file']");
 
-    const input =
-        document.querySelector(
-            "input[type=file]"
-        );
+    if (uploadInput) {
 
-    if (uploadBox && input) {
-
-        input.addEventListener("change", function () {
+        uploadInput.addEventListener("change", function () {
 
             if (this.files.length > 0) {
 
-                uploadBox.querySelector("h4").innerHTML =
-                    this.files[0].name;
+                console.log("Selected File : " + this.files[0].name);
 
-                uploadBox.style.borderColor =
-                    "#22c55e";
+                const uploadBox =
+                    document.querySelector(".upload-box h4");
 
-                uploadBox.style.boxShadow =
-                    "0 0 35px #22c55e";
+                if (uploadBox) {
+
+                    uploadBox.innerHTML =
+                        this.files[0].name;
+
+                }
 
             }
 
@@ -69,18 +71,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     //------------------------------------------------------
-    // Button Animation
+    // Analyze Button
     //------------------------------------------------------
 
-    const button =
+    const analyzeButton =
         document.querySelector(".btn-analyze");
 
-    if (button) {
+    if (analyzeButton) {
 
-        button.addEventListener("click", function () {
+        analyzeButton.addEventListener("click", function () {
+
+            this.disabled = true;
 
             this.innerHTML =
-                "<i class='fa-solid fa-spinner fa-spin'></i> Processing...";
+                "<i class='fa-solid fa-spinner fa-spin'></i> Processing Attendance...";
 
         });
 
@@ -89,68 +93,72 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-//----------------------------------------------------------
+//------------------------------------------------------
 // Particles Background
-//----------------------------------------------------------
+//------------------------------------------------------
 
-particlesJS("particles-js", {
+if (typeof particlesJS !== "undefined") {
 
-    particles: {
+    particlesJS("particles-js", {
 
-        number: {
+        particles: {
 
-            value: 80
+            number: {
 
-        },
+                value: 80
 
-        color: {
+            },
 
-            value: "#38bdf8"
+            color: {
 
-        },
+                value: "#0d6efd"
 
-        shape: {
+            },
 
-            type: "circle"
+            shape: {
 
-        },
+                type: "circle"
 
-        opacity: {
+            },
 
-            value: 0.4
+            opacity: {
 
-        },
+                value: 0.5
 
-        size: {
+            },
 
-            value: 4
+            size: {
 
-        },
+                value: 3
 
-        move: {
+            },
 
-            enable: true,
-
-            speed: 2
-
-        }
-
-    },
-
-    interactivity: {
-
-        events: {
-
-            onhover: {
+            move: {
 
                 enable: true,
 
-                mode: "repulse"
+                speed: 2
+
+            }
+
+        },
+
+        interactivity: {
+
+            events: {
+
+                onhover: {
+
+                    enable: true,
+
+                    mode: "repulse"
+
+                }
 
             }
 
         }
 
-    }
+    });
 
-});
+}

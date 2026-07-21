@@ -1,320 +1,297 @@
-/* =====================================================
-   Attendance Notification System
-   Developed by Maharajan
-===================================================== */
+/*
+=========================================================
+Attendance Notification System Pro
+Enterprise Dashboard
+Version : 5.0
+Developed by Maharajan
+=========================================================
+*/
 
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
 }
 
 body{
-
-    min-height:100vh;
-
-    background:linear-gradient(
-        135deg,
-        #0f172a,
-        #1e3a8a,
-        #2563eb,
-        #0f172a
-    );
-
-    background-size:400% 400%;
-
-    animation:gradientMove 15s infinite;
-
-    overflow-x:hidden;
-
-    color:white;
-
+    background:#f4f7fb;
+    font-family:"Segoe UI",Arial,sans-serif;
+    color:#333;
 }
 
-@keyframes gradientMove{
+/* ================= Navbar ================= */
 
-0%{
-
-background-position:0% 50%;
-
+.navbar{
+    background:linear-gradient(90deg,#0d6efd,#4f8dfd);
+    box-shadow:0 3px 12px rgba(0,0,0,.15);
 }
 
-50%{
-
-background-position:100% 50%;
-
+.navbar-brand{
+    color:#fff !important;
+    font-size:28px;
+    font-weight:bold;
 }
 
-100%{
+.developer{
+    color:#fff;
+    font-size:14px;
+}
 
-background-position:0% 50%;
+/* ================= Cards ================= */
 
+.summary-card{
+    border:none;
+    border-radius:18px;
+    color:#fff;
+    padding:25px;
+    transition:.3s;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.summary-card:hover{
+    transform:translateY(-6px);
+}
+
+.summary-card h2{
+    font-size:36px;
+    font-weight:bold;
+    margin-top:12px;
+}
+
+.blue{
+    background:#0d6efd;
+}
+
+.green{
+    background:#198754;
+}
+
+.red{
+    background:#dc3545;
+}
+
+.orange{
+    background:#fd7e14;
+}
+
+.purple{
+    background:#6f42c1;
+}
+
+.teal{
+    background:#20c997;
+}
+
+.dark{
+    background:#212529;
+}
+
+/* ================= Charts ================= */
+
+.chart-card{
+    background:#fff;
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+/* ================= Table ================= */
+
+.table{
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.table thead{
+    background:#0d6efd;
+    color:#fff;
+}
+
+.table tbody tr:hover{
+    background:#eef5ff;
+}
+
+/* ================= Buttons ================= */
+
+.btn{
+    border-radius:10px;
+    font-weight:600;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+/* ================= Badge ================= */
+
+.badge{
+    padding:8px 12px;
+    font-size:12px;
+    margin-bottom:4px;
+}
+
+/* ================= Modal ================= */
+
+.modal-content{
+    border-radius:15px;
+}
+
+.modal-header{
+    border-top-left-radius:15px;
+    border-top-right-radius:15px;
+}
+
+/* ================= Search ================= */
+
+.form-control{
+    border-radius:10px;
+}
+
+/* ================= Footer ================= */
+
+.footer{
+    margin-top:40px;
+    padding:20px;
+    text-align:center;
+    color:#666;
+}
+
+/* ================= Responsive ================= */
+
+@media(max-width:768px){
+
+.summary-card{
+    margin-bottom:15px;
+}
+
+.navbar-brand{
+    font-size:22px;
+}
+
+.summary-card h2{
+    font-size:28px;
 }
 
 }
+/* =====================================================
+   Upload Page
+===================================================== */
 
 #particles-js{
 
-position:fixed;
+    position:fixed;
 
-top:0;
+    top:0;
 
-left:0;
+    left:0;
 
-width:100%;
+    width:100%;
 
-height:100%;
+    height:100%;
 
-z-index:-1;
+    z-index:-1;
 
-}
-
-.container-fluid{
-
-padding-top:60px;
-
-padding-bottom:60px;
+    background:linear-gradient(135deg,#0d6efd,#6610f2);
 
 }
 
 .glass-card{
 
-background:rgba(255,255,255,.08);
+    background:rgba(255,255,255,.15);
 
-backdrop-filter:blur(18px);
+    backdrop-filter:blur(18px);
 
-border:1px solid rgba(255,255,255,.15);
+    -webkit-backdrop-filter:blur(18px);
 
-border-radius:30px;
+    border:1px solid rgba(255,255,255,.25);
 
-padding:50px;
+    border-radius:20px;
 
-box-shadow:
+    padding:40px;
 
-0 20px 60px rgba(0,0,0,.45);
+    box-shadow:0 20px 40px rgba(0,0,0,.20);
 
-transition:.5s;
-
-transform-style:preserve-3d;
-
-}
-
-.glass-card:hover{
-
-transform:
-
-rotateX(4deg)
-
-rotateY(-4deg)
-
-scale(1.02);
+    transition:.4s;
 
 }
 
 .logo-circle{
 
-width:120px;
+    width:100px;
 
-height:120px;
+    height:100px;
 
-margin:auto;
+    margin:auto;
 
-border-radius:50%;
+    border-radius:50%;
 
-background:linear-gradient(
-45deg,
-#06b6d4,
-#3b82f6
-);
+    background:#0d6efd;
 
-display:flex;
+    color:#fff;
 
-align-items:center;
+    display:flex;
 
-justify-content:center;
+    justify-content:center;
 
-font-size:55px;
+    align-items:center;
 
-box-shadow:
+    font-size:42px;
 
-0 0 30px #3b82f6;
-
-animation:float 4s infinite;
+    box-shadow:0 10px 25px rgba(13,110,253,.45);
 
 }
 
-@keyframes float{
+.form-control{
 
-0%{
+    border-radius:12px;
 
-transform:translateY(0px);
-
-}
-
-50%{
-
-transform:translateY(-12px);
+    padding:15px;
 
 }
 
-100%{
+.form-control:focus{
 
-transform:translateY(0px);
+    border-color:#0d6efd;
 
-}
-
-}
-
-.main-title{
-
-font-size:42px;
-
-font-weight:700;
-
-margin-top:30px;
-
-}
-
-.developer{
-
-margin-top:10px;
-
-color:#38bdf8;
-
-font-weight:500;
-
-letter-spacing:1px;
-
-}
-
-.subtitle{
-
-margin-top:20px;
-
-color:#d1d5db;
-
-font-size:18px;
-
-line-height:32px;
-
-}
-
-.upload-box{
-
-margin-top:50px;
-
-padding:70px;
-
-border:3px dashed rgba(255,255,255,.30);
-
-border-radius:25px;
-
-text-align:center;
-
-cursor:pointer;
-
-transition:.4s;
-
-position:relative;
-
-overflow:hidden;
-
-}
-
-.upload-box:hover{
-
-background:rgba(255,255,255,.08);
-
-transform:scale(1.02);
-
-border-color:#38bdf8;
-
-}
-
-.upload-box input{
-
-position:absolute;
-
-top:0;
-
-left:0;
-
-width:100%;
-
-height:100%;
-
-opacity:0;
-
-cursor:pointer;
-
-}
-
-.excel-icon{
-
-font-size:70px;
-
-color:#22c55e;
-
-margin-bottom:25px;
-
-}
-
-.upload-box h4{
-
-font-size:28px;
-
-margin-bottom:10px;
-
-}
-
-.upload-box p{
-
-color:#cbd5e1;
+    box-shadow:0 0 15px rgba(13,110,253,.35);
 
 }
 
 .btn-analyze{
 
-margin-top:20px;
+    padding:15px;
 
-padding:18px 60px;
+    font-size:18px;
 
-border:none;
+    font-weight:600;
 
-border-radius:50px;
-
-background:linear-gradient(
-45deg,
-#2563eb,
-#06b6d4
-);
-
-font-size:20px;
-
-font-weight:600;
-
-color:white;
-
-transition:.4s;
-
-box-shadow:
-
-0 0 25px #2563eb;
+    border-radius:12px;
 
 }
 
 .btn-analyze:hover{
 
-transform:
+    transform:translateY(-3px);
 
-translateY(-4px)
+}
 
-scale(1.05);
+.upload-box{
 
-box-shadow:
+    border:2px dashed #0d6efd;
 
-0 0 40px #38bdf8;
+    border-radius:15px;
+
+    padding:25px;
+
+    text-align:center;
+
+    transition:.3s;
+
+}
+
+.upload-box:hover{
+
+    background:#f8fbff;
 
 }
 
@@ -326,25 +303,13 @@ padding:25px;
 
 }
 
-.main-title{
-
-font-size:30px;
-
-}
-
 .logo-circle{
 
-width:90px;
+width:75px;
 
-height:90px;
+height:75px;
 
-font-size:40px;
-
-}
-
-.upload-box{
-
-padding:40px;
+font-size:30px;
 
 }
 

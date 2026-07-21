@@ -2,12 +2,13 @@
 =========================================================
 Attendance Notification System Pro
 Main Flask Application
-Version : 2.0
+Version : 5.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
 
 import os
+import traceback
 
 from flask import (
     Flask,
@@ -33,62 +34,71 @@ from services.attendance_checker import AttendanceChecker
 from services.report_generator import ReportGenerator
 from services.hr_report import HRReportGenerator
 from services.email_service import EmailService
+from services.notification_service import NotificationService
 
-
-# =========================================================
+# =====================================================
 # Flask Application
-# =========================================================
+# =====================================================
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = SECRET_KEY
+app.secret_key = SECRET_KEY
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
 app.config["REPORT_FOLDER"] = REPORT_FOLDER
 
+# Create folders if they don't exist
+os.makedirs(
+    UPLOAD_FOLDER,
+    exist_ok=True
+)
 
-# =========================================================
-# Services
-# =========================================================
+os.makedirs(
+    REPORT_FOLDER,
+    exist_ok=True
+)
+
+# =====================================================
+# Initialize Services
+# =====================================================
 
 attendance_checker = AttendanceChecker()
 
 report_generator = ReportGenerator()
 
-hr_report_generator = HRReportGenerator()
+hr_report = HRReportGenerator()
+
+notification_service = NotificationService()
 
 email_service = EmailService()
 
-
-# =========================================================
+# =====================================================
 # Global Variables
-# =========================================================
+# =====================================================
 
 analysis_result = None
 
 report_path = None
 
-hr_report = ""
+hr_report_text = ""
 
 late_punch_report = ""
-# =========================================================
-# Utility Functions
-# =========================================================
+
+# =====================================================
+# Utility Function
+# =====================================================
 
 def allowed_file(filename):
 
-    if "." not in filename:
-        return False
+    return (
+        filename is not None
+        and "." in filename
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
 
-    extension = filename.rsplit(".", 1)[1].lower()
-
-    return extension in ALLOWED_EXTENSIONS
-
-
-# =========================================================
+# =====================================================
 # Home Page
-# =========================================================
+# =====================================================
 
 @app.route("/")
 def home():
@@ -97,23 +107,28 @@ def home():
         "index.html",
         app_name=APP_NAME
     )
-    # =========================================================
-# Upload Attendance Excel
-# =========================================================
+    # =====================================================
+# Upload Attendance File
+# =====================================================
 
-@app.route("/upload", methods=["POST"])
+@app.route(
+    "/upload",
+    methods=["POST"]
+)
 def upload_file():
 
     global analysis_result
     global report_path
-    global hr_report
+    global hr_report_text
     global late_punch_report
+
+    # ---------------------------------------
+    # Check File
+    # ---------------------------------------
 
     if "attendance_file" not in request.files:
 
-        flash(
-            "Please select an Excel file."
-        )
+        flash("Please select an attendance file.")
 
         return redirect(
             url_for("home")
@@ -123,9 +138,7 @@ def upload_file():
 
     if file.filename == "":
 
-        flash(
-            "No file selected."
-        )
+        flash("No file selected.")
 
         return redirect(
             url_for("home")
@@ -133,16 +146,18 @@ def upload_file():
 
     if not allowed_file(file.filename):
 
-        flash(
-            "Only Excel (.xlsx or .xls) files are allowed."
-        )
+        flash("Only Excel (.xlsx, .xls) or CSV files are allowed.")
 
         return redirect(
             url_for("home")
         )
 
+    # ---------------------------------------
+    # Save File
+    # ---------------------------------------
+
     filename = secure_filename(
-        file.filename
+        file.filename or ""
     )
 
     filepath = os.path.join(
@@ -152,107 +167,137 @@ def upload_file():
 
     file.save(filepath)
 
-    try:
+    # ---------------------------------------
+    # Process Attendance
+    # ---------------------------------------
 
-        # ==========================================
-        # Process Attendance Excel
-        # ==========================================
+    try:
 
         analysis_result = attendance_checker.process_excel(
             filepath
         )
 
-        # ==========================================
+        if analysis_result is None:
+
+            raise ValueError(
+                "Attendance processing failed."
+            )
+
+        employees = analysis_result.get(
+            "employees",
+            []
+        )
+
+        summary = analysis_result.get(
+            "summary",
+            {}
+        )
+
+        # ---------------------------------------
+        # Generate Employee Notifications
+        # ---------------------------------------
+
+        for employee in employees:
+
+            employee["notification"] = (
+                notification_service.generate_message(
+                    employee
+                )
+            )
+
+        # ---------------------------------------
+        # Generate HR Reports
+        # ---------------------------------------
+
+        reports = hr_report.generate(
+            employees,
+            summary
+        )
+
+        hr_report_text = reports.get(
+            "hr_report",
+            ""
+        )
+
+        late_punch_report = reports.get(
+            "late_punch_report",
+            ""
+        )
+
+        # ---------------------------------------
         # Generate Excel Report
-        # ==========================================
+        # ---------------------------------------
 
-        report_path = report_generator.generate_report(
-            analysis_result,
-            filename
+        report_path = report_generator.generate_excel(
+            employees,
+            "Attendance_Report.xlsx"
         )
 
-        # ==========================================
-        # Generate WhatsApp Reports
-        # ==========================================
-
-        reports = hr_report_generator.generate(
-            analysis_result["employees"],
-            analysis_result["summary"]
-        )
-
-        hr_report = reports["hr_report"]
-
-        late_punch_report = reports["late_punch_report"]
-        # ==========================================
+        # ---------------------------------------
         # Send Email Notifications
-        # ==========================================
+        # ---------------------------------------
 
         sent = 0
-
         failed = 0
 
-        for employee in analysis_result["employees"]:
+        for employee in employees:
 
             email = employee.get(
                 "email",
                 ""
             ).strip()
 
-            if email:
+            if not email:
+                continue
 
-                if email_service.send_email(employee):
+            if email_service.send_email(
+                employee
+            ):
 
-                    sent += 1
+                sent += 1
 
-                else:
+            else:
 
-                    failed += 1
-
-        # ==========================================
-        # Success Message
-        # ==========================================
+                failed += 1
 
         flash(
-
-            f"Attendance processed successfully. "
-            f"Emails Sent : {sent} | Failed : {failed}"
-
+            f"Attendance processed successfully. Emails Sent: {sent} | Failed: {failed}"
         )
 
         return redirect(
-
-            url_for("dashboard")
-
+            url_for(
+                "dashboard"
+            )
         )
 
-    except Exception as e:
+    except Exception as error:
+
+        traceback.print_exc()
 
         flash(
-
-            f"Error : {str(e)}"
-
+            f"Error: {error}"
         )
 
         return redirect(
-
-            url_for("home")
-
+            url_for(
+                "home"
+            )
         )
-        # =========================================================
+        # =====================================================
 # Dashboard
-# =========================================================
+# =====================================================
 
 @app.route("/dashboard")
 def dashboard():
 
     global analysis_result
-    global hr_report
+    global hr_report_text
     global late_punch_report
 
     if analysis_result is None:
 
         flash(
-            "Please upload an attendance Excel file first."
+            "Please upload an attendance file first."
         )
 
         return redirect(
@@ -267,14 +312,16 @@ def dashboard():
 
         result=analysis_result,
 
-        hr_report=hr_report,
+        hr_report=hr_report_text,
 
         late_punch_report=late_punch_report
 
     )
-    # =========================================================
-# Download Excel Report
-# =========================================================
+
+
+# =====================================================
+# Download Report
+# =====================================================
 
 @app.route("/download")
 def download_report():
@@ -291,20 +338,34 @@ def download_report():
             url_for("dashboard")
         )
 
+    if not os.path.exists(report_path):
+
+        flash(
+            "Report file not found."
+        )
+
+        return redirect(
+            url_for("dashboard")
+        )
+
     return send_file(
 
         report_path,
 
-        as_attachment=True
+        as_attachment=True,
+
+        download_name="Attendance_Report.xlsx"
 
     )
+    # =====================================================
+# Send Email Notifications
+# =====================================================
 
+@app.route(
+    "/send_emails",
+    methods=["POST"]
+)
 
-# =========================================================
-# Send Email Notifications Manually
-# =========================================================
-
-@app.route("/send_emails", methods=["POST"])
 def send_emails():
 
     global analysis_result
@@ -319,20 +380,30 @@ def send_emails():
             url_for("home")
         )
 
+    employees = analysis_result.get(
+        "employees",
+        []
+    )
+
     sent = 0
 
     failed = 0
 
-    for employee in analysis_result["employees"]:
+    for employee in employees:
 
         email = employee.get(
             "email",
             ""
         ).strip()
 
-        if email:
+        if not email:
+            continue
 
-            if email_service.send_email(employee):
+        try:
+
+            if email_service.send_email(
+                employee
+            ):
 
                 sent += 1
 
@@ -340,46 +411,65 @@ def send_emails():
 
                 failed += 1
 
+        except Exception:
+
+            failed += 1
+
     flash(
 
-        f"Email Notifications Sent Successfully! "
+        f"Email Notifications Sent Successfully. "
         f"Success : {sent} | Failed : {failed}"
 
     )
 
     return redirect(
-        url_for("dashboard")
+
+        url_for(
+            "dashboard"
+        )
+
     )
-
-
-# =========================================================
-# Error Handler
-# =========================================================
+    # =====================================================
+# Error Handlers
+# =====================================================
 
 @app.errorhandler(404)
 def page_not_found(error):
 
     return render_template(
-
         "404.html",
-
         app_name=APP_NAME
-
     ), 404
 
 
-# =========================================================
+@app.errorhandler(500)
+def internal_server_error(error):
+
+    import traceback
+
+    traceback.print_exc()
+
+    return render_template(
+        "500.html",
+        app_name=APP_NAME,
+        error=str(error)
+    ), 500
+
+
+# =====================================================
 # Run Application
-# =========================================================
+# =====================================================
 
 if __name__ == "__main__":
 
+    print("=" * 60)
+    print(APP_NAME)
+    print("Attendance Notification System Pro Started")
+    print("=" * 60)
+
     app.run(
-
         host="0.0.0.0",
-
         port=5000,
-
-        debug=True
-
+        debug=True,
+        threaded=True
     )

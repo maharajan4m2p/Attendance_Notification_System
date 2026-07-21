@@ -1,6 +1,11 @@
 services:
   - type: web
     name: attendance-notification-system
-    runtime: python
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    env: python
+    plan: free
+
+    buildCommand: pip install -r requirements.txt
+
     startCommand: gunicorn app:app
+
+    autoDeploy: true

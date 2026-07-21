@@ -1,665 +1,294 @@
 """
-=========================================
+=========================================================
+Attendance Notification System Pro
 HR Report Generator
+Version : 5.0 Enterprise
 Developed by Maharajan
-=========================================
+=========================================================
 """
 
-from datetime import datetime
+from config import (
+    MONTHLY_OT_LIMIT,
+    MONTHLY_OT_WARNING
+)
 
 
 class HRReportGenerator:
 
     # =====================================================
-    # Generate HR Reports
+    # Initialize
     # =====================================================
 
-    def generate(self, employees, summary):
+    def __init__(self):
 
-        # ==========================================
-        # Create Reports
-        # ==========================================
+        self.monthly_limit = MONTHLY_OT_LIMIT
 
-        hr_report = []
+        self.warning_limit = MONTHLY_OT_WARNING
+        # =====================================================
+    # Generate HR Report
+    # =====================================================
 
-        late_report = []
+    def generate(
+        self,
+        employees,
+        summary
+    ):
 
-        today = datetime.now().strftime("%d-%b-%Y")
+        hr = []
 
-        current_time = datetime.now().strftime("%I:%M %p")
+        late = []
 
-        present = (
-            summary["total"]
-            - summary["missing_in"]
+        warning = []
+
+        limit = []
+
+        exceeded = []
+
+        # =====================================================
+        # Attendance Summary
+        # =====================================================
+
+        hr.append("=" * 60)
+
+        hr.append("ATTENDANCE SUMMARY REPORT")
+
+        hr.append("=" * 60)
+
+        hr.append("")
+
+        hr.append(
+            f"Total Employees      : {summary.get('total', 0)}"
         )
 
-        # ==========================================
-        # HR REPORT HEADER
-        # ==========================================
-
-        hr_report.append(
-            "══════════════════════════════════════"
+        hr.append(
+            f"Present Employees    : {summary.get('present', 0)}"
         )
 
-        hr_report.append(
-            "🏢 ADISTHAM VENTURES PRIVATE LIMITED"
+        hr.append(
+            f"Late Punch           : {summary.get('late_in', 0)}"
         )
 
-        hr_report.append(
-            "📢 DAILY ATTENDANCE REPORT"
+        hr.append(
+            f"Early Out            : {summary.get('early_out', 0)}"
         )
 
-        hr_report.append(
-            f"📅 Date : {today}"
+        hr.append(
+            f"Missing Punch In     : {summary.get('missing_in', 0)}"
         )
 
-        hr_report.append(
-            f"🕒 Generated : {current_time}"
+        hr.append(
+            f"Missing Punch Out    : {summary.get('missing_out', 0)}"
         )
 
-        hr_report.append(
-            "══════════════════════════════════════"
+        hr.append(
+            f"Overtime Employees   : {summary.get('overtime', 0)}"
         )
 
-        hr_report.append("")
-
-        # ==========================================
-        # SUMMARY
-        # ==========================================
-
-        hr_report.append(
-            "📊 SUMMARY"
+        hr.append(
+            f"OT Warning           : {summary.get('warning', 0)}"
         )
 
-        hr_report.append("")
-
-        hr_report.append(
-            f"👥 Total Employees : {summary['total']}"
+        hr.append(
+            f"Limit Reached        : {summary.get('limit_reached', 0)}"
         )
 
-        hr_report.append(
-            f"🟢 Present : {present}"
+        hr.append(
+            f"OT Exceeded          : {summary.get('monthly_ot_exceeded', 0)}"
         )
 
-        hr_report.append(
-            f"🔴 Late Punch : {summary['late_in']}"
-        )
+        hr.append("")
 
-        hr_report.append(
-            f"🟠 Early Punch Out : {summary['early_out']}"
-        )
+        hr.append("=" * 60)
 
-        hr_report.append(
-            f"❌ Missing Punch In : {summary['missing_in']}"
-        )
-
-        hr_report.append(
-            f"❌ Missing Punch Out : {summary['missing_out']}"
-        )
-
-        hr_report.append(
-            f"🟢 Overtime : {summary['overtime']}"
-        )
-
-        hr_report.append("")
-
-        hr_report.append(
-            "══════════════════════════════════════"
-        )
-
-        hr_report.append("")
-
-        # ==========================================
-        # LATE REPORT HEADER
-        # ==========================================
-
-        late_report.append(
-            "══════════════════════════════════════"
-        )
-
-        late_report.append(
-            "🏢 ADISTHAM VENTURES PRIVATE LIMITED"
-        )
-
-        late_report.append(
-            "🔴 LATE PUNCH & MISSING PUNCH OUT REPORT"
-        )
-
-        late_report.append(
-            f"📅 Date : {today}"
-        )
-
-        late_report.append(
-            f"🕒 Generated : {current_time}"
-        )
-
-        late_report.append("")
-
-        late_report.append(
-            f"👥 Total Employees : {summary['total']}"
-        )
-
-        late_report.append(
-            f"🔴 Late Punch : {summary['late_in']}"
-        )
-
-        late_report.append(
-            f"❌ Missing Punch Out : {summary['missing_out']}"
-        )
-
-        late_report.append(
-            "══════════════════════════════════════"
-        )
-
-        late_report.append("")
-        # ==========================================
-        # LATE PUNCH IN
-        # ==========================================
-
-        GRACE_TIME = "09:11 AM"
-
-        hr_report.append(f"🔴 LATE PUNCH IN (After {GRACE_TIME})")
-        hr_report.append("")
-
-        late_report.append(f"🔴 LATE PUNCH IN (After {GRACE_TIME})")
-        late_report.append("")
-
-        count = 1
+        hr.append("")
+        # =====================================================
+        # Process Employees
+        # =====================================================
 
         for emp in employees:
 
-            late_status = next(
-                (
-                    s for s in emp["status"]
-                    if "Late" in s
-                ),
+            name = emp.get(
+                "name",
                 ""
             )
 
-            if late_status:
-
-                employee_text = f"""
-{count})
-
-👤 Name          : {emp['name']}
-🆔 Employee ID   : {emp['employee_id']}
-📱 WhatsApp      : +91{emp['phone']}
-📞 Phone         : {emp['phone']}
-📧 Email         : {emp.get('email', '-')}
-🕘 Punch In      : {emp['punch_in']}
-🕕 Punch Out     : {emp['punch_out']}
-⚠️ Status        : Late Punch in .
-
-📝 Remark        : Employee Reported Late . 
-
-🚨 Action        : Counsel Employee If Late Attendance is frequent .
-
-────────────────────────────────────
-"""
-
-                hr_report.append(employee_text)
-
-                late_report.append(employee_text)
-
-                count += 1
-
-        if count == 1:
-
-            hr_report.append(
-                "✅ No employees reported late."
-            )
-
-            late_report.append(
-                "✅ No employees reported late."
-            )
-
-        hr_report.append("")
-
-        late_report.append("")
-
-        late_report.append(
-            "══════════════════════════════════════"
-        )
-
-        late_report.append("")
-        # ==========================================
-        # MISSING PUNCH OUT
-        # ==========================================
-
-        hr_report.append(
-            "❌ MISSING PUNCH OUT"
-        )
-
-        hr_report.append("")
-
-        late_report.append(
-            "❌ MISSING PUNCH OUT"
-        )
-
-        late_report.append("")
-
-        count = 1
-
-        for emp in employees:
-
-            if "Missing Punch Out" in emp["status"]:
-
-                employee_text = f"""
-{count})
-
-👤 Name          : {emp['name']}
-🆔 Employee ID   : {emp['employee_id']}
-📱 WhatsApp      : +91{emp['phone']}
-📞 Phone         : {emp['phone']}
-📧 Email         : {emp.get('email', '-')}
-
-🕘 Punch In      : {emp['punch_in']}
-🕕 Punch Out     : --
-
-⚠️ Status        : Missing Punch Out .
-
-📝 Remark        : Employee Forget to Punch Out . 
-
-🚨 Action        : Employee Must Complete Punch Out or Contact HR .
-
-────────────────────────────────────
-"""
-
-                hr_report.append(employee_text)
-
-                late_report.append(employee_text)
-
-                count += 1
-
-        if count == 1:
-
-            hr_report.append(
-                "✅ No employees with missing punch out."
-            )
-
-            late_report.append(
-                "✅ No employees with missing punch out."
-            )
-
-        hr_report.append("")
-
-        late_report.append("")
-
-        late_report.append(
-            "══════════════════════════════════════"
-        )
-
-        late_report.append("")
-        # ==========================================
-        # EARLY PUNCH OUT
-        # ==========================================
-
-        hr_report.append(
-            "🟠 EARLY PUNCH OUT"
-        )
-
-        hr_report.append("")
-
-        count = 1
-
-        for emp in employees:
-
-            early_status = next(
-
-                (
-                    s for s in emp["status"]
-                    if "Early" in s
-                ),
-
+            emp_id = emp.get(
+                "employee_id",
                 ""
-
             )
 
-            if early_status:
-
-                hr_report.append(f"""
-{count})
-
-👤 Name          : {emp['name']}
-🆔 Employee ID   : {emp['employee_id']}
-📱 WhatsApp      : +91{emp['phone']}
-📞 Phone         : {emp['phone']}
-📧 Email         : {emp.get('email','-')}
-
-🕘 Punch In      : {emp['punch_in']}
-🕕 Punch Out     : {emp['punch_out']}
-
-⚠️ Status        : Early Punch Out .
-
-📝 Remark        : Employee Left Before Shift . 
-
-🚨 Action        : Verify Whether Prior Approval Was Obtained .
-
-────────────────────────────────────
-""")
-
-                count += 1
-
-        if count == 1:
-
-            hr_report.append(
-                "✅ No employees punched out early."
-            )
-
-        hr_report.append("")
-
-        hr_report.append(
-            "══════════════════════════════════════"
-        )
-
-        hr_report.append("")
-        # ==========================================
-        # MISSING PUNCH IN
-        # ==========================================
-
-        hr_report.append(
-            "❌ MISSING PUNCH IN"
-        )
-
-        hr_report.append("")
-
-        count = 1
-
-        for emp in employees:
-
-            if "Missing Punch In" in emp["status"]:
-
-                hr_report.append(f"""
-{count})
-
-👤 Name          : {emp['name']}
-🆔 Employee ID   : {emp['employee_id']}
-📱 WhatsApp      : +91{emp['phone']}
-📞 Phone         : {emp['phone']}
-📧 Email         : {emp.get('email', '-')}
-
-🕘 Punch In      : --
-🕕 Punch Out     : {emp['punch_out']}
-
-⚠️ Status        : Missing Punch In .
-
-📝 Remark        : Employee Forget to Punch in . 
-
-🚨 Action        : Employee must Contact HR to Regularize Attendance .
-
-────────────────────────────────────
-""")
-
-                count += 1
-
-        if count == 1:
-
-            hr_report.append(
-                "✅ No employees with missing punch in."
-            )
-
-        hr_report.append("")
-
-        hr_report.append(
-            "══════════════════════════════════════"
-        )
-
-        hr_report.append("")
-        # ==========================================
-        # OVERTIME
-        # ==========================================
-
-        hr_report.append(
-            "🟢 OVERTIME"
-        )
-
-        hr_report.append("")
-
-        count = 1
-
-        for emp in employees:
-
-            ot_status = next(
-
-                (
-                    s for s in emp["status"]
-                    if "Overtime" in s
-                ),
-
+            department = emp.get(
+                "department",
                 ""
-
             )
 
-            if ot_status:
-
-                hr_report.append(f"""
-{count})
-
-👤 Name          : {emp['name']}
-🆔 Employee ID   : {emp['employee_id']}
-📱 WhatsApp      : +91{emp['phone']}
-📞 Phone         : {emp['phone']}
-📧 Email         : {emp.get('email', '-')}
-
-🕘 Punch In      : {emp['punch_in']}
-🕕 Punch Out     : {emp['punch_out']}
-
-⚡ Status        : Overtime
-
-📝 Remark        : Employee Worked beyond Scheduled Shift . 
-
-🚨 Action        : Verify and Approve Overtime if Applicable .
-
-────────────────────────────────────
-""")
-
-                count += 1
-
-        if count == 1:
-
-            hr_report.append(
-                "✅ No overtime employees."
+            monthly_ot = emp.get(
+                "monthly_ot",
+                "00:00"
             )
 
-        hr_report.append("")
+            status = emp.get(
+                "monthly_status",
+                "Normal"
+            )
 
-        hr_report.append(
-            "══════════════════════════════════════"
-        )
+            employee_status = emp.get(
+                "status",
+                []
+            )
 
-        hr_report.append("")
-        
-        # ==========================================
-        # ON TIME
-        # ==========================================
+            # -----------------------------------------
+            # Late Punch
+            # -----------------------------------------
 
-        hr_report.append("✅ ON TIME")
-        hr_report.append("")
+            if any(
+                "Late" in item
+                for item in employee_status
+            ):
 
-        count = 1
+                late.append(
 
-        for emp in employees:
+                    f"{emp_id} | {name} | {department} | "
+                    f"Punch In : {emp.get('punch_in', '--')}"
 
-            if emp["status"] == ["On Time"]:
+                )
 
-                hr_report.append(f"""
-            {count})
+            # -----------------------------------------
+            # Missing Punch
+            # -----------------------------------------
 
-👤 Name          : {emp['name']}
-🆔 Employee ID   : {emp['employee_id']}
-📱 WhatsApp      : +91{emp['phone']}
-📞 Phone         : {emp['phone']}
-📧 Email         : {emp.get('email', '-')}
+            if any(
+                "Missing" in item
+                for item in employee_status
+            ):
 
-🕘 Punch In      : {emp['punch_in']}
-🕕 Punch Out     : {emp['punch_out']}
+                late.append(
 
-✅ Status        : On Time
+                    f"{emp_id} | {name} | Missing Punch"
 
-📝 Remark        : Attendance recorded successfully.
+                )
 
-🚨 Action        : No action required.
+            # -----------------------------------------
+            # Monthly Warning
+            # -----------------------------------------
 
-    ────────────────────────────────────
-        """)
+            if status == "Warning":
 
-            count += 1
+                warning.append(
 
-        if count == 1:
+                    f"{emp_id} | {name} | OT : {monthly_ot}"
 
-            hr_report.append("✅ No employees with On Time attendance.")
+                )
 
-        hr_report.append("")
-        hr_report.append("══════════════════════════════════════")
-        # ==========================================
-        # LATE REPORT SUMMARY
-        # ==========================================
+            # -----------------------------------------
+            # Monthly Limit Reached
+            # -----------------------------------------
 
-        late_report.append(
-            "📊 SUMMARY"
-        )
+            elif status == "Limit Reached":
 
-        late_report.append("")
+                limit.append(
 
-        late_report.append(
-            f"👥 Total Employees      : {summary['total']}"
-        )
+                    f"{emp_id} | {name} | OT : {monthly_ot}"
 
-        late_report.append(
-            f"🔴 Total Late Punch     : {summary['late_in']}"
-        )
+                )
 
-        late_report.append(
-            f"❌ Missing Punch Out    : {summary['missing_out']}"
-        )
+            # -----------------------------------------
+            # Monthly Exceeded
+            # -----------------------------------------
 
-        late_report.append("")
+            elif status == "Exceeded":
 
-        late_report.append(
-            "══════════════════════════════════════"
-        )
+                exceeded.append(
 
-        # ==========================================
-        # FOOTER
-        # ==========================================
+                    f"{emp_id} | {name} | OT : {monthly_ot}"
 
-        # ==========================================
-        # FINAL SUMMARY
-        # ==========================================
+                )
 
-        hr_report.append("")
+        # =====================================================
+        # Warning Section
+        # =====================================================
 
-        hr_report.append("📊 FINAL SUMMARY")
+        if warning:
 
-        hr_report.append("")
+            hr.append("MONTHLY OT WARNING")
 
-        hr_report.append(
-            f"👥 Total Employees : {summary['total']}"
-        )
+            hr.append("-" * 60)
 
-        hr_report.append(
-            f"🟢 Present : {present}"
-        )
+            hr.extend(warning)
 
-        hr_report.append(
-            f"🔴 Late Punch : {summary['late_in']}"
-        )
+            hr.append("")
 
-        hr_report.append(
-            f"🟠 Early Punch Out : {summary['early_out']}"
-        )
+        # =====================================================
+        # Limit Reached Section
+        # =====================================================
 
-        hr_report.append(
-            f"❌ Missing Punch In : {summary['missing_in']}"
-        )
+        if limit:
 
-        hr_report.append(
-            f"❌ Missing Punch Out : {summary['missing_out']}"
-        )
+            hr.append("MONTHLY OT LIMIT REACHED")
 
-        hr_report.append(
-            f"🟢 Overtime : {summary['overtime']}"
-        )
+            hr.append("-" * 60)
 
-        # ==========================================
-# FOOTER
-# ==========================================
+            hr.extend(limit)
 
-        hr_report.append(
-            "Generated Automatically"
-        )
+            hr.append("")
 
-        hr_report.append("")
+        # =====================================================
+        # Exceeded Section
+        # =====================================================
 
-        hr_report.append(
+        if exceeded:
+
+            hr.append("MONTHLY OT EXCEEDED")
+
+            hr.append("-" * 60)
+
+            hr.extend(exceeded)
+
+            hr.append("")
+
+        # =====================================================
+        # Late Punch Section
+        # =====================================================
+
+        if late:
+
+            hr.append("LATE / MISSING PUNCH REPORT")
+
+            hr.append("-" * 60)
+
+            hr.extend(late)
+
+            hr.append("")
+            # =====================================================
+        # Footer
+        # =====================================================
+
+        hr.append("=" * 60)
+
+        hr.append(
             "Attendance Notification System Pro"
         )
 
-        hr_report.append("")
+        hr.append("HR Report Generator")
 
-        hr_report.append(
-            "Developed by Maharajan"
-        )
+        hr.append("=" * 60)
 
-        hr_report.append("")
+        # =====================================================
+        # Generate Report Strings
+        # =====================================================
 
-        hr_report.append(
-            "🏢 ADISTHAM VENTURES PRIVATE LIMITED"
-        )
+        hr_report = "\n".join(hr)
 
-        hr_report.append("")
+        late_punch_report = "\n".join(late)
 
-        hr_report.append(
-            "End of Report"
-        )
-
-        hr_report.append("")
-
-        hr_report.append(
-            "══════════════════════════════════════"
-        )
-
-        late_report.append(
-            "Generated Automatically"
-        )
-
-        late_report.append("")
-
-        late_report.append(
-            "Attendance Notification System Pro"
-        )
-
-        late_report.append("")
-
-        late_report.append(
-            "Developed by Maharajan"
-        )
-
-        late_report.append("")
-
-        late_report.append(
-            "🏢 ADISTHAM VENTURES PRIVATE LIMITED"
-        )
-
-        late_report.append("")
-
-        late_report.append(
-            "End of Report"
-        )
-
-        late_report.append("")
-
-        late_report.append(
-            "══════════════════════════════════════"
-        )
-        # ==========================================
-        # RETURN REPORTS
-        # ==========================================
+        # =====================================================
+        # Return Reports
+        # =====================================================
 
         return {
 
-            "hr_report": "\n".join(hr_report),
+            "hr_report": hr_report,
 
-            "late_punch_report": "\n".join(late_report)
+            "late_punch_report": late_punch_report
 
         }
