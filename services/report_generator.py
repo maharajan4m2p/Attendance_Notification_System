@@ -2,7 +2,7 @@
 =========================================================
 Attendance Notification System Pro
 Report Generator
-Version : 8.0 Enterprise (Ultra Performance)
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
@@ -14,26 +14,35 @@ import pandas as pd
 from openpyxl import load_workbook
 
 from openpyxl.styles import (
+
     Font,
+
     PatternFill,
-    Alignment
+
+    Alignment,
+
+    Border,
+
+    Side
+
 )
 
 from config import REPORT_FOLDER
 
 
 class ReportGenerator:
-
     """
     Enterprise Excel Report Generator
 
     Features
     --------
-    • High Speed Excel Export
+    • Professional Excel Report
     • Auto Column Width
-    • Status Highlighting
+    • Status Highlight
     • Freeze Header
     • Auto Filter
+    • Border Formatting
+    • High Performance
     """
 
     # =====================================================
@@ -68,7 +77,7 @@ class ReportGenerator:
 
         )
 
-        self.center_alignment = Alignment(
+        self.center = Alignment(
 
             horizontal="center",
 
@@ -96,6 +105,16 @@ class ReportGenerator:
 
         )
 
+        self.orange_fill = PatternFill(
+
+            fill_type="solid",
+
+            start_color="FCE4D6",
+
+            end_color="FCE4D6"
+
+        )
+
         self.red_fill = PatternFill(
 
             fill_type="solid",
@@ -106,26 +125,39 @@ class ReportGenerator:
 
         )
 
-    # =====================================================
+        thin = Side(
+
+            border_style="thin",
+
+            color="BFBFBF"
+
+        )
+
+        self.border = Border(
+
+            left=thin,
+
+            right=thin,
+
+            top=thin,
+
+            bottom=thin
+
+        )
+        # =====================================================
     # Generate Excel Report
     # =====================================================
 
     def generate_excel(
-
         self,
-
         employees,
-
         filename
-
     ):
 
         if not employees:
 
             raise ValueError(
-
                 "No employee data available."
-
             )
 
         report_path = os.path.join(
@@ -140,11 +172,115 @@ class ReportGenerator:
         print("Generating Excel Report...")
         print("=" * 60)
 
-        dataframe = pd.DataFrame(
+        # -----------------------------------------
+        # Employee Data
+        # -----------------------------------------
 
-            employees
+        dataframe = pd.DataFrame([
 
-        )
+            {
+
+                "Employee ID": emp.get(
+
+                    "employee_id",
+
+                    ""
+
+                ),
+
+                "Employee Name": emp.get(
+
+                    "name",
+
+                    ""
+
+                ),
+
+                "Department": emp.get(
+
+                    "department",
+
+                    ""
+
+                ),
+
+                "Designation": emp.get(
+
+                    "designation",
+
+                    ""
+
+                ),
+
+                "Attendance Date": emp.get(
+
+                    "attendance_date",
+
+                    ""
+
+                ),
+
+                "Punch In": emp.get(
+
+                    "punch_in",
+
+                    "--"
+
+                ),
+
+                "Punch Out": emp.get(
+
+                    "punch_out",
+
+                    "--"
+
+                ),
+
+                "Daily OT": emp.get(
+
+                    "daily_ot",
+
+                    "00:00"
+
+                ),
+
+                "Monthly OT": emp.get(
+
+                    "monthly_ot",
+
+                    "00:00"
+
+                ),
+
+                "Remaining OT": emp.get(
+
+                    "remaining_ot",
+
+                    "00:00"
+
+                ),
+
+                "Daily Status": emp.get(
+
+                    "daily_status",
+
+                    "Normal"
+
+                ),
+
+                "Monthly Status": emp.get(
+
+                    "monthly_status",
+
+                    "Normal"
+
+                )
+
+            }
+
+            for emp in employees
+
+        ])
 
         dataframe.to_excel(
 
@@ -161,16 +297,8 @@ class ReportGenerator:
             report_path
 
         )
-
-        workbook = load_workbook(report_path)
-        
         worksheet = workbook.active
-        
-        if worksheet is None:
-            raise ValueError("Worksheet not found")
-        
         worksheet.title = "Attendance Report"
-
         # =====================================================
         # Header Formatting
         # =====================================================
@@ -181,28 +309,62 @@ class ReportGenerator:
 
             cell.font = self.header_font
 
-            cell.alignment = self.center_alignment
-        
-        if worksheet is not None:
-            worksheet.freeze_panes = "A2"
+            cell.alignment = self.center
+
+            cell.border = self.border
+
         # =====================================================
+        # Freeze Header
+        # =====================================================
+
+        worksheet.freeze_panes = "A2"
+
+        # =====================================================
+        # Auto Filter
+        # =====================================================
+
+        worksheet.auto_filter.ref = worksheet.dimensions
+
+        # =====================================================
+        # Row Formatting
+        # =====================================================
+
+        for row in worksheet.iter_rows(
+
+            min_row=2
+
+        ):
+
+            for cell in row:
+
+                cell.alignment = self.center
+
+                cell.border = self.border
+
+        # =====================================================
+        # Row Height
+        # =====================================================
+
+        worksheet.row_dimensions[1].height = 28
+
+        for row in range(
+
+            2,
+
+            worksheet.max_row + 1
+
+        ):
+
+            worksheet.row_dimensions[row].height = 22
+            # =====================================================
         # Auto Column Width
         # =====================================================
-        if worksheet is None:
-            raise ValueError("Worksheet is not found")
-        
+
         for column_cells in worksheet.columns:
 
-            max_length = 0
+            column_letter = column_cells[0].column_letter
 
-            from openpyxl.cell.cell import Cell
-            
-            first_cell = column_cells[0]
-            
-            if isinstance(first_cell,Cell):
-                column_letter = first_cell.column_letter
-            else:
-                continue
+            max_length = len(str(column_cells[0].value))
 
             for cell in column_cells:
 
@@ -210,72 +372,445 @@ class ReportGenerator:
 
                     if cell.value is not None:
 
-                        max_length = max(
+                        value_length = len(str(cell.value))
 
-                            max_length,
+                        if value_length > max_length:
 
-                            len(str(cell.value))
-
-                        )
+                            max_length = value_length
 
                 except Exception:
 
                     pass
-            if workbook is not None:
-                
-                worksheet.column_dimensions[
-                    column_letter
-                ].width = min(
 
-                    max_length + 3,
+            worksheet.column_dimensions[
 
-                    40
+                column_letter
 
-                )
+            ].width = min(
+
+                max_length + 4,
+
+                35
+
+            )
 
         # =====================================================
         # Status Cell Coloring
         # =====================================================
-        if worksheet is not None:
-            for row in worksheet.iter_rows(
 
-                min_row=2
+        daily_status_column = None
 
-            ):
+        monthly_status_column = None
 
-                for cell in row:
+        for cell in worksheet[1]:
 
-                    value = str(
+            if cell.value == "Daily Status":
 
-                        cell.value
+                daily_status_column = cell.column
 
-                    ).strip()
+            elif cell.value == "Monthly Status":
 
-                    if value == "Normal":
+                monthly_status_column = cell.column
 
-                        cell.fill = self.green_fill
+        for row in range(
 
-                    elif value in (
+            2,
 
-                        "Warning",
+            worksheet.max_row + 1
 
-                        "Limit Reached"
+        ):
 
-                    ):
+            # -----------------------------------------
+            # Daily Status
+            # -----------------------------------------
 
-                        cell.fill = self.yellow_fill
+            if daily_status_column:
 
-                    elif value == "Exceeded":
+                cell = worksheet.cell(
 
-                        cell.fill = self.red_fill
+                    row=row,
 
-                    cell.alignment = self.center_alignment
+                    column=daily_status_column
 
+                )
+
+                value = str(cell.value).strip()
+
+                if value == "Normal":
+
+                    cell.fill = self.green_fill
+
+                elif value == "Warning":
+
+                    cell.fill = self.yellow_fill
+
+                elif value == "Limit Reached":
+
+                    cell.fill = self.orange_fill
+
+                elif value == "Exceeded":
+
+                    cell.fill = self.red_fill
+
+                cell.alignment = self.center
+
+                cell.border = self.border
+
+            # -----------------------------------------
+            # Monthly Status
+            # -----------------------------------------
+
+            if monthly_status_column:
+
+                cell = worksheet.cell(
+
+                    row=row,
+
+                    column=monthly_status_column
+
+                )
+
+                value = str(cell.value).strip()
+
+                if value == "Normal":
+
+                    cell.fill = self.green_fill
+
+                elif value == "Warning":
+
+                    cell.fill = self.yellow_fill
+
+                elif value == "Limit Reached":
+
+                    cell.fill = self.orange_fill
+
+                elif value == "Exceeded":
+
+                    cell.fill = self.red_fill
+
+                cell.alignment = self.center
+
+                cell.border = self.border
+        
         # =====================================================
-        # Auto Filter
+        # Create Summary Sheet
         # =====================================================
-        if worksheet is not None:
-            worksheet.auto_filter.ref = worksheet.dimensions
+
+        summary_sheet = workbook.create_sheet(
+
+            title="Summary"
+
+        )
+        summary_sheet = workbook["Summary"]
+
+        total = len(employees)
+
+        present = sum(
+            1
+            for emp in employees
+            if not any(
+                keyword in str(status)
+                for keyword in (
+                    "Late Punch",
+                    "Early Out",
+                    "Missing Punch"
+                )
+                for status in emp.get("status", [])
+            )
+        )
+        late = sum(
+
+            1
+
+            for emp in employees
+
+            if any(
+
+                "Late Punch" in str(status)
+
+                for status in emp.get(
+
+                    "status",
+
+                    []
+
+                )
+
+            )
+
+        )
+
+        early = sum(
+
+            1
+
+            for emp in employees
+
+            if any(
+
+                "Early Out" in str(status)
+
+                for status in emp.get(
+
+                    "status",
+
+                    []
+
+                )
+
+            )
+
+        )
+
+        overtime = sum(
+
+            1
+
+            for emp in employees
+
+            if emp.get(
+
+                "daily_ot_minutes",
+
+                0
+
+            ) > 0
+
+        )
+
+        warning = sum(
+
+            1
+
+            for emp in employees
+
+            if emp.get(
+
+                "monthly_status"
+
+            ) == "Warning"
+
+        )
+
+        limit = sum(
+
+            1
+
+            for emp in employees
+
+            if emp.get(
+
+                "monthly_status"
+
+            ) == "Limit Reached"
+
+        )
+
+        exceeded = sum(
+
+            1
+
+            for emp in employees
+
+            if emp.get(
+
+                "monthly_status"
+
+            ) == "Exceeded"
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "Attendance Notification System Pro"
+
+            ]
+
+        )
+        summary_sheet["A1"].font = Font(
+            bold=True,
+            size=16,
+            color="1F4E78"
+        )
+        
+        summary_sheet["A1"].alignment = self.center
+        
+        summary_sheet.merge_cells("A1:B1")
+
+        summary_sheet.append([])
+
+        summary_sheet.append(
+
+            [
+
+                "Attendance Summary",
+
+                "Count"
+
+            ]
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "Total Employees",
+
+                total
+
+            ]
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "Present",
+
+                present
+
+            ]
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "Late Punch",
+
+                late
+
+            ]
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "Early Out",
+
+                early
+
+            ]
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "Overtime Employees",
+
+                overtime
+
+            ]
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "OT Warning",
+
+                warning
+
+            ]
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "Limit Reached",
+
+                limit
+
+            ]
+
+        )
+
+        summary_sheet.append(
+
+            [
+
+                "OT Exceeded",
+
+                exceeded
+
+            ]
+
+        )
+
+        # -----------------------------------------
+        # Summary Sheet Formatting
+        # -----------------------------------------
+
+        for cell in summary_sheet[3]:
+
+            cell.fill = self.header_fill
+
+            cell.font = self.header_font
+
+            cell.alignment = self.center
+
+            cell.border = self.border
+
+        for row in summary_sheet.iter_rows(
+
+            min_row=4
+
+        ):
+
+            for cell in row:
+
+                cell.alignment = self.center
+
+                cell.border = self.border
+                
+            if row[0].value == "Total Employees":
+                row[1].fill = self.header_fill
+                row[1].font = self.header_font
+
+            elif row[0].value == "Present":
+
+                row[1].fill = self.green_fill
+
+            elif row[0].value == "OT Warning":
+
+                row[1].fill = self.yellow_fill
+
+            elif row[0].value == "Limit Reached":
+
+                row[1].fill = self.orange_fill
+
+            elif row[0].value == "OT Exceeded":
+
+                row[1].fill = self.red_fill
+
+        summary_sheet.column_dimensions["A"].width = 35
+
+        summary_sheet.column_dimensions["B"].width = 18
+        
+        summary_sheet.auto_filter.ref = summary_sheet.dimensions
+        
+        summary_sheet.freeze_panes = "A4"
+        
+        
+        # =====================================================
+        # Activate Attendance Sheet
+        # =====================================================
+
+        summary_index = workbook.sheetnames.index("Summary")
+
+        workbook.active = summary_index
 
         # =====================================================
         # Save Workbook
@@ -291,6 +826,8 @@ class ReportGenerator:
 
         print("=" * 60)
         print("Excel Report Generated Successfully")
+        print("=" * 60)
+        print(f"Report Path : {report_path}")
         print("=" * 60)
 
         return report_path

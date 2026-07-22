@@ -2,7 +2,7 @@
 =========================================================
 Attendance Notification System Pro
 Enterprise Configuration
-Version : 8.0 Enterprise (Ultra Performance)
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
@@ -15,13 +15,53 @@ import os
 
 APP_NAME = "Attendance Notification System Pro"
 
-VERSION = "8.0 Enterprise"
+VERSION = "10.0 Enterprise"
 
 AUTHOR = "Maharajan"
 
-SECRET_KEY = "attendance_notification_secret_key"
+BUILD = "Enterprise Release v10"
 
-DEBUG = True
+LAST_UPDATED = "2026"
+
+COPYRIGHT = "Attendance Notification System Pro"
+
+# =====================================================
+# Security
+# =====================================================
+
+SECRET_KEY = os.getenv(
+
+    "SECRET_KEY",
+
+    "attendance_notification_secret_key"
+
+)
+
+DEBUG = os.getenv(
+
+    "FLASK_DEBUG",
+
+    "False"
+
+).lower() == "true"
+
+# =====================================================
+# Server Configuration
+# =====================================================
+
+HOST = "0.0.0.0"
+
+PORT = int(
+
+    os.getenv(
+
+        "PORT",
+
+        5000
+
+    )
+
+)
 
 # =====================================================
 # Base Directory
@@ -32,7 +72,6 @@ BASE_DIR = os.path.abspath(
     os.path.dirname(__file__)
 
 )
-
 # =====================================================
 # Folder Configuration
 # =====================================================
@@ -81,7 +120,7 @@ BACKUP_FOLDER = os.path.join(
 # Create Required Folders
 # =====================================================
 
-for folder in (
+REQUIRED_FOLDERS = (
 
     UPLOAD_FOLDER,
 
@@ -93,7 +132,9 @@ for folder in (
 
     BACKUP_FOLDER
 
-):
+)
+
+for folder in REQUIRED_FOLDERS:
 
     os.makedirs(
 
@@ -148,6 +189,25 @@ BACKUP_DATABASE = os.path.join(
 )
 
 # =====================================================
+# Log Files
+# =====================================================
+
+LOG_FILE = os.path.join(
+
+    LOG_FOLDER,
+
+    "attendance.log"
+
+)
+
+ERROR_LOG_FILE = os.path.join(
+
+    LOG_FOLDER,
+
+    "error.log"
+
+)
+# =====================================================
 # Upload Configuration
 # =====================================================
 
@@ -161,7 +221,7 @@ ALLOWED_EXTENSIONS = {
 
 }
 
-MAX_CONTENT_LENGTH = 20 * 1024 * 1024
+MAX_CONTENT_LENGTH = 25 * 1024 * 1024   # 25 MB
 
 SUPPORTED_ENCODINGS = [
 
@@ -174,6 +234,9 @@ SUPPORTED_ENCODINGS = [
     "cp1252"
 
 ]
+
+DEFAULT_ENCODING = "utf-8"
+
 # =====================================================
 # Company Shift Configuration
 # =====================================================
@@ -195,6 +258,21 @@ STANDARD_WORKING_MINUTES = 480
 WORKING_DAYS_PER_MONTH = 25
 
 # =====================================================
+# Shift Rules
+# =====================================================
+
+ALLOW_EARLY_IN = True
+
+ALLOW_LATE_OUT = True
+
+ALLOW_WEEKEND_OT = True
+
+ALLOW_HOLIDAY_OT = True
+
+AUTO_CALCULATE_WORKING_HOURS = True
+
+AUTO_GENERATE_NOTIFICATION = True
+# =====================================================
 # Attendance Rules
 # =====================================================
 
@@ -207,12 +285,6 @@ CHECK_MISSING_IN = True
 CHECK_MISSING_OUT = True
 
 CALCULATE_OVERTIME = True
-
-ALLOW_EARLY_IN = True
-
-ALLOW_WEEKEND_OT = True
-
-ALLOW_HOLIDAY_OT = True
 
 AUTO_CALCULATE_WORKING_HOURS = True
 
@@ -250,6 +322,18 @@ LIMIT_REACHED_STATUS = "Limit Reached"
 
 EXCEEDED_STATUS = "Exceeded"
 
+MONTHLY_STATUS = (
+
+    NORMAL_STATUS,
+
+    WARNING_STATUS,
+
+    LIMIT_REACHED_STATUS,
+
+    EXCEEDED_STATUS
+
+)
+
 # =====================================================
 # Monthly Database Rules
 # =====================================================
@@ -265,6 +349,83 @@ REMOVE_DUPLICATE_DATE = True
 UPDATE_EXISTING_RECORD = True
 
 KEEP_ALL_HISTORY = True
+
+DATABASE_CACHE = True
+
+ENABLE_DATABASE_BACKUP = True
+# =====================================================
+# Attendance Rules
+# =====================================================
+
+CHECK_LATE_IN = True
+
+CHECK_EARLY_OUT = True
+
+CHECK_MISSING_IN = True
+
+CHECK_MISSING_OUT = True
+
+CALCULATE_OVERTIME = True
+
+AUTO_CALCULATE_WORKING_HOURS = True
+
+AUTO_GENERATE_NOTIFICATION = True
+
+ROUND_WORKING_MINUTES = True
+
+ROUND_OVERTIME_MINUTES = True
+
+# =====================================================
+# Daily Overtime Rules (Minutes)
+# =====================================================
+
+DAILY_OT_WARNING = 45
+
+DAILY_OT_LIMIT = 60
+
+MAX_DAILY_OT = 300
+
+# =====================================================
+# Monthly Overtime Rules (Hours)
+# =====================================================
+
+MONTHLY_OT_WARNING = 21
+
+MONTHLY_OT_LIMIT = 25
+
+MONTHLY_OT_MAX = 999
+
+# =====================================================
+# Monthly Status
+# =====================================================
+
+NORMAL_STATUS = "Normal"
+
+WARNING_STATUS = "Warning"
+
+LIMIT_REACHED_STATUS = "Limit Reached"
+
+EXCEEDED_STATUS = "Exceeded"
+
+# =====================================================
+# Monthly Database Rules
+# =====================================================
+
+STORE_MONTHLY_HISTORY = True
+
+AUTO_MONTH_RESET = True
+
+AUTO_BACKUP_DATABASE = True
+
+REMOVE_DUPLICATE_DATE = True
+
+UPDATE_EXISTING_RECORD = True
+
+KEEP_ALL_HISTORY = True
+
+AUTO_CREATE_EMPLOYEE = True
+
+VALIDATE_EMPLOYEE_ID = True
 
 # =====================================================
 # Notification Rules
@@ -291,21 +452,6 @@ ENABLE_WHATSAPP = True
 ENABLE_SMS = False
 
 ENABLE_TEAMS = False
-
-# =====================================================
-# Date & Time Format
-# =====================================================
-
-DATE_FORMAT = "%d-%b-%Y"
-
-TIME_FORMAT = "%I:%M %p"
-
-DATETIME_FORMAT = "%d-%b-%Y %I:%M %p"
-
-DATABASE_DATE_FORMAT = "%Y-%m-%d"
-
-DATABASE_MONTH_FORMAT = "%Y-%m"
-
 # =====================================================
 # Company Information
 # =====================================================
@@ -316,9 +462,26 @@ HR_NAME = "HR Department"
 
 COMPANY_ADDRESS = "Tirupur, Tamil Nadu"
 
-HR_EMAIL = "adishtam.hr@gmail.com"
+COMPANY_PHONE = ""
 
-SUPPORT_EMAIL = "adishtam.hr@gmail.com"
+COMPANY_WEBSITE = ""
+
+HR_EMAIL = os.getenv(
+
+    "HR_EMAIL",
+
+    "adishtam.hr@gmail.com"
+
+)
+
+SUPPORT_EMAIL = os.getenv(
+
+    "SUPPORT_EMAIL",
+
+    HR_EMAIL
+
+)
+
 # =====================================================
 # Email Configuration
 # =====================================================
@@ -327,7 +490,13 @@ SMTP_SERVER = "smtp.gmail.com"
 
 SMTP_PORT = 587
 
-SMTP_USERNAME = "adishtam.hr@gmail.com"
+SMTP_USERNAME = os.getenv(
+
+    "EMAIL_USERNAME",
+
+    HR_EMAIL
+
+)
 
 SMTP_PASSWORD = os.getenv(
 
@@ -336,6 +505,12 @@ SMTP_PASSWORD = os.getenv(
     ""
 
 )
+
+USE_TLS = True
+
+EMAIL_TIMEOUT = 30
+
+EMAIL_RETRY_COUNT = 3
 
 EMAIL_SUBJECT = "Attendance Notification"
 
@@ -347,12 +522,21 @@ LIMIT_SUBJECT = "Monthly Overtime Limit Reached"
 
 EXCEEDED_SUBJECT = "Monthly Overtime Exceeded"
 
-USE_TLS = True
+DEFAULT_SENDER_NAME = COMPANY_NAME
 
-EMAIL_TIMEOUT = 30
+DEFAULT_REPLY_TO = HR_EMAIL
 
-EMAIL_RETRY_COUNT = 3
+# =====================================================
+# Email Validation
+# =====================================================
 
+REQUIRE_EMPLOYEE_EMAIL = False
+
+SKIP_INVALID_EMAIL = True
+
+EMAIL_BATCH_SIZE = 100
+
+EMAIL_LOGGING = True
 # =====================================================
 # Report Settings
 # =====================================================
@@ -380,6 +564,16 @@ GENERATE_LIMIT_REPORT = True
 GENERATE_EXCEEDED_REPORT = True
 
 SAVE_REPORT_HISTORY = True
+
+AUTO_OPEN_REPORT = False
+
+REPORT_DATE_FORMAT = "%d-%b-%Y"
+
+REPORT_TIME_FORMAT = "%I:%M %p"
+
+REPORT_AUTHOR = AUTHOR
+
+REPORT_COMPANY = COMPANY_NAME
 
 # =====================================================
 # Dashboard Settings
@@ -411,6 +605,21 @@ SHOW_FILTER_BUTTONS = True
 
 SHOW_EXPORT_BUTTON = True
 
+SHOW_PRINT_BUTTON = True
+
+SHOW_REFRESH_BUTTON = True
+
+SHOW_COMPANY_LOGO = True
+
+DEFAULT_PAGE_SIZE = 25
+
+ENABLE_PAGINATION = True
+
+ENABLE_SORTING = True
+
+ENABLE_SEARCH = True
+
+ENABLE_CHART_ANIMATION = True
 # =====================================================
 # Performance Settings
 # =====================================================
@@ -427,15 +636,79 @@ ENABLE_DATABASE_BACKUP = True
 
 ENABLE_AUTO_CLEANUP = True
 
+AUTO_DELETE_UPLOADS = False
+
+AUTO_DELETE_REPORTS = False
+
+MAX_LOG_FILE_SIZE = 10 * 1024 * 1024   # 10 MB
+
+# =====================================================
+# Date & Time Format
+# =====================================================
+
+DATE_FORMAT = "%d-%b-%Y"
+
+TIME_FORMAT = "%I:%M %p"
+
+DATETIME_FORMAT = "%d-%b-%Y %I:%M %p"
+
+DATABASE_DATE_FORMAT = "%Y-%m-%d"
+
+DATABASE_MONTH_FORMAT = "%Y-%m"
+
+# =====================================================
+# Flask Configuration
+# =====================================================
+
+FLASK_CONFIG = {
+
+    "SECRET_KEY": SECRET_KEY,
+
+    "MAX_CONTENT_LENGTH": MAX_CONTENT_LENGTH,
+
+    "UPLOAD_FOLDER": UPLOAD_FOLDER,
+
+    "DEBUG": DEBUG
+
+}
+
 # =====================================================
 # Application Information
 # =====================================================
 
 COPYRIGHT = "Attendance Notification System Pro"
 
+BUILD = "Enterprise Release v10"
+
 LAST_UPDATED = "2026"
 
-BUILD = "Enterprise Release"
+# =====================================================
+# Configuration Validation
+# =====================================================
+
+if MAX_CONTENT_LENGTH <= 0:
+
+    raise ValueError(
+
+        "MAX_CONTENT_LENGTH must be greater than zero."
+
+    )
+
+if DAILY_OT_LIMIT < DAILY_OT_WARNING:
+
+    raise ValueError(
+
+        "DAILY_OT_LIMIT must be greater than or equal to DAILY_OT_WARNING."
+
+    )
+
+if MONTHLY_OT_LIMIT < MONTHLY_OT_WARNING:
+
+    raise ValueError(
+
+        "MONTHLY_OT_LIMIT must be greater than or equal to MONTHLY_OT_WARNING."
+
+    )
 
 # =====================================================
 # End of Configuration

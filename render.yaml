@@ -1,11 +1,25 @@
 services:
   - type: web
+
     name: attendance-notification-system
-    env: python
+
+    runtime: python
+
     plan: free
 
-    buildCommand: pip install -r requirements.txt
+    autoDeploy: true
+
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
 
     startCommand: gunicorn app:app
 
-    autoDeploy: true
+    healthCheckPath: /
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.11"
+
+      - key: PYTHONUNBUFFERED
+        value: "1"

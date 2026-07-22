@@ -2,179 +2,664 @@
 =========================================================
 Attendance Notification System Pro
 Enterprise Dashboard
-Version : 5.0
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 */
 
+/* =====================================================
+   Global Styles
+===================================================== */
+
 *{
+
     margin:0;
+
     padding:0;
+
     box-sizing:border-box;
+
+}
+
+:root{
+
+    --primary:#0d6efd;
+
+    --success:#198754;
+
+    --danger:#dc3545;
+
+    --warning:#fd7e14;
+
+    --purple:#6f42c1;
+
+    --teal:#20c997;
+
+    --dark:#212529;
+
+    --light:#f4f7fb;
+
+    --white:#ffffff;
+
+    --shadow:0 10px 25px rgba(0,0,0,.12);
+
+    --radius:18px;
+
+    --transition:.3s ease;
+
+}
+
+html{
+
+    scroll-behavior:smooth;
+
 }
 
 body{
-    background:#f4f7fb;
-    font-family:"Segoe UI",Arial,sans-serif;
+
+    background:var(--light);
+
     color:#333;
+
+    font-family:
+
+        "Segoe UI",
+
+        Arial,
+
+        sans-serif;
+
+    overflow-x:hidden;
+
+    min-height:100vh;
+
 }
 
-/* ================= Navbar ================= */
+/* =====================================================
+   Selection
+===================================================== */
+
+::selection{
+
+    background:var(--primary);
+
+    color:var(--white);
+
+}
+
+/* =====================================================
+   Links
+===================================================== */
+
+a{
+
+    text-decoration:none;
+
+    transition:var(--transition);
+
+}
+
+a:hover{
+
+    text-decoration:none;
+
+}
+/*
+=========================================================
+Attendance Notification System Pro
+Enterprise Dashboard
+Version : 10.0 Enterprise
+Developed by Maharajan
+=========================================================
+*/
+
+/* =====================================================
+   Global
+===================================================== */
+
+*{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+
+}
+
+html{
+
+    scroll-behavior:smooth;
+
+}
+
+body{
+
+    background:#f4f7fb;
+
+    color:#333;
+
+    font-family:"Segoe UI",Arial,sans-serif;
+
+    min-height:100vh;
+
+    overflow-x:hidden;
+
+}
+
+/* =====================================================
+   Navbar
+===================================================== */
 
 .navbar{
-    background:linear-gradient(90deg,#0d6efd,#4f8dfd);
-    box-shadow:0 3px 12px rgba(0,0,0,.15);
+
+    background:linear-gradient(
+        90deg,
+        #0d6efd,
+        #4f8dfd
+    );
+
+    box-shadow:0 3px 15px rgba(0,0,0,.15);
+
 }
 
 .navbar-brand{
+
     color:#fff !important;
+
     font-size:28px;
-    font-weight:bold;
+
+    font-weight:700;
+
+    letter-spacing:.5px;
+
+}
+
+.navbar-brand:hover{
+
+    opacity:.95;
+
 }
 
 .developer{
+
     color:#fff;
+
     font-size:14px;
+
+    font-weight:500;
+
 }
 
-/* ================= Cards ================= */
+/* =====================================================
+   Summary Cards
+===================================================== */
 
 .summary-card{
+
     border:none;
+
     border-radius:18px;
+
     color:#fff;
+
     padding:25px;
-    transition:.3s;
+
+    transition:all .3s ease;
+
     box-shadow:0 10px 25px rgba(0,0,0,.12);
+
+    overflow:hidden;
+
+    position:relative;
+
 }
 
 .summary-card:hover{
+
     transform:translateY(-6px);
+
+    box-shadow:0 18px 35px rgba(0,0,0,.18);
+
+}
+
+.summary-card i{
+
+    font-size:34px;
+
+    opacity:.9;
+
 }
 
 .summary-card h2{
+
     font-size:36px;
-    font-weight:bold;
+
+    font-weight:700;
+
     margin-top:12px;
+
 }
 
+.summary-card p{
+
+    margin:0;
+
+    font-size:15px;
+
+    opacity:.95;
+
+}
+
+/* =====================================================
+   Card Colors
+===================================================== */
+
 .blue{
+
     background:#0d6efd;
+
 }
 
 .green{
+
     background:#198754;
+
 }
 
 .red{
+
     background:#dc3545;
+
 }
 
 .orange{
+
     background:#fd7e14;
+
 }
 
 .purple{
+
     background:#6f42c1;
+
 }
 
 .teal{
+
     background:#20c997;
+
 }
 
 .dark{
+
     background:#212529;
-}
-
-/* ================= Charts ================= */
-
-.chart-card{
-    background:#fff;
-    border-radius:16px;
-    padding:20px;
-    box-shadow:0 5px 20px rgba(0,0,0,.08);
-}
-
-/* ================= Table ================= */
-
-.table{
-    border-radius:10px;
-    overflow:hidden;
-}
-
-.table thead{
-    background:#0d6efd;
-    color:#fff;
-}
-
-.table tbody tr:hover{
-    background:#eef5ff;
-}
-
-/* ================= Buttons ================= */
-
-.btn{
-    border-radius:10px;
-    font-weight:600;
-}
-
-.btn:hover{
-    transform:translateY(-2px);
-}
-
-/* ================= Badge ================= */
-
-.badge{
-    padding:8px 12px;
-    font-size:12px;
-    margin-bottom:4px;
-}
-
-/* ================= Modal ================= */
-
-.modal-content{
-    border-radius:15px;
-}
-
-.modal-header{
-    border-top-left-radius:15px;
-    border-top-right-radius:15px;
-}
-
-/* ================= Search ================= */
-
-.form-control{
-    border-radius:10px;
-}
-
-/* ================= Footer ================= */
-
-.footer{
-    margin-top:40px;
-    padding:20px;
-    text-align:center;
-    color:#666;
-}
-
-/* ================= Responsive ================= */
-
-@media(max-width:768px){
-
-.summary-card{
-    margin-bottom:15px;
-}
-
-.navbar-brand{
-    font-size:22px;
-}
-
-.summary-card h2{
-    font-size:28px;
-}
 
 }
 /* =====================================================
-   Upload Page
+   Summary Cards
+===================================================== */
+
+.summary-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    border:none;
+
+    border-radius:20px;
+
+    padding:24px;
+
+    color:#fff;
+
+    transition:all .35s ease;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+
+}
+
+.summary-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 18px 35px rgba(0,0,0,.18);
+
+}
+
+.summary-card i{
+
+    font-size:34px;
+
+    opacity:.9;
+
+}
+
+.summary-card h2{
+
+    margin-top:12px;
+
+    font-size:34px;
+
+    font-weight:700;
+
+}
+
+.summary-card h5{
+
+    font-size:17px;
+
+    font-weight:600;
+
+    margin-bottom:0;
+
+}
+
+/* Card Colors */
+
+.blue{
+
+    background:linear-gradient(135deg,#0d6efd,#4f8dfd);
+
+}
+
+.green{
+
+    background:linear-gradient(135deg,#198754,#3cb878);
+
+}
+
+.red{
+
+    background:linear-gradient(135deg,#dc3545,#ff6b6b);
+
+}
+
+.orange{
+
+    background:linear-gradient(135deg,#fd7e14,#ffb347);
+
+}
+
+.purple{
+
+    background:linear-gradient(135deg,#6f42c1,#9b6dff);
+
+}
+
+.teal{
+
+    background:linear-gradient(135deg,#20c997,#54e0c7);
+
+}
+
+.dark{
+
+    background:linear-gradient(135deg,#212529,#495057);
+
+}
+
+/* =====================================================
+   Charts
+===================================================== */
+
+.chart-card{
+
+    background:#ffffff;
+
+    border-radius:18px;
+
+    padding:20px;
+
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+
+    transition:.3s;
+
+}
+
+.chart-card:hover{
+
+    box-shadow:0 12px 28px rgba(0,0,0,.14);
+
+}
+
+.chart-card canvas{
+
+    max-height:350px;
+
+}
+
+/* =====================================================
+   Employee Table
+===================================================== */
+
+.table{
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    background:#fff;
+
+}
+
+.table thead{
+
+    background:#0d6efd;
+
+    color:#fff;
+
+}
+
+.table th{
+
+    font-weight:600;
+
+    text-align:center;
+
+    vertical-align:middle;
+
+}
+
+.table td{
+
+    text-align:center;
+
+    vertical-align:middle;
+
+}
+
+.table tbody tr{
+
+    transition:.25s;
+
+}
+
+.table tbody tr:hover{
+
+    background:#eef5ff;
+
+}
+/* =====================================================
+   Buttons
+===================================================== */
+
+.btn{
+
+    border-radius:12px;
+
+    font-weight:600;
+
+    transition:all .25s ease;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 18px rgba(0,0,0,.15);
+
+}
+
+.btn-primary{
+
+    background:#0d6efd;
+
+    border-color:#0d6efd;
+
+}
+
+.btn-success{
+
+    background:#198754;
+
+    border-color:#198754;
+
+}
+
+.btn-danger{
+
+    background:#dc3545;
+
+    border-color:#dc3545;
+
+}
+
+.btn-warning{
+
+    color:#212529;
+
+}
+
+/* =====================================================
+   Status Badges
+===================================================== */
+
+.badge{
+
+    padding:8px 14px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    border-radius:25px;
+
+    margin:2px;
+
+}
+
+/* =====================================================
+   Modal
+===================================================== */
+
+.modal-content{
+
+    border:none;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.20);
+
+}
+
+.modal-header{
+
+    background:#0d6efd;
+
+    color:#fff;
+
+    border-bottom:none;
+
+}
+
+.modal-title{
+
+    font-weight:700;
+
+}
+
+.modal-footer{
+
+    border-top:none;
+
+}
+
+/* =====================================================
+   Search Box
+===================================================== */
+
+.form-control{
+
+    border-radius:12px;
+
+    padding:12px 16px;
+
+    border:1px solid #ced4da;
+
+    transition:.25s;
+
+}
+
+.form-control:focus{
+
+    border-color:#0d6efd;
+
+    box-shadow:0 0 12px rgba(13,110,253,.25);
+
+}
+
+/* =====================================================
+   Filter Buttons
+===================================================== */
+
+.filter-btn{
+
+    margin:4px;
+
+    border-radius:30px;
+
+    transition:.25s;
+
+}
+
+.filter-btn.active{
+
+    background:#0d6efd;
+
+    color:#fff;
+
+    border-color:#0d6efd;
+
+}
+/* =====================================================
+   Footer
+===================================================== */
+
+.footer{
+
+    margin-top:40px;
+
+    padding:25px;
+
+    text-align:center;
+
+    color:#6c757d;
+
+    font-size:14px;
+
+    border-top:1px solid #dee2e6;
+
+    background:#ffffff;
+
+}
+
+/* =====================================================
+   Upload Page Background
 ===================================================== */
 
 #particles-js{
@@ -191,13 +676,25 @@ body{
 
     z-index:-1;
 
-    background:linear-gradient(135deg,#0d6efd,#6610f2);
+    background:linear-gradient(
+
+        135deg,
+
+        #0d6efd,
+
+        #6610f2
+
+    );
 
 }
 
+/* =====================================================
+   Glass Card
+===================================================== */
+
 .glass-card{
 
-    background:rgba(255,255,255,.15);
+    background:rgba(255,255,255,.18);
 
     backdrop-filter:blur(18px);
 
@@ -205,15 +702,27 @@ body{
 
     border:1px solid rgba(255,255,255,.25);
 
-    border-radius:20px;
+    border-radius:22px;
 
     padding:40px;
 
     box-shadow:0 20px 40px rgba(0,0,0,.20);
 
-    transition:.4s;
+    transition:all .35s ease;
 
 }
+
+.glass-card:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:0 28px 50px rgba(0,0,0,.25);
+
+}
+
+/* =====================================================
+   Company Logo
+===================================================== */
 
 .logo-circle{
 
@@ -225,10 +734,6 @@ body{
 
     border-radius:50%;
 
-    background:#0d6efd;
-
-    color:#fff;
-
     display:flex;
 
     justify-content:center;
@@ -237,9 +742,65 @@ body{
 
     font-size:42px;
 
+    color:#fff;
+
+    background:linear-gradient(
+
+        135deg,
+
+        #0d6efd,
+
+        #4f8dfd
+
+    );
+
     box-shadow:0 10px 25px rgba(13,110,253,.45);
 
 }
+
+/* =====================================================
+   Upload Box
+===================================================== */
+
+.upload-box{
+
+    border:2px dashed #0d6efd;
+
+    border-radius:16px;
+
+    padding:25px;
+
+    text-align:center;
+
+    transition:all .3s ease;
+
+    background:#ffffff;
+
+}
+
+.upload-box:hover{
+
+    background:#f8fbff;
+
+    border-color:#0b5ed7;
+
+}
+
+.upload-box h4{
+
+    margin-top:15px;
+
+    font-size:18px;
+
+    font-weight:600;
+
+    color:#0d6efd;
+
+}
+
+/* =====================================================
+   Upload Form
+===================================================== */
 
 .form-control{
 
@@ -259,6 +820,8 @@ body{
 
 .btn-analyze{
 
+    width:100%;
+
     padding:15px;
 
     font-size:18px;
@@ -267,6 +830,8 @@ body{
 
     border-radius:12px;
 
+    transition:all .3s ease;
+
 }
 
 .btn-analyze:hover{
@@ -274,43 +839,257 @@ body{
     transform:translateY(-3px);
 
 }
+/* =====================================================
+   Responsive Design
+===================================================== */
 
-.upload-box{
+@media (max-width: 1200px) {
 
-    border:2px dashed #0d6efd;
+    .summary-card h2 {
 
-    border-radius:15px;
+        font-size: 30px;
 
-    padding:25px;
+    }
 
-    text-align:center;
+    .chart-card {
 
-    transition:.3s;
+        margin-bottom: 20px;
 
-}
-
-.upload-box:hover{
-
-    background:#f8fbff;
-
-}
-
-@media(max-width:768px){
-
-.glass-card{
-
-padding:25px;
+    }
 
 }
 
-.logo-circle{
+@media (max-width: 992px) {
 
-width:75px;
+    .navbar-brand {
 
-height:75px;
+        font-size: 24px;
 
-font-size:30px;
+    }
+
+    .developer {
+
+        display: none;
+
+    }
+
+    .summary-card {
+
+        margin-bottom: 20px;
+
+    }
+
+    .glass-card {
+
+        padding: 30px;
+
+    }
 
 }
+
+@media (max-width: 768px) {
+
+    .navbar-brand {
+
+        font-size: 22px;
+
+    }
+
+    .summary-card {
+
+        padding: 20px;
+
+        margin-bottom: 15px;
+
+    }
+
+    .summary-card h2 {
+
+        font-size: 28px;
+
+    }
+
+    .summary-card h5 {
+
+        font-size: 16px;
+
+    }
+
+    .chart-card {
+
+        padding: 15px;
+
+    }
+
+    .glass-card {
+
+        padding: 25px;
+
+    }
+
+    .logo-circle {
+
+        width: 75px;
+
+        height: 75px;
+
+        font-size: 30px;
+
+    }
+
+    .upload-box {
+
+        padding: 20px;
+
+    }
+
+    .btn-analyze {
+
+        font-size: 16px;
+
+        padding: 14px;
+
+    }
+
+    .table {
+
+        font-size: 14px;
+
+    }
+
+    .modal-dialog {
+
+        margin: 10px;
+
+    }
+
+}
+
+@media (max-width: 576px) {
+
+    body {
+
+        font-size: 14px;
+
+    }
+
+    .navbar-brand {
+
+        font-size: 20px;
+
+    }
+
+    .summary-card {
+
+        padding: 18px;
+
+    }
+
+    .summary-card h2 {
+
+        font-size: 24px;
+
+    }
+
+    .chart-card {
+
+        padding: 12px;
+
+    }
+
+    .footer {
+
+        font-size: 12px;
+
+        padding: 15px;
+
+    }
+
+    .btn {
+
+        width: 100%;
+
+        margin-bottom: 10px;
+
+    }
+
+    .filter-btn {
+
+        width: 100%;
+
+    }
+
+    .form-control {
+
+        font-size: 14px;
+
+    }
+
+    .logo-circle {
+
+        width: 65px;
+
+        height: 65px;
+
+        font-size: 26px;
+
+    }
+
+}
+
+/* =====================================================
+   Smooth Animation
+===================================================== */
+
+.summary-card,
+.chart-card,
+.glass-card,
+.btn,
+.upload-box,
+.modal-content {
+
+    transition: all .3s ease;
+
+}
+
+/* =====================================================
+   Scrollbar
+===================================================== */
+
+::-webkit-scrollbar {
+
+    width: 10px;
+
+}
+
+::-webkit-scrollbar-track {
+
+    background: #f1f1f1;
+
+}
+
+::-webkit-scrollbar-thumb {
+
+    background: #0d6efd;
+
+    border-radius: 10px;
+
+}
+
+::-webkit-scrollbar-thumb:hover {
+
+    background: #0b5ed7;
+
+}
+
+/* =====================================================
+   Selection
+===================================================== */
+
+::selection {
+
+    background: #0d6efd;
+
+    color: #ffffff;
 
 }

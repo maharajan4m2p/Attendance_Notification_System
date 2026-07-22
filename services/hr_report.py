@@ -2,12 +2,13 @@
 =========================================================
 Attendance Notification System Pro
 HR Report Generator
-Version : 8.0 Enterprise (Ultra Performance)
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
 
 from config import (
+    COMPANY_NAME,
     MONTHLY_OT_LIMIT,
     MONTHLY_OT_WARNING
 )
@@ -19,11 +20,11 @@ class HRReportGenerator:
 
     Features
     --------
-    • Attendance Summary
+    • Daily Attendance Summary
     • Late Punch Report
     • Missing Punch Report
-    • Monthly OT Report
-    • High Performance
+    • Monthly Overtime Report
+    • HR WhatsApp Report
     """
 
     # =====================================================
@@ -32,22 +33,19 @@ class HRReportGenerator:
 
     def __init__(self):
 
+        self.company = COMPANY_NAME
+
         self.limit_text = f"{MONTHLY_OT_LIMIT}:00"
 
         self.warning_text = f"{MONTHLY_OT_WARNING}:00"
-
-    # =====================================================
+        # =====================================================
     # Generate HR Report
     # =====================================================
 
     def generate(
-
         self,
-
         employees,
-
         summary
-
     ):
 
         hr = []
@@ -61,28 +59,14 @@ class HRReportGenerator:
         exceeded = []
 
         # =====================================================
-        # Attendance Summary
+        # Company Header
         # =====================================================
 
         hr.extend([
 
-            "📊 ATTENDANCE SUMMARY",
+            f"🏢 {self.company}",
 
-            "",
-
-            f"👥 Total Employees : {summary.get('total', 0)}",
-
-            f"✅ Present : {summary.get('present', 0)}",
-
-            f"⏰ Late Punch : {summary.get('late_in', 0)}",
-
-            f"🏃 Early Out : {summary.get('early_out', 0)}",
-
-            f"❌ Missing Punch In : {summary.get('missing_in', 0)}",
-
-            f"❌ Missing Punch Out : {summary.get('missing_out', 0)}",
-
-            f"🕒 Overtime Employees : {summary.get('overtime', 0)}",
+            "📋 DAILY ATTENDANCE REPORT",
 
             "",
 
@@ -93,49 +77,97 @@ class HRReportGenerator:
         ])
 
         # =====================================================
+        # Attendance Summary
+        # =====================================================
+
+        hr.extend([
+
+            "📊 ATTENDANCE SUMMARY",
+
+            "",
+
+            f"👥 Total Employees      : {summary.get('total', 0)}",
+
+            f"✅ Present              : {summary.get('present', 0)}",
+
+            f"⏰ Late Punch           : {summary.get('late_in', 0)}",
+
+            f"🏃 Early Out            : {summary.get('early_out', 0)}",
+
+            f"❌ Missing Punch In     : {summary.get('missing_in', 0)}",
+
+            f"❌ Missing Punch Out    : {summary.get('missing_out', 0)}",
+
+            f"🕒 Overtime Employees   : {summary.get('overtime', 0)}",
+
+            f"⚠️ OT Warning          : {summary.get('warning', 0)}",
+
+            f"🟠 Limit Reached       : {summary.get('limit_reached', 0)}",
+
+            f"🔴 OT Exceeded         : {summary.get('exceeded', 0)}",
+
+            "",
+
+            "=" * 60,
+
+            ""
+
+        ])
+        # =====================================================
         # Employee Processing
         # =====================================================
 
-        for employee in employees:
+        for emp in employees:
 
-            emp_id = employee.get(
-
-                "employee_id",
-
-                ""
-
+            emp_id = str(
+                emp.get(
+                    "employee_id",
+                    ""
+                )
             )
 
-            name = employee.get(
-
-                "name",
-
-                ""
-
+            name = str(
+                emp.get(
+                    "name",
+                    ""
+                )
             )
 
-            monthly_ot = employee.get(
+            department = str(
+                emp.get(
+                    "department",
+                    ""
+                )
+            )
 
-                "monthly_ot",
+            punch_in = emp.get(
+                "punch_in",
+                "--"
+            )
 
+            punch_out = emp.get(
+                "punch_out",
+                "--"
+            )
+
+            daily_ot = emp.get(
+                "daily_ot",
                 "00:00"
-
             )
 
-            monthly_status = employee.get(
+            monthly_ot = emp.get(
+                "monthly_ot",
+                "00:00"
+            )
 
+            monthly_status = emp.get(
                 "monthly_status",
-
                 "Normal"
-
             )
 
-            status_list = employee.get(
-
+            status_list = emp.get(
                 "status",
-
                 []
-
             )
 
             # -----------------------------------------
@@ -143,16 +175,13 @@ class HRReportGenerator:
             # -----------------------------------------
 
             if any(
-
-                "Late" in status
-
+                "Late" in str(status)
                 for status in status_list
-
             ):
 
                 late.append(
 
-                    f"⏰ {emp_id} - {name} ({employee.get('punch_in','--')})"
+                    f"⏰ {emp_id} | {name} | {department} | IN : {punch_in}"
 
                 )
 
@@ -161,44 +190,49 @@ class HRReportGenerator:
             # -----------------------------------------
 
             if any(
-
-                "Missing" in status
-
+                "Missing" in str(status)
                 for status in status_list
-
             ):
 
                 late.append(
 
-                    f"❌ {emp_id} - {name}"
+                    f"❌ {emp_id} | {name} | OUT : {punch_out}"
 
                 )
 
             # -----------------------------------------
-            # Monthly OT Status
+            # Monthly OT Warning
             # -----------------------------------------
 
             if monthly_status == "Warning":
 
                 warning.append(
 
-                    f"⚠️ {emp_id} - {name} : {monthly_ot}"
+                    f"⚠️ {emp_id} | {name} | OT : {monthly_ot}"
 
                 )
+
+            # -----------------------------------------
+            # Monthly OT Limit Reached
+            # -----------------------------------------
 
             elif monthly_status == "Limit Reached":
 
                 limit.append(
 
-                    f"🟠 {emp_id} - {name} : {monthly_ot}"
+                    f"🟠 {emp_id} | {name} | OT : {monthly_ot}"
 
                 )
+
+            # -----------------------------------------
+            # Monthly OT Exceeded
+            # -----------------------------------------
 
             elif monthly_status == "Exceeded":
 
                 exceeded.append(
 
-                    f"🔴 {emp_id} - {name} : {monthly_ot}"
+                    f"🔴 {emp_id} | {name} | OT : {monthly_ot}"
 
                 )
                 # =====================================================
@@ -207,17 +241,15 @@ class HRReportGenerator:
 
         if warning:
 
-            hr.append(
+            hr.extend([
 
-                f"⚠️ MONTHLY OT WARNING ({self.warning_text})"
+                f"⚠️ MONTHLY OT WARNING ({self.warning_text})",
 
-            )
+                ""
 
-            hr.extend(
+            ])
 
-                warning
-
-            )
+            hr.extend(warning)
 
             hr.append("")
 
@@ -227,17 +259,15 @@ class HRReportGenerator:
 
         if limit:
 
-            hr.append(
+            hr.extend([
 
-                f"🟠 MONTHLY OT LIMIT REACHED ({self.limit_text})"
+                f"🟠 MONTHLY OT LIMIT REACHED ({self.limit_text})",
 
-            )
+                ""
 
-            hr.extend(
+            ])
 
-                limit
-
-            )
+            hr.extend(limit)
 
             hr.append("")
 
@@ -247,79 +277,129 @@ class HRReportGenerator:
 
         if exceeded:
 
-            hr.append(
+            hr.extend([
 
-                "🔴 MONTHLY OT EXCEEDED"
+                "🔴 MONTHLY OT EXCEEDED",
 
-            )
+                ""
 
-            hr.extend(
+            ])
 
-                exceeded
-
-            )
+            hr.extend(exceeded)
 
             hr.append("")
 
         # =====================================================
-        # Late & Missing Punch Report
+        # No Monthly OT Issues
+        # =====================================================
+
+        if not warning and not limit and not exceeded:
+
+            hr.extend([
+
+                "✅ MONTHLY OT STATUS",
+
+                "",
+
+                "No employees have crossed the monthly overtime warning limit.",
+
+                ""
+
+            ])
+
+        # =====================================================
+        # Late / Missing Punch Report
         # =====================================================
 
         if late:
 
-            late.insert(
+            hr.extend([
 
-                0,
+                "=" * 60,
 
-                "⏰ LATE & MISSING PUNCH REPORT"
+                "",
 
-            )
-
-            late.insert(
-
-                1,
+                "⏰ LATE & MISSING PUNCH REPORT",
 
                 ""
 
-            )
+            ])
+
+            hr.extend(late)
+
+            hr.append("")
 
         else:
 
-            late.extend([
+            hr.extend([
+
+                "=" * 60,
+
+                "",
 
                 "⏰ LATE & MISSING PUNCH REPORT",
 
                 "",
 
-                "No late or missing punch records found."
+                "✅ No late or missing punch records found.",
+
+                ""
 
             ])
+            # =====================================================
+        # Report Footer
+        # =====================================================
+
+        hr.extend([
+
+            "=" * 60,
+
+            "",
+
+            "Attendance Notification System Pro",
+
+            "Generated Automatically",
+
+            ""
+
+        ])
 
         # =====================================================
-        # Generate Reports
+        # Generate Final Reports
         # =====================================================
 
         hr_report = "\n".join(
-
             hr
-
         )
 
         late_punch_report = "\n".join(
-
             late
-
         )
 
         print("=" * 60)
+
         print("HR Report Generated Successfully")
+
         print("=" * 60)
 
         return {
 
             "hr_report": hr_report,
 
-            "late_punch_report": late_punch_report
+            "late_punch_report": late_punch_report,
+
+            "warning_report": "\n".join(warning),
+
+            "limit_report": "\n".join(limit),
+
+            "exceeded_report": "\n".join(exceeded),
+
+            "warning_count": len(warning),
+
+            "limit_count": len(limit),
+
+            "exceeded_count": len(exceeded),
+
+            "late_count": len(late)
 
         }
-                

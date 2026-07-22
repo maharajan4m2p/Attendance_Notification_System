@@ -2,15 +2,18 @@
 =========================================================
 Attendance Notification System Pro
 Dashboard JavaScript
-Version : 8.0 Enterprise (Ultra Performance)
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 */
 
 "use strict";
 
-let hrReportText = "";
+// =====================================================
+// Global Variables
+// =====================================================
 
+let hrReportText = "";
 let employeeModal = null;
 
 // =====================================================
@@ -18,155 +21,152 @@ let employeeModal = null;
 // =====================================================
 
 function showEmployee(
-
     id,
-
     name,
-
     department,
-
     designation,
-
     date,
-
     punchIn,
-
     punchOut,
-
     dailyOT,
-
     monthlyOT,
-
     remainingOT,
-
     dailyStatus,
-
     monthlyStatus,
-
     notification
+) {
 
-){
+    const setText = (id, value, defaultValue = "--") => {
 
-    document.getElementById("mEmpId").textContent = id;
+        const element = document.getElementById(id);
 
-    document.getElementById("mName").textContent = name;
+        if (element) {
 
-    document.getElementById("mDepartment").textContent = department;
+            element.textContent = value || defaultValue;
 
-    document.getElementById("mDesignation").textContent = designation;
+        }
 
-    document.getElementById("mDate").textContent = date;
+    };
 
-    document.getElementById("mPunchIn").textContent = punchIn;
+    setText("mEmpId", id, "");
+    setText("mName", name, "");
+    setText("mDepartment", department, "");
+    setText("mDesignation", designation, "");
+    setText("mDate", date, "");
+    setText("mPunchIn", punchIn);
+    setText("mPunchOut", punchOut);
+    setText("mDailyOT", dailyOT, "00:00");
+    setText("mMonthlyOT", monthlyOT, "00:00");
+    setText("mRemainingOT", remainingOT, "00:00");
+    setText("mDailyStatus", dailyStatus, "Normal");
+    setText("mMonthlyStatus", monthlyStatus, "Normal");
 
-    document.getElementById("mPunchOut").textContent = punchOut;
+    const notificationBox = document.getElementById("mNotification");
 
-    document.getElementById("mDailyOT").textContent = dailyOT || "00:00";
+    if (notificationBox) {
 
-    document.getElementById("mMonthlyOT").textContent = monthlyOT || "00:00";
+        notificationBox.value = notification || "";
 
-    document.getElementById("mRemainingOT").textContent = remainingOT || "00:00";
+    }
 
-    document.getElementById("mDailyStatus").textContent = dailyStatus || "Normal";
-
-    document.getElementById("mMonthlyStatus").textContent = monthlyStatus || "Normal";
-
-    document.getElementById("mNotification").value = notification || "";
-
-    // -----------------------------------------
+    // =====================================================
     // Daily Status Badge
-    // -----------------------------------------
+    // =====================================================
 
     const daily = document.getElementById("mDailyStatus");
 
-    daily.className = "badge";
+    if (daily) {
 
-    if(dailyStatus === "Normal"){
+        daily.className = "badge";
 
-        daily.classList.add("bg-success");
+        switch (dailyStatus) {
+
+            case "Normal":
+                daily.classList.add("bg-success");
+                break;
+
+            case "Warning":
+                daily.classList.add("bg-warning", "text-dark");
+                break;
+
+            case "Limit Reached":
+                daily.classList.add("bg-dark");
+                break;
+
+            default:
+                daily.classList.add("bg-danger");
+
+        }
 
     }
 
-    else if(dailyStatus === "Warning"){
-
-        daily.classList.add("bg-warning","text-dark");
-
-    }
-
-    else if(dailyStatus === "Limit Reached"){
-
-        daily.classList.add("bg-dark");
-
-    }
-
-    else{
-
-        daily.classList.add("bg-danger");
-
-    }
-
-    // -----------------------------------------
+    // =====================================================
     // Monthly Status Badge
-    // -----------------------------------------
+    // =====================================================
 
     const monthly = document.getElementById("mMonthlyStatus");
 
-    monthly.className = "badge";
+    if (monthly) {
 
-    if(monthlyStatus === "Normal"){
+        monthly.className = "badge";
 
-        monthly.classList.add("bg-success");
+        switch (monthlyStatus) {
+
+            case "Normal":
+                monthly.classList.add("bg-success");
+                break;
+
+            case "Warning":
+                monthly.classList.add("bg-warning", "text-dark");
+                break;
+
+            case "Limit Reached":
+                monthly.classList.add("bg-dark");
+                break;
+
+            default:
+                monthly.classList.add("bg-danger");
+
+        }
 
     }
 
-    else if(monthlyStatus === "Warning"){
+    const modalElement = document.getElementById("employeeModal");
 
-        monthly.classList.add("bg-warning","text-dark");
+    if (modalElement) {
 
-    }
+        employeeModal = new bootstrap.Modal(modalElement);
 
-    else if(monthlyStatus === "Limit Reached"){
-
-        monthly.classList.add("bg-dark");
+        employeeModal.show();
 
     }
-
-    else{
-
-        monthly.classList.add("bg-danger");
-
-    }
-
-    employeeModal = new bootstrap.Modal(
-
-        document.getElementById("employeeModal")
-
-    );
-
-    employeeModal.show();
 
 }
 // =====================================================
 // Copy Employee Notification
 // =====================================================
 
-function copyNotification(){
+async function copyNotification() {
 
     const notification = document.getElementById("mNotification");
 
-    if(!notification){
-
+    if (!notification) {
         return;
-
     }
 
-    navigator.clipboard.writeText(
+    try {
 
-        notification.value
+        await navigator.clipboard.writeText(notification.value || "");
 
-    );
+        alert("Notification copied successfully.");
 
-    alert("Notification copied successfully.");
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Failed to copy notification.");
+
+    }
 
 }
 
@@ -174,49 +174,27 @@ function copyNotification(){
 // Add Employee Notification to HR Report
 // =====================================================
 
-function addToReport(){
+function addToReport() {
 
-    const notification = document.getElementById(
+    const notification = document.getElementById("mNotification");
+    const hrReport = document.getElementById("hrReport");
 
-        "mNotification"
-
-    );
-
-    const hrReport = document.getElementById(
-
-        "hrReport"
-
-    );
-
-    if(
-
-        !notification ||
-
-        !hrReport
-
-    ){
-
+    if (!notification || !hrReport) {
         return;
-
     }
 
-    if(hrReportText.length > 0){
+    if (hrReportText.length > 0) {
 
         hrReportText +=
-
-        "\n\n========================================\n\n";
+            "\n\n========================================\n\n";
 
     }
 
-    hrReportText += notification.value;
+    hrReportText += notification.value || "";
 
     hrReport.value = hrReportText;
 
-    alert(
-
-        "Employee added to HR Report."
-
-    );
+    alert("Employee added to HR Report.");
 
 }
 
@@ -224,31 +202,27 @@ function addToReport(){
 // Copy HR Report
 // =====================================================
 
-function copyHRReport(){
+async function copyHRReport() {
 
-    const report = document.getElementById(
+    const report = document.getElementById("hrReport");
 
-        "hrReport"
-
-    );
-
-    if(!report){
-
+    if (!report) {
         return;
-
     }
 
-    navigator.clipboard.writeText(
+    try {
 
-        report.value
+        await navigator.clipboard.writeText(report.value || "");
 
-    );
+        alert("HR Report copied successfully.");
 
-    alert(
+    } catch (error) {
 
-        "HR Report copied successfully."
+        console.error(error);
 
-    );
+        alert("Failed to copy HR Report.");
+
+    }
 
 }
 
@@ -256,32 +230,22 @@ function copyHRReport(){
 // Send HR Report to WhatsApp
 // =====================================================
 
-function sendHRReport(){
+function sendHRReport() {
 
-    const report = document.getElementById(
+    const report = document.getElementById("hrReport");
 
-        "hrReport"
+    if (!report || !report.value.trim()) {
 
-    );
-
-    if(!report){
+        alert("HR Report is empty.");
 
         return;
 
     }
 
     window.open(
-
         "https://wa.me/?text=" +
-
-        encodeURIComponent(
-
-            report.value
-
-        ),
-
+        encodeURIComponent(report.value),
         "_blank"
-
     );
 
 }
@@ -290,31 +254,27 @@ function sendHRReport(){
 // Copy Late Punch Report
 // =====================================================
 
-function copyLatePunchReport(){
+async function copyLatePunchReport() {
 
-    const report = document.getElementById(
+    const report = document.getElementById("latePunchReport");
 
-        "latePunchReport"
-
-    );
-
-    if(!report){
-
+    if (!report) {
         return;
-
     }
 
-    navigator.clipboard.writeText(
+    try {
 
-        report.value
+        await navigator.clipboard.writeText(report.value || "");
 
-    );
+        alert("Late / Missing Punch Report copied.");
 
-    alert(
+    } catch (error) {
 
-        "Late / Missing Punch Report copied."
+        console.error(error);
 
-    );
+        alert("Failed to copy report.");
+
+    }
 
 }
 
@@ -322,32 +282,22 @@ function copyLatePunchReport(){
 // Send Late Punch Report
 // =====================================================
 
-function sendLatePunchReport(){
+function sendLatePunchReport() {
 
-    const report = document.getElementById(
+    const report = document.getElementById("latePunchReport");
 
-        "latePunchReport"
+    if (!report || !report.value.trim()) {
 
-    );
-
-    if(!report){
+        alert("Late Punch Report is empty.");
 
         return;
 
     }
 
     window.open(
-
         "https://wa.me/?text=" +
-
-        encodeURIComponent(
-
-            report.value
-
-        ),
-
+        encodeURIComponent(report.value),
         "_blank"
-
     );
 
 }
@@ -355,49 +305,29 @@ function sendLatePunchReport(){
 // Employee Search
 // =====================================================
 
-const employeeSearch = document.getElementById(
+const employeeSearch = document.getElementById("employeeSearch");
 
-    "employeeSearch"
+if (employeeSearch) {
 
-);
+    employeeSearch.addEventListener("input", function () {
 
-if(employeeSearch){
+        const keyword = this.value.toLowerCase().trim();
 
-    employeeSearch.addEventListener(
+        const rows = document.querySelectorAll(
+            "#employeeTable tbody tr"
+        );
 
-        "keyup",
+        rows.forEach((row) => {
 
-        function(){
+            const text = row.textContent.toLowerCase();
 
-            const keyword = this.value
+            row.style.display = text.includes(keyword)
+                ? ""
+                : "none";
 
-                .toLowerCase()
+        });
 
-                .trim();
-
-            const rows = document.querySelectorAll(
-
-                "#employeeTable tbody tr"
-
-            );
-
-            rows.forEach(function(row){
-
-                const text = row.innerText.toLowerCase();
-
-                row.style.display =
-
-                    text.includes(keyword)
-
-                    ? ""
-
-                    : "none";
-
-            });
-
-        }
-
-    );
+    });
 
 }
 
@@ -405,75 +335,49 @@ if(employeeSearch){
 // Employee Filters
 // =====================================================
 
-const filterButtons = document.querySelectorAll(
+const filterButtons = document.querySelectorAll(".filter-btn");
 
-    ".filter-btn"
+filterButtons.forEach((button) => {
 
-);
+    button.addEventListener("click", function () {
 
-filterButtons.forEach(function(button){
+        // Remove Active Class
 
-    button.addEventListener(
+        filterButtons.forEach((btn) => {
 
-        "click",
+            btn.classList.remove("active");
 
-        function(){
+        });
 
-            // Remove Active Button
+        this.classList.add("active");
 
-            filterButtons.forEach(function(btn){
+        const filter = this.dataset.filter || "All";
 
-                btn.classList.remove(
+        const rows = document.querySelectorAll(
+            "#employeeTable tbody tr"
+        );
 
-                    "active"
+        rows.forEach((row) => {
 
-                );
+            if (filter === "All") {
 
-            });
+                row.style.display = "";
 
-            this.classList.add(
+                return;
 
-                "active"
+            }
 
-            );
+            const text = row.textContent.toLowerCase();
 
-            const filter = this.dataset.filter;
+            row.style.display = text.includes(
+                filter.toLowerCase()
+            )
+                ? ""
+                : "none";
 
-            const rows = document.querySelectorAll(
+        });
 
-                "#employeeTable tbody tr"
-
-            );
-
-            rows.forEach(function(row){
-
-                if(filter === "All"){
-
-                    row.style.display = "";
-
-                    return;
-
-                }
-
-                const text = row.innerText.toLowerCase();
-
-                row.style.display =
-
-                    text.includes(
-
-                        filter.toLowerCase()
-
-                    )
-
-                    ? ""
-
-                    : "none";
-
-            });
-
-        }
-
-    );
+    });
 
 });
 
@@ -481,9 +385,9 @@ filterButtons.forEach(function(button){
 // Reset Search
 // =====================================================
 
-function clearSearch(){
+function clearSearch() {
 
-    if(!employeeSearch){
+    if (!employeeSearch) {
 
         return;
 
@@ -491,13 +395,27 @@ function clearSearch(){
 
     employeeSearch.value = "";
 
-    document.querySelectorAll(
-
+    const rows = document.querySelectorAll(
         "#employeeTable tbody tr"
+    );
 
-    ).forEach(function(row){
+    rows.forEach((row) => {
 
         row.style.display = "";
+
+    });
+
+    // Reset Active Filter
+
+    filterButtons.forEach((btn) => {
+
+        btn.classList.remove("active");
+
+        if ((btn.dataset.filter || "") === "All") {
+
+            btn.classList.add("active");
+
+        }
 
     });
 
@@ -506,97 +424,171 @@ function clearSearch(){
 // Dashboard Charts
 // =====================================================
 
-window.addEventListener(
+window.addEventListener("load", function () {
 
-    "load",
+    const dashboardData = window.dashboardData || {};
 
-    function(){
+    const summary = dashboardData.summary || {};
 
-        const summary = window.dashboardData.summary || {};
+    const employees = dashboardData.employees || [];
 
-        const employees = window.dashboardData.employees || [];
+    // =====================================================
+    // Attendance Pie Chart
+    // =====================================================
 
-        // =============================================
-        // Attendance Pie Chart
-        // =============================================
+    const attendanceCanvas = document.getElementById("attendanceChart");
 
-        const attendanceCanvas = document.getElementById(
+    if (attendanceCanvas && typeof Chart !== "undefined") {
 
-            "attendanceChart"
+        new Chart(attendanceCanvas, {
 
-        );
+            type: "pie",
 
-        if(attendanceCanvas){
+            data: {
 
-            new Chart(
+                labels: [
 
-                attendanceCanvas,
+                    "Present",
 
-                {
+                    "Late Punch",
 
-                    type: "pie",
+                    "Early Out",
 
-                    data: {
+                    "Missing In",
 
-                        labels: [
+                    "Missing Out"
 
-                            "Present",
+                ],
 
-                            "Late Punch",
+                datasets: [{
 
-                            "Early Out",
+                    data: [
 
-                            "Missing In",
+                        summary.present || 0,
 
-                            "Missing Out"
+                        summary.late_in || 0,
 
-                        ],
+                        summary.early_out || 0,
 
-                        datasets: [{
+                        summary.missing_in || 0,
 
-                            data: [
+                        summary.missing_out || 0
 
-                                summary.present || 0,
+                    ],
 
-                                summary.late_in || 0,
+                    backgroundColor: [
 
-                                summary.early_out || 0,
+                        "#198754",
 
-                                summary.missing_in || 0,
+                        "#dc3545",
 
-                                summary.missing_out || 0
+                        "#fd7e14",
 
-                            ],
+                        "#6c757d",
 
-                            backgroundColor: [
+                        "#212529"
 
-                                "#198754",
+                    ]
 
-                                "#dc3545",
+                }]
 
-                                "#fd7e14",
+            },
 
-                                "#6c757d",
+            options: {
 
-                                "#212529"
+                responsive: true,
 
-                            ]
+                maintainAspectRatio: false,
 
-                        }]
+                plugins: {
 
-                    },
+                    legend: {
 
-                    options: {
+                        position: "bottom"
 
-                        responsive: true,
+                    }
 
-                        plugins: {
+                }
 
-                            legend: {
+            }
 
-                                position: "bottom"
+        });
 
-                            }
+    }
+
+    // =====================================================
+    // Attendance Statistics
+    // =====================================================
+
+    const statisticsCanvas = document.getElementById("statisticsChart");
+
+    if (statisticsCanvas && typeof Chart !== "undefined") {
+
+        new Chart(statisticsCanvas, {
+
+            type: "bar",
+
+            data: {
+
+                labels: [
+
+                    "Present",
+
+                    "Late",
+
+                    "Early",
+
+                    "Overtime"
+
+                ],
+
+                datasets: [{
+
+                    label: "Employees",
+
+                    data: [
+
+                        summary.present || 0,
+
+                        summary.late_in || 0,
+
+                        summary.early_out || 0,
+
+                        summary.overtime || 0
+
+                    ],
+
+                    backgroundColor: "#0d6efd"
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        display: false
+
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            precision: 0
 
                         }
 
@@ -604,221 +596,123 @@ window.addEventListener(
 
                 }
 
-            );
+            }
 
-        }
+        });
 
-        // =============================================
-        // Attendance Statistics
-        // =============================================
+    }
 
-        const statisticsCanvas = document.getElementById(
+    // =====================================================
+    // Monthly OT Status
+    // =====================================================
 
-            "statisticsChart"
+    const monthlyCanvas = document.getElementById("monthlyOTChart");
+
+    if (monthlyCanvas && typeof Chart !== "undefined") {
+
+        const warning = summary.warning || 0;
+
+        const limit = summary.limit_reached || 0;
+
+        const exceeded = summary.monthly_ot_exceeded || 0;
+
+        const normal = Math.max(
+
+            0,
+
+            (summary.total || 0)
+
+            - warning
+
+            - limit
+
+            - exceeded
 
         );
 
-        if(statisticsCanvas){
+        new Chart(monthlyCanvas, {
 
-            new Chart(
+            type: "doughnut",
 
-                statisticsCanvas,
+            data: {
 
-                {
+                labels: [
 
-                    type: "bar",
+                    "Normal",
 
-                    data: {
+                    "Warning",
 
-                        labels: [
+                    "Limit Reached",
 
-                            "Present",
+                    "Exceeded"
 
-                            "Late",
+                ],
 
-                            "Early",
+                datasets: [{
 
-                            "Overtime"
+                    data: [
 
-                        ],
+                        normal,
 
-                        datasets: [{
+                        warning,
 
-                            label: "Employees",
+                        limit,
 
-                            data: [
+                        exceeded
 
-                                summary.present || 0,
+                    ],
 
-                                summary.late_in || 0,
+                    backgroundColor: [
 
-                                summary.early_out || 0,
+                        "#198754",
 
-                                summary.overtime || 0
+                        "#ffc107",
 
-                            ]
+                        "#212529",
 
-                        }]
+                        "#dc3545"
 
-                    },
+                    ]
 
-                    options: {
+                }]
 
-                        responsive: true,
+            },
 
-                        plugins: {
+            options: {
 
-                            legend: {
+                responsive: true,
 
-                                display: false
+                maintainAspectRatio: false,
 
-                            }
+                plugins: {
 
-                        },
+                    legend: {
 
-                        scales: {
-
-                            y: {
-
-                                beginAtZero: true
-
-                            }
-
-                        }
+                        position: "bottom"
 
                     }
 
                 }
 
-            );
+            }
 
-        }
+        });
 
-        // =============================================
-        // Monthly OT Status
-        // =============================================
+    }
 
-        const monthlyCanvas = document.getElementById(
+    // =====================================================
+    // Top Monthly OT Employees
+    // =====================================================
 
-            "monthlyOTChart"
+    const topCanvas = document.getElementById("topOTChart");
 
-        );
+    if (topCanvas && typeof Chart !== "undefined") {
 
-        if(monthlyCanvas){
+        const sorted = [...employees]
 
-            const warning = summary.warning || 0;
+            .sort(
 
-            const limit = summary.limit_reached || 0;
-
-            const exceeded = summary.monthly_ot_exceeded || 0;
-
-            const normal =
-
-                (summary.total || 0)
-
-                -
-
-                warning
-
-                -
-
-                limit
-
-                -
-
-                exceeded;
-
-            new Chart(
-
-                monthlyCanvas,
-
-                {
-
-                    type: "doughnut",
-
-                    data: {
-
-                        labels: [
-
-                            "Normal",
-
-                            "Warning",
-
-                            "Limit Reached",
-
-                            "Exceeded"
-
-                        ],
-
-                        datasets: [{
-
-                            data: [
-
-                                normal,
-
-                                warning,
-
-                                limit,
-
-                                exceeded
-
-                            ],
-
-                            backgroundColor: [
-
-                                "#198754",
-
-                                "#ffc107",
-
-                                "#212529",
-
-                                "#dc3545"
-
-                            ]
-
-                        }]
-
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        plugins: {
-
-                            legend: {
-
-                                position: "bottom"
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            );
-
-        }
-
-        // =============================================
-        // Top Monthly OT Employees
-        // =============================================
-
-        const topCanvas = document.getElementById(
-
-            "topOTChart"
-
-        );
-
-        if(topCanvas){
-
-            const sorted = [...employees]
-
-                .sort(
-
-                    (a, b) =>
+                (a, b) =>
 
                     (b.monthly_ot_minutes || 0)
 
@@ -826,53 +720,65 @@ window.addEventListener(
 
                     (a.monthly_ot_minutes || 0)
 
-                )
+            )
 
-                .slice(0, 10);
+            .slice(0, 10);
 
-            new Chart(
+        new Chart(topCanvas, {
 
-                topCanvas,
+            type: "bar",
 
-                {
+            data: {
 
-                    type: "bar",
+                labels: sorted.map(
 
-                    data: {
+                    emp => emp.name || "Unknown"
 
-                        labels: sorted.map(
+                ),
 
-                            emp => emp.name
+                datasets: [{
 
-                        ),
+                    label: "Monthly OT (Minutes)",
 
-                        datasets: [{
+                    data: sorted.map(
 
-                            label: "Monthly OT (Minutes)",
+                        emp => emp.monthly_ot_minutes || 0
 
-                            data: sorted.map(
+                    ),
 
-                                emp => emp.monthly_ot_minutes || 0
+                    backgroundColor: "#6610f2"
 
-                            )
+                }]
 
-                        }]
+            },
 
-                    },
+            options: {
 
-                    options: {
+                responsive: true,
 
-                        responsive: true,
+                maintainAspectRatio: false,
 
-                        indexAxis: "y",
+                indexAxis: "y",
 
-                        scales: {
+                plugins: {
 
-                            x: {
+                    legend: {
 
-                                beginAtZero: true
+                        display: false
 
-                            }
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            precision: 0
 
                         }
 
@@ -880,85 +786,13 @@ window.addEventListener(
 
                 }
 
-            );
+            }
 
-        }
-
-    }
-
-);
-// =====================================================
-// Utility Functions
-// =====================================================
-
-// Escape HTML
-
-function escapeHtml(text){
-
-    if(text === null || text === undefined){
-
-        return "";
+        });
 
     }
 
-    return String(text)
-
-        .replace(/&/g,"&amp;")
-
-        .replace(/</g,"&lt;")
-
-        .replace(/>/g,"&gt;")
-
-        .replace(/"/g,"&quot;")
-
-        .replace(/'/g,"&#039;");
-
-}
-
-// =====================================================
-// Initialize Dashboard
-// =====================================================
-
-document.addEventListener(
-
-    "DOMContentLoaded",
-
-    function(){
-
-        console.log("==========================================");
-
-        console.log(
-
-            "Attendance Notification System Pro"
-
-        );
-
-        console.log(
-
-            "Dashboard Loaded Successfully"
-
-        );
-
-        console.log("==========================================");
-
-        // Initialize HR Report Text
-
-        const report = document.getElementById(
-
-            "hrReport"
-
-        );
-
-        if(report){
-
-            hrReportText = report.value || "";
-
-        }
-
-    }
-
-);
-
+});
 // =====================================================
 // Keyboard Shortcuts
 // =====================================================
@@ -967,17 +801,17 @@ document.addEventListener(
 
     "keydown",
 
-    function(event){
+    function (event) {
 
         // Ctrl + F -> Employee Search
 
-        if(
+        if (
 
             event.ctrlKey &&
 
             event.key.toLowerCase() === "f"
 
-        ){
+        ) {
 
             event.preventDefault();
 
@@ -987,25 +821,67 @@ document.addEventListener(
 
             );
 
-            if(search){
+            if (search) {
 
                 search.focus();
+
+                search.select();
 
             }
 
         }
 
-        // ESC -> Close Modal
+        // ESC -> Close Employee Modal
 
-        if(
+        if (
 
             event.key === "Escape" &&
 
             employeeModal
 
-        ){
+        ) {
 
-            employeeModal.hide();
+            try {
+
+                employeeModal.hide();
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+            }
+
+        }
+
+        // Ctrl + P -> Print Dashboard
+
+        if (
+
+            event.ctrlKey &&
+
+            event.key.toLowerCase() === "p"
+
+        ) {
+
+            event.preventDefault();
+
+            printDashboard();
+
+        }
+
+        // F5 -> Refresh Dashboard
+
+        if (
+
+            event.key === "F5"
+
+        ) {
+
+            event.preventDefault();
+
+            refreshDashboard();
 
         }
 
@@ -1017,21 +893,21 @@ document.addEventListener(
 // Refresh Dashboard
 // =====================================================
 
-function refreshDashboard(){
+function refreshDashboard() {
 
     location.reload();
 
 }
 
 // =====================================================
-// Export Table (Future Support)
+// Export Employee Table
 // =====================================================
 
-function exportEmployeeTable(){
+function exportEmployeeTable() {
 
     alert(
 
-        "Use the Download Excel button to export the report."
+        "Please use the Download Excel button to export the report."
 
     );
 
@@ -1041,12 +917,11 @@ function exportEmployeeTable(){
 // Print Dashboard
 // =====================================================
 
-function printDashboard(){
+function printDashboard() {
 
     window.print();
 
 }
-
 // =====================================================
 // Cleanup
 // =====================================================
@@ -1055,18 +930,98 @@ window.addEventListener(
 
     "beforeunload",
 
-    function(){
+    function () {
+
+        try {
+
+            if (employeeModal) {
+
+                employeeModal.hide();
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+        }
 
         employeeModal = null;
 
         hrReportText = "";
 
+        console.log("Dashboard Cleanup Completed.");
+
     }
 
 );
 
-console.log(
+// =====================================================
+// Window Error Handler
+// =====================================================
 
-    "Dashboard JavaScript Initialized Successfully."
+window.addEventListener(
+
+    "error",
+
+    function (event) {
+
+        console.error(
+
+            "Dashboard Error:",
+
+            event.message,
+
+            "\nFile:",
+
+            event.filename,
+
+            "\nLine:",
+
+            event.lineno
+
+        );
+
+    }
 
 );
+
+// =====================================================
+// Unhandled Promise Rejection
+// =====================================================
+
+window.addEventListener(
+
+    "unhandledrejection",
+
+    function (event) {
+
+        console.error(
+
+            "Unhandled Promise:",
+
+            event.reason
+
+        );
+
+    }
+
+);
+
+// =====================================================
+// Dashboard Ready
+// =====================================================
+
+console.log("==================================================");
+
+console.log("Attendance Notification System Pro");
+
+console.log("Dashboard JavaScript Initialized Successfully");
+
+console.log("Version : 10.0 Enterprise");
+
+console.log("Developed by Maharajan");
+
+console.log("==================================================");

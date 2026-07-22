@@ -2,7 +2,7 @@
 =========================================================
 Attendance Notification System Pro
 Attendance Checker
-Version : 8.0 Enterprise (Ultra Performance)
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
@@ -36,12 +36,11 @@ class AttendanceChecker:
 
     Features
     --------
-    • High-performance attendance processing
-    • Single database load/save
-    • Optimized for large Excel/CSV files
-    • Low memory usage
-    • HR report generation
-    • Employee notification generation
+    • High Performance Attendance Processing
+    • Automatic Daily OT
+    • Monthly OT Tracking
+    • HR Report Generation
+    • Employee Notifications
     """
 
     # =====================================================
@@ -65,9 +64,9 @@ class AttendanceChecker:
             "%H:%M"
         )
 
-        # ---------------------------------------------
-        # Shared Services
-        # ---------------------------------------------
+        # -----------------------------------------
+        # Services
+        # -----------------------------------------
 
         self.database = DatabaseManager()
 
@@ -79,11 +78,11 @@ class AttendanceChecker:
 
         self.notification_service = NotificationService()
 
-        # ---------------------------------------------
-        # Required Columns
-        # ---------------------------------------------
+        # -----------------------------------------
+        # Required Attendance Columns
+        # -----------------------------------------
 
-        self.required_columns = (
+        self.required_columns = [
 
             "Employee No",
 
@@ -95,11 +94,11 @@ class AttendanceChecker:
 
             "OUT Time"
 
-        )
+        ]
 
-        # ---------------------------------------------
-        # Invalid Time Values
-        # ---------------------------------------------
+        # -----------------------------------------
+        # Empty Time Values
+        # -----------------------------------------
 
         self.empty_time_values = {
 
@@ -127,7 +126,24 @@ class AttendanceChecker:
 
         }
 
-    # =====================================================
+        # -----------------------------------------
+        # Supported Attendance Date Formats
+        # -----------------------------------------
+
+        self.date_formats = [
+
+            "%d-%b-%Y",
+
+            "%d-%B-%Y",
+
+            "%d/%m/%Y",
+
+            "%d-%m-%Y",
+
+            "%Y-%m-%d"
+
+        ]
+        # =====================================================
     # Read Attendance File
     # =====================================================
 
@@ -144,66 +160,143 @@ class AttendanceChecker:
             filepath
         )[1].lower()
 
+        # -----------------------------------------
+        # Read CSV
+        # -----------------------------------------
+
         if extension == ".csv":
 
-            try:
+            dataframe = None
 
-                dataframe = pd.read_csv(
-                    filepath,
-                    encoding="utf-8",
-                    low_memory=False
+            for encoding in (
+
+                "utf-8",
+
+                "utf-8-sig",
+
+                "latin1",
+
+                "cp1252"
+
+            ):
+
+                try:
+
+                    dataframe = pd.read_csv(
+
+                        filepath,
+
+                        encoding=encoding,
+
+                        low_memory=False
+
+                    )
+
+                    break
+
+                except Exception:
+
+                    continue
+
+            if dataframe is None:
+
+                raise ValueError(
+
+                    "Unable to read CSV file."
+
                 )
 
-            except UnicodeDecodeError:
-
-                dataframe = pd.read_csv(
-                    filepath,
-                    encoding="latin1",
-                    low_memory=False
-                )
+        # -----------------------------------------
+        # Read Excel
+        # -----------------------------------------
 
         elif extension in (
+
             ".xlsx",
+
             ".xls"
+
         ):
 
             dataframe = pd.read_excel(
+
                 filepath,
+
                 engine="openpyxl"
+
             )
 
         else:
 
             raise ValueError(
-                f"Unsupported file format : {extension}"
+
+                f"Unsupported File : {extension}"
+
             )
+
+        # -----------------------------------------
+        # Clean Column Names
+        # -----------------------------------------
 
         dataframe.columns = [
 
-            str(column).strip()
+            str(column)
+
+            .strip()
+
+            .replace("\n", " ")
+
+            .replace("\r", " ")
 
             for column in dataframe.columns
 
         ]
 
         dataframe.dropna(
+
             how="all",
+
             inplace=True
+
         )
 
         dataframe.reset_index(
+
             drop=True,
+
             inplace=True
+
         )
 
-        print(
-            f"Employees Found : {len(dataframe)}"
+        # -----------------------------------------
+        # Remove Empty Employee Rows
+        # -----------------------------------------
+
+        dataframe = dataframe.loc[
+
+            dataframe["Employee No"]
+
+            .notna()
+
+        ]
+
+        dataframe.reset_index(
+
+            drop=True,
+
+            inplace=True
+
         )
 
         print("=" * 60)
+        print(
+
+            f"Employees Found : {len(dataframe)}"
+
+        )
+        print("=" * 60)
 
         return dataframe
-
     # =====================================================
     # Convert Time
     # =====================================================
@@ -214,24 +307,56 @@ class AttendanceChecker:
     ):
 
         if value is None:
-
             return None
 
         if pd.isna(value):
-
             return None
+
+        # -----------------------------------------
+        # Excel Datetime
+        # -----------------------------------------
 
         if isinstance(
             value,
             datetime
         ):
-
             return value
+
+        # -----------------------------------------
+        # Excel Float Time
+        # -----------------------------------------
+
+        if isinstance(
+            value,
+            (int, float)
+        ):
+
+            try:
+
+                total_seconds = int(
+                    float(value) * 86400
+                )
+
+                hours = (
+                    total_seconds // 3600
+                ) % 24
+
+                minutes = (
+                    total_seconds % 3600
+                ) // 60
+
+                return datetime.strptime(
+                    f"{hours:02d}:{minutes:02d}",
+                    "%H:%M"
+                )
+
+            except Exception:
+
+                return None
 
         value = str(value).strip()
 
         if value in self.empty_time_values:
-
             return None
 
         value = (
@@ -240,7 +365,7 @@ class AttendanceChecker:
             .replace("-", ":")
         )
 
-        for fmt in (
+        supported_formats = [
 
             "%H:%M",
 
@@ -250,9 +375,13 @@ class AttendanceChecker:
 
             "%I:%M:%S %p",
 
-            "%I:%M%p"
+            "%I:%M%p",
 
-        ):
+            "%H.%M"
+
+        ]
+
+        for fmt in supported_formats:
 
             try:
 
@@ -266,6 +395,7 @@ class AttendanceChecker:
                 continue
 
         return None
+
 
     # =====================================================
     # Format Time
@@ -288,7 +418,7 @@ class AttendanceChecker:
             return "--"
 
         return value.strftime(
-            "%I:%M %p"
+            "%H:%M"
         )
         # =====================================================
     # Process Attendance File
@@ -315,9 +445,9 @@ class AttendanceChecker:
                 "Attendance file is empty."
             )
 
-        # =====================================================
-        # Required Columns
-        # =====================================================
+        # -----------------------------------------
+        # Validate Required Columns
+        # -----------------------------------------
 
         missing_columns = [
 
@@ -339,12 +469,6 @@ class AttendanceChecker:
 
             )
 
-        print("Required Columns Verified")
-
-        # =====================================================
-        # Initialize
-        # =====================================================
-
         employees = []
 
         summary = {
@@ -363,270 +487,299 @@ class AttendanceChecker:
 
             "overtime": 0,
 
-            "warning": 0,
+            "monthly_warning": 0,
 
-            "limit_reached": 0,
+            "monthly_limit_reached": 0,
 
             "monthly_ot_exceeded": 0
 
         }
 
-        total_rows = len(dataframe)
-
-        print("=" * 60)
-        print(
-            f"Employees Found : {total_rows}"
-        )
-        print("=" * 60)
-
-        # =====================================================
-        # Performance Cache
-        # =====================================================
-
-        convert_time = self.convert_time
-
-        format_time = self.format_time
-
-        process_ot = self.ot_manager.process
-
-        generate_notification = (
-
-            self.notification_service.generate_message
-
-        )
-
-        employees_append = employees.append
-
-        empty_time_values = self.empty_time_values
-
-        # =====================================================
-        # Process Employees
-        # =====================================================
-
-        for index, row in enumerate(
-
-            dataframe.itertuples(index=False),
-
-            start=1
-
-        ):
-
-            if index % 250 == 0 or index == total_rows:
-
-                progress = round(
-
-                    (index / total_rows) * 100,
-
-                    1
-
-                )
-
-                print(
-
-                    f"Processed {index}/{total_rows} ({progress}%)"
-
-                )
+        for _, row in dataframe.iterrows():
 
             summary["total"] += 1
 
-            # =====================================================
+            # -----------------------------------------
+            # Attendance Date
+            # -----------------------------------------
+
+            attendance_date = str(
+
+                row.get(
+
+                    "Attendance Date",
+
+                    ""
+
+                )
+
+            ).strip()
+
+            for fmt in self.date_formats:
+
+                try:
+
+                    attendance_date = datetime.strptime(
+
+                        attendance_date,
+
+                        fmt
+
+                    ).strftime("%Y-%m-%d")
+
+                    break
+
+                except Exception:
+
+                    continue
+
+            # -----------------------------------------
             # Employee Information
-            # =====================================================
+            # -----------------------------------------
 
             employee = {
 
                 "employee_id": str(
-                    getattr(
-                        row,
-                        "Employee_No",
+
+                    row.get(
+
+                        "Employee No",
+
                         ""
+
                     )
+
                 ).strip(),
 
                 "name": str(
-                    getattr(
-                        row,
-                        "Employee_Name",
-                        ""
-                    )
-                ).strip(),
 
-                "unit": str(
-                    getattr(
-                        row,
-                        "Unit",
+                    row.get(
+
+                        "Employee Name",
+
                         ""
+
                     )
+
                 ).strip(),
 
                 "department": str(
-                    getattr(
-                        row,
+
+                    row.get(
+
                         "Department",
+
                         ""
+
                     )
+
                 ).strip(),
 
                 "designation": str(
-                    getattr(
-                        row,
+
+                    row.get(
+
                         "Designation",
+
                         ""
+
                     )
+
                 ).strip(),
 
-                "attendance_date": str(
-                    getattr(
-                        row,
-                        "Attendance_Date",
-                        ""
-                    )
-                ).strip(),
-
-                "approval_status": str(
-                    getattr(
-                        row,
-                        "Approval_Status",
-                        ""
-                    )
-                ).strip(),
-
-                "remarks": str(
-                    getattr(
-                        row,
-                        "Remarks",
-                        ""
-                    )
-                ).strip(),
+                "attendance_date": attendance_date,
 
                 "email": str(
-                    getattr(
-                        row,
+
+                    row.get(
+
                         "Email",
+
                         ""
+
                     )
+
                 ).strip(),
 
-                "status": [],
-
-                "notification": ""
+                "status": []
 
             }
 
-            status = employee["status"]
+            # -----------------------------------------
+            # Punch Times
+            # -----------------------------------------
 
-            status_append = status.append
+            in_time = self.convert_time(
 
-            # =====================================================
-            # Punch Details
-            # =====================================================
+                row.get(
 
-            in_time = convert_time(
+                    "IN Time"
 
-                getattr(
-                    row,
-                    "IN_Time",
-                    ""
                 )
 
             )
 
-            out_time = convert_time(
+            out_time = self.convert_time(
 
-                getattr(
-                    row,
-                    "OUT_Time",
-                    ""
+                row.get(
+
+                    "OUT Time"
+
                 )
 
             )
 
-            employee["punch_in"] = format_time(
+            employee["punch_in"] = self.format_time(
                 in_time
             )
 
-            employee["punch_out"] = format_time(
+            employee["punch_out"] = self.format_time(
                 out_time
             )
 
+            # -----------------------------------------
+            # Late / Early
+            # -----------------------------------------
+
             late = str(
 
-                getattr(
-                    row,
-                    "Late_IN_HH_MM",
-                    ""
+                row.get(
+
+                    "Late IN(HH:MM)",
+
+                    row.get(
+
+                        "Late IN",
+
+                        "00:00"
+
+                    )
+
                 )
 
             ).strip()
 
             early = str(
 
-                getattr(
-                    row,
-                    "Early_OUT_HH_MM",
-                    ""
-                )
+                row.get(
 
-            ).strip()
+                    "Early OUT(HH:MM)",
 
-            employee["daily_ot"] = str(
+                    row.get(
 
-                getattr(
-                    row,
-                    "OT_HRS",
-                    "00:00"
+                        "Early OUT",
+
+                        "00:00"
+
+                    )
 
                 )
 
             ).strip()
+
+            # -----------------------------------------
+            # Daily OT
+            # -----------------------------------------
+
+            daily_ot = str(
+
+                row.get(
+
+                    "OT HRS",
+
+                    row.get(
+
+                        "OT",
+
+                        "0.00"
+
+                    )
+
+                )
+
+            ).strip()
+
+            if "." in daily_ot:
+
+                try:
+
+                    hour, minute = daily_ot.split(".")
+
+                    daily_ot = (
+
+                        f"{int(hour):02d}:"
+
+                        f"{int(minute):02d}"
+
+                    )
+
+                except Exception:
+
+                    daily_ot = "00:00"
+
+            elif ":" not in daily_ot:
+
+                daily_ot = "00:00"
+
+            employee["daily_ot"] = daily_ot
             # =====================================================
             # Attendance Validation
             # =====================================================
 
+            status = employee["status"]
+
+            # -----------------------------------------
+            # Missing Punch In
+            # -----------------------------------------
+
             if CHECK_MISSING_IN and in_time is None:
 
-                status_append(
+                status.append(
                     "Missing Punch In"
                 )
 
                 summary["missing_in"] += 1
 
+            # -----------------------------------------
+            # Missing Punch Out
+            # -----------------------------------------
+
             if CHECK_MISSING_OUT and out_time is None:
 
-                status_append(
+                status.append(
                     "Missing Punch Out"
                 )
 
                 summary["missing_out"] += 1
 
+            # -----------------------------------------
+            # Late Punch
+            # -----------------------------------------
+
             if (
-
                 CHECK_LATE_IN
-
-                and late not in empty_time_values
-
+                and late not in self.empty_time_values
+                and late != "00:00"
             ):
 
-                status_append(
-
+                status.append(
                     f"Late Punch ({late})"
-
                 )
 
                 summary["late_in"] += 1
 
+            # -----------------------------------------
+            # Early Out
+            # -----------------------------------------
+
             if (
-
                 CHECK_EARLY_OUT
-
-                and early not in empty_time_values
-
+                and early not in self.empty_time_values
+                and early != "00:00"
             ):
 
-                status_append(
-
+                status.append(
                     f"Early Out ({early})"
-
                 )
 
                 summary["early_out"] += 1
@@ -635,87 +788,103 @@ class AttendanceChecker:
             # Overtime Processing
             # =====================================================
 
-            employee = process_ot(
-
+            employee = self.ot_manager.process(
                 employee,
-
                 out_time
-
             )
-            print("=" * 60)
-            print(employee["employee_id"])
-            print("Daily OT :", employee.get("daily_ot"))
-            print("Monthly OT :", employee.get("monthly_ot"))
-            print("Remaining OT :", employee.get("remaining_ot"))
-            print("=" * 60)
+
+            # Preserve OT from CSV if available
+            if employee["daily_ot"] == "00:00":
+
+                employee["daily_ot"] = daily_ot
+
+            # -----------------------------------------
+            # Daily OT Employee
+            # -----------------------------------------
 
             if employee.get(
-
                 "daily_ot_minutes",
-
                 0
-
             ) > 0:
 
-                status_append(
-
+                status.append(
                     f"Daily OT ({employee['daily_ot']})"
-
                 )
 
                 summary["overtime"] += 1
 
+            # -----------------------------------------
+            # Monthly Status
+            # -----------------------------------------
+
             monthly_status = employee.get(
-
                 "monthly_status",
-
                 "Normal"
-
             )
 
             if monthly_status == "Warning":
 
-                status_append(
+                summary["monthly_warning"] += 1
 
+                status.append(
                     "Monthly OT Warning"
-
                 )
-
-                summary["warning"] += 1
 
             elif monthly_status == "Limit Reached":
 
-                status_append(
+                summary["monthly_limit_reached"] += 1
 
+                status.append(
                     "Monthly OT Limit Reached"
-
                 )
-
-                summary["limit_reached"] += 1
 
             elif monthly_status == "Exceeded":
 
-                status_append(
-
-                    "Monthly OT Exceeded"
-
-                )
-
                 summary["monthly_ot_exceeded"] += 1
 
-            # =====================================================
-            # Present Employee
-            # =====================================================
-
-            if not status:
-
-                status_append(
-
-                    "On Time"
-
+                status.append(
+                    "Monthly OT Exceeded"
                 )
 
+            # =====================================================
+            # Present Count
+            # =====================================================
+
+            attendance_issue = False
+
+            for item in status:
+
+                if (
+
+                    "Late Punch" in item
+
+                    or
+
+                    "Early Out" in item
+
+                    or
+
+                    "Missing Punch" in item
+
+                ):
+
+                    attendance_issue = True
+
+                    break
+
+            if not attendance_issue:
+
                 summary["present"] += 1
+
+            # -----------------------------------------
+            # On Time
+            # -----------------------------------------
+
+            if len(status) == 0:
+
+                status.append(
+                    "On Time"
+                )
 
             # =====================================================
             # Generate Notification
@@ -723,25 +892,17 @@ class AttendanceChecker:
 
             employee["notification"] = (
 
-                generate_notification(
-
+                self.notification_service.generate_message(
                     employee
-
                 )
 
             )
 
-            # =====================================================
-            # Store Employee
-            # =====================================================
-
-            employees_append(
-
+            employees.append(
                 employee
-
             )
             # =====================================================
-        # Finalize Database
+        # Save Monthly OT Database
         # =====================================================
 
         print("=" * 60)
@@ -751,44 +912,72 @@ class AttendanceChecker:
         self.database.finalize()
 
         print("=" * 60)
-        print("Database Saved Successfully")
+        print("Monthly OT Database Saved Successfully")
         print("=" * 60)
 
         # =====================================================
-        # Generate HR Report
+        # Generate HR Reports
         # =====================================================
-
-        print("=" * 60)
-        print("Generating HR Report...")
-        print("=" * 60)
 
         reports = self.hr_generator.generate(
-
             employees,
-
             summary
-
         )
 
         hr_report = reports.get(
-
             "hr_report",
-
             ""
-
         )
 
         late_punch_report = reports.get(
-
             "late_punch_report",
-
             ""
-
         )
 
-        print("=" * 60)
-        print("HR Report Generated Successfully")
-        print("=" * 60)
+        # =====================================================
+        # Top Monthly OT Employees
+        # =====================================================
+
+        top_ot_employees = sorted(
+
+            employees,
+
+            key=lambda employee: employee.get(
+                "monthly_ot_minutes",
+                0
+            ),
+
+            reverse=True
+
+        )[:10]
+
+        # =====================================================
+        # Dashboard Statistics
+        # =====================================================
+
+        attendance_statistics = {
+
+            "present": summary["present"],
+
+            "late": summary["late_in"],
+
+            "early": summary["early_out"],
+
+            "missing_in": summary["missing_in"],
+
+            "missing_out": summary["missing_out"]
+
+        }
+
+        monthly_ot_statistics = {
+
+            "warning": summary["monthly_warning"],
+
+            "limit_reached": summary["monthly_limit_reached"],
+
+            "exceeded": summary["monthly_ot_exceeded"]
+
+        }
 
         # =====================================================
         # Processing Time
@@ -808,21 +997,45 @@ class AttendanceChecker:
         )
         print("=" * 60)
 
-        # =====================================================
-        # Attendance Processing Completed
-        # =====================================================
-
         print("=" * 60)
         print("Attendance Processing Completed Successfully")
         print("=" * 60)
 
         # =====================================================
-        # Return Result
+        # Dashboard Result
         # =====================================================
 
         result = {
 
-            "summary": summary,
+            "summary": {
+
+                "total": summary["total"],
+
+                "present": summary["present"],
+
+                "late_in": summary["late_in"],
+
+                "early_out": summary["early_out"],
+
+                "missing_in": summary["missing_in"],
+
+                "missing_out": summary["missing_out"],
+
+                "overtime": summary["overtime"],
+
+                "monthly_warning": summary["monthly_warning"],
+
+                "monthly_limit_reached": summary["monthly_limit_reached"],
+
+                "monthly_ot_exceeded": summary["monthly_ot_exceeded"]
+
+            },
+
+            "attendance_statistics": attendance_statistics,
+
+            "monthly_ot_statistics": monthly_ot_statistics,
+
+            "top_ot_employees": top_ot_employees,
 
             "employees": employees,
 
@@ -835,9 +1048,12 @@ class AttendanceChecker:
         }
 
         # =====================================================
-        # Memory Cleanup
+        # Cleanup
         # =====================================================
+
+        del dataframe
 
         gc.collect()
 
         return result
+    

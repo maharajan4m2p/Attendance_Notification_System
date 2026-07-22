@@ -2,7 +2,7 @@
 =========================================================
 Attendance Notification System Pro
 Overtime Manager
-Version : 8.0 Enterprise (Ultra Performance)
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
@@ -14,7 +14,11 @@ from config import (
     DAILY_OT_LIMIT,
     DAILY_OT_WARNING,
     MONTHLY_OT_LIMIT,
-    MONTHLY_OT_WARNING
+    MONTHLY_OT_WARNING,
+    NORMAL_STATUS,
+    WARNING_STATUS,
+    LIMIT_REACHED_STATUS,
+    EXCEEDED_STATUS
 )
 
 from services.database_manager import DatabaseManager
@@ -26,20 +30,19 @@ class OvertimeManager:
 
     Features
     --------
-    • Daily OT calculation
-    • Monthly OT tracking
-    • Shared DatabaseManager
-    • Enterprise performance
+    • Daily OT Calculation
+    • Monthly OT Tracking
+    • Remaining OT Calculation
+    • Daily Status
+    • Monthly Status
+    • Database Synchronization
     """
 
     # =====================================================
     # Initialize
     # =====================================================
 
-    def __init__(
-        self,
-        database=None
-    ):
+    def __init__(self, database=None):
 
         self.database = database or DatabaseManager()
 
@@ -47,6 +50,14 @@ class OvertimeManager:
             SHIFT_END,
             "%H:%M"
         )
+
+        self.daily_warning = DAILY_OT_WARNING
+
+        self.daily_limit = DAILY_OT_LIMIT
+
+        self.monthly_warning = MONTHLY_OT_WARNING * 60
+
+        self.monthly_limit = MONTHLY_OT_LIMIT * 60
 
         self.empty_time_values = {
 
@@ -56,23 +67,24 @@ class OvertimeManager:
 
             "--",
 
-            "00:00",
-
-            "00:00:00",
-
             "0",
 
             "0.0",
+
+            "00:00",
+
+            "00:00:00",
 
             "nan",
 
             "NaN",
 
-            "None"
+            "None",
+
+            "N/A"
 
         }
-
-    # =====================================================
+        # =====================================================
     # Convert Minutes -> HH:MM
     # =====================================================
 
@@ -81,15 +93,24 @@ class OvertimeManager:
         minutes
     ):
 
-        if minutes is None or minutes <= 0:
+        try:
+
+            minutes = int(minutes)
+
+        except (TypeError, ValueError):
 
             return "00:00"
 
-        hours = int(minutes // 60)
+        if minutes <= 0:
 
-        mins = int(minutes % 60)
+            return "00:00"
+
+        hours = minutes // 60
+
+        mins = minutes % 60
 
         return f"{hours:02d}:{mins:02d}"
+
 
     # =====================================================
     # Convert HH:MM -> Minutes
@@ -110,25 +131,42 @@ class OvertimeManager:
 
             return 0
 
+        # -----------------------------------------
+        # HH:MM Format
+        # -----------------------------------------
+
+        if ":" in value:
+
+            try:
+
+                hours, minutes = value.split(":")
+
+                return (
+
+                    int(hours) * 60
+
+                    +
+
+                    int(minutes)
+
+                )
+
+            except Exception:
+
+                return 0
+
+        # -----------------------------------------
+        # Numeric Format
+        # -----------------------------------------
+
         try:
 
-            hours, minutes = value.split(":")
-
-            return (
-
-                int(hours) * 60
-
-                +
-
-                int(minutes)
-
-            )
+            return int(float(value))
 
         except Exception:
 
             return 0
-
-    # =====================================================
+        # =====================================================
     # Calculate Daily Overtime
     # =====================================================
 
@@ -137,34 +175,46 @@ class OvertimeManager:
         out_time
     ):
 
+        # -----------------------------------------
+        # Invalid Punch Out
+        # -----------------------------------------
+
         if out_time is None:
 
             return 0
 
-        if not isinstance(
-            out_time,
-            datetime
-        ):
+        if not isinstance(out_time, datetime):
 
             return 0
 
-        overtime = int(
+        # -----------------------------------------
+        # Calculate OT Minutes
+        # -----------------------------------------
+
+        overtime_minutes = int(
 
             (
                 out_time -
 
                 self.shift_end
 
-            ).total_seconds() // 60
+            ).total_seconds() / 60
 
         )
 
-        return max(
-            0,
-            overtime
-        )
-        # =====================================================
-    # Daily OT Validation
+        # -----------------------------------------
+        # Prevent Negative OT
+        # -----------------------------------------
+
+        if overtime_minutes < 0:
+
+            overtime_minutes = 0
+
+        return overtime_minutes
+
+
+    # =====================================================
+    # Check Daily OT Status
     # =====================================================
 
     def check_daily_limit(
@@ -174,6 +224,7 @@ class OvertimeManager:
     ):
 
         employee["daily_ot_minutes"] = overtime_minutes
+
         employee["daily_ot"] = self.minutes_to_time(
             overtime_minutes
         )
@@ -182,33 +233,41 @@ class OvertimeManager:
         # Daily Status
         # -----------------------------------------
 
-        if overtime_minutes > DAILY_OT_LIMIT:
+        if overtime_minutes > self.daily_limit:
 
-            status = "Exceeded"
-            message = "Daily OT exceeded."
+            employee["daily_status"] = EXCEEDED_STATUS
 
-        elif overtime_minutes == DAILY_OT_LIMIT:
+            employee["daily_message"] = (
+                "Daily overtime exceeded company limit."
+            )
 
-            status = "Limit Reached"
-            message = "Daily OT limit reached."
+        elif overtime_minutes == self.daily_limit:
 
-        elif overtime_minutes >= DAILY_OT_WARNING:
+            employee["daily_status"] = LIMIT_REACHED_STATUS
 
-            status = "Warning"
-            message = "Daily OT nearing limit."
+            employee["daily_message"] = (
+                "Daily overtime limit reached."
+            )
+
+        elif overtime_minutes >= self.daily_warning:
+
+            employee["daily_status"] = WARNING_STATUS
+
+            employee["daily_message"] = (
+                "Daily overtime warning."
+            )
 
         else:
 
-            status = "Normal"
-            message = "Daily OT within limit."
+            employee["daily_status"] = NORMAL_STATUS
 
-        employee["daily_status"] = status
-        employee["daily_message"] = message
+            employee["daily_message"] = (
+                "Daily overtime within limit."
+            )
 
         return employee
-
     # =====================================================
-    # Monthly OT Validation
+    # Update Monthly Overtime
     # =====================================================
 
     def update_monthly_ot(
@@ -216,75 +275,135 @@ class OvertimeManager:
         employee
     ):
 
+        # -----------------------------------------
+        # Update Monthly Database
+        # -----------------------------------------
+
         employee = self.database.update_employee(
             employee
         )
 
-        monthly_minutes = employee.get(
-            "monthly_ot_minutes",
-            0
+        # -----------------------------------------
+        # Get Values
+        # -----------------------------------------
+
+        monthly_minutes = int(
+
+            employee.get(
+
+                "monthly_ot_minutes",
+
+                0
+
+            )
+
         )
 
-        monthly_limit = MONTHLY_OT_LIMIT * 60
-        warning_limit = MONTHLY_OT_WARNING * 60
+        remaining_minutes = int(
 
-        remaining_minutes = max(
-            0,
-            monthly_limit - monthly_minutes
+            employee.get(
+
+                "remaining_ot_minutes",
+
+                0
+
+            )
+
         )
+
+        # -----------------------------------------
+        # Convert Time
+        # -----------------------------------------
 
         employee["monthly_ot"] = self.minutes_to_time(
+
             monthly_minutes
+
         )
 
         employee["remaining_ot"] = self.minutes_to_time(
+
             remaining_minutes
+
         )
 
         employee["monthly_ot_minutes"] = monthly_minutes
+
         employee["remaining_ot_minutes"] = remaining_minutes
 
         # -----------------------------------------
         # Monthly Status
         # -----------------------------------------
 
-        if monthly_minutes > monthly_limit:
+        if monthly_minutes > self.monthly_limit:
 
-            status = "Exceeded"
-            message = "Monthly OT exceeded."
+            employee["monthly_status"] = EXCEEDED_STATUS
 
-        elif monthly_minutes == monthly_limit:
+            employee["monthly_message"] = (
 
-            status = "Limit Reached"
-            message = "Monthly OT limit reached."
+                "Monthly overtime exceeded company limit."
 
-        elif monthly_minutes >= warning_limit:
+            )
 
-            status = "Warning"
-            message = "Monthly OT nearing limit."
+        elif monthly_minutes == self.monthly_limit:
+
+            employee["monthly_status"] = LIMIT_REACHED_STATUS
+
+            employee["monthly_message"] = (
+
+                "Monthly overtime limit reached."
+
+            )
+
+        elif monthly_minutes >= self.monthly_warning:
+
+            employee["monthly_status"] = WARNING_STATUS
+
+            employee["monthly_message"] = (
+
+                "Monthly overtime warning."
+
+            )
 
         else:
 
-            status = "Normal"
-            message = "Monthly OT within limit."
+            employee["monthly_status"] = NORMAL_STATUS
 
-        employee["monthly_status"] = status
-        employee["monthly_message"] = message
+            employee["monthly_message"] = (
+
+                "Monthly overtime within limit."
+
+            )
+
+        # -----------------------------------------
+        # Dashboard Flags
+        # -----------------------------------------
 
         employee["warning"] = (
-            status == "Warning"
+
+            employee["monthly_status"]
+
+            == WARNING_STATUS
+
         )
 
         employee["limit_reached"] = (
-            status == "Limit Reached"
+
+            employee["monthly_status"]
+
+            == LIMIT_REACHED_STATUS
+
         )
 
         employee["ot_exceeded"] = (
-            status == "Exceeded"
+
+            employee["monthly_status"]
+
+            == EXCEEDED_STATUS
+
         )
 
         return employee
-
     # =====================================================
     # Process Employee Overtime
     # =====================================================
@@ -295,17 +414,103 @@ class OvertimeManager:
         out_time
     ):
 
-        overtime_minutes = self.calculate_daily_ot(
+        # -----------------------------------------
+        # Calculate Daily Overtime
+        # -----------------------------------------
+
+        daily_ot_minutes = self.calculate_daily_ot(
             out_time
         )
 
+        # -----------------------------------------
+        # Daily Validation
+        # -----------------------------------------
+
         employee = self.check_daily_limit(
             employee,
-            overtime_minutes
+            daily_ot_minutes
         )
+
+        # -----------------------------------------
+        # Update Monthly Database
+        # -----------------------------------------
 
         employee = self.update_monthly_ot(
             employee
+        )
+
+        # -----------------------------------------
+        # Ensure Dashboard Fields
+        # -----------------------------------------
+
+        employee.setdefault(
+            "daily_ot_minutes",
+            0
+        )
+
+        employee.setdefault(
+            "daily_ot",
+            "00:00"
+        )
+
+        employee.setdefault(
+            "monthly_ot_minutes",
+            0
+        )
+
+        employee.setdefault(
+            "monthly_ot",
+            "00:00"
+        )
+
+        employee.setdefault(
+            "remaining_ot_minutes",
+            0
+        )
+
+        employee.setdefault(
+            "remaining_ot",
+            "00:00"
+        )
+
+        employee.setdefault(
+            "daily_status",
+            NORMAL_STATUS
+        )
+
+        employee.setdefault(
+            "monthly_status",
+            NORMAL_STATUS
+        )
+
+        employee.setdefault(
+            "daily_message",
+            ""
+        )
+
+        employee.setdefault(
+            "monthly_message",
+            ""
+        )
+
+        employee.setdefault(
+            "warning",
+            False
+        )
+
+        employee.setdefault(
+            "limit_reached",
+            False
+        )
+
+        employee.setdefault(
+            "ot_exceeded",
+            False
+        )
+
+        employee.setdefault(
+            "notification_status",
+            ""
         )
 
         return employee

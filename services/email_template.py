@@ -2,7 +2,7 @@
 =========================================================
 Attendance Notification System Pro
 Email Template
-Version : 8.0 Enterprise (Ultra Performance)
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
@@ -24,8 +24,9 @@ class EmailTemplate:
     Features
     --------
     • Employee Attendance Summary
-    • Overtime Information
-    • Monthly Warning Messages
+    • Daily Attendance Status
+    • Monthly Overtime Status
+    • Company Policy
     • Professional Email Format
     """
 
@@ -36,12 +37,9 @@ class EmailTemplate:
     def __init__(self):
 
         self.subject = (
-
             f"{COMPANY_NAME} - Attendance Notification"
-
         )
-
-    # =====================================================
+        # =====================================================
     # Generate Email
     # =====================================================
 
@@ -90,39 +88,47 @@ Your attendance has been processed successfully.
 
 EMPLOYEE DETAILS
 
-Employee ID      : {employee.get('employee_id', '')}
-Employee Name    : {employee.get('name', '')}
-Department       : {employee.get('department', '')}
-Designation      : {employee.get('designation', '')}
-Attendance Date  : {employee.get('attendance_date', '')}
+Employee ID        : {employee.get('employee_id', '')}
+
+Employee Name      : {employee.get('name', '')}
+
+Department         : {employee.get('department', '')}
+
+Designation        : {employee.get('designation', '')}
+
+Attendance Date    : {employee.get('attendance_date', '')}
 
 ====================================================
 
 ATTENDANCE DETAILS
 
-Punch In         : {employee.get('punch_in', '--')}
-Punch Out        : {employee.get('punch_out', '--')}
+Punch In           : {employee.get('punch_in', '--')}
 
-Attendance Status : {status_text}
+Punch Out          : {employee.get('punch_out', '--')}
 
-Late Punch        : {employee.get('late_minutes', '00:00')}
-Early Punch Out   : {employee.get('early_minutes', '00:00')}
+Attendance Status  : {status_text}
+
+Late Minutes       : {employee.get('late_minutes', '00:00')}
+
+Early Out Minutes  : {employee.get('early_minutes', '00:00')}
 
 ====================================================
 
 OVERTIME DETAILS
 
-Daily OT          : {employee.get('daily_ot', '00:00')}
-Daily OT Status   : {employee.get('daily_status', 'Normal')}
+Daily OT           : {employee.get('daily_ot', '00:00')}
 
-Monthly OT        : {employee.get('monthly_ot', '00:00')}
-Monthly Status    : {employee.get('monthly_status', 'Normal')}
+Daily Status       : {employee.get('daily_status', 'Normal')}
 
-Remaining OT      : {employee.get('remaining_ot', '00:00')}
+Monthly OT         : {employee.get('monthly_ot', '00:00')}
+
+Monthly Status     : {employee.get('monthly_status', 'Normal')}
+
+Remaining OT       : {employee.get('remaining_ot', '00:00')}
 
 ====================================================
 
-NOTIFICATION
+ATTENDANCE NOTIFICATION
 
 {employee.get('notification', 'Attendance processed successfully.')}
 
@@ -130,14 +136,14 @@ NOTIFICATION
 
 COMPANY POLICY
 
-Shift Timing      : {SHIFT_START} - {SHIFT_END}
+Shift Timing       : {SHIFT_START} - {SHIFT_END}
 
-Daily OT Limit    : {DAILY_OT_LIMIT} Minutes
+Daily OT Limit     : {DAILY_OT_LIMIT} Minutes
 
-Monthly OT Limit  : {MONTHLY_OT_LIMIT} Hours
+Monthly OT Limit   : {MONTHLY_OT_LIMIT} Hours
 """
 # =====================================================
-        # Monthly Warning
+        # Monthly OT Status
         # =====================================================
 
         monthly_status = employee.get(
@@ -154,11 +160,13 @@ Monthly OT Limit  : {MONTHLY_OT_LIMIT} Hours
 
 ====================================================
 
-⚠ MONTHLY OT WARNING
+⚠️ MONTHLY OT WARNING
 
-Your monthly overtime is approaching the company limit.
+Your monthly overtime has crossed the company warning limit.
 
-Please coordinate with your Reporting Manager.
+Please monitor your overtime hours carefully.
+
+Contact your Reporting Manager if additional overtime is required.
 
 """
 
@@ -168,11 +176,11 @@ Please coordinate with your Reporting Manager.
 
 ====================================================
 
-🚨 MONTHLY OT LIMIT REACHED
+🟠 MONTHLY OT LIMIT REACHED
 
 You have reached the maximum monthly overtime limit.
 
-Further overtime requires HR approval.
+Any additional overtime requires prior approval from the HR Department.
 
 """
 
@@ -182,11 +190,11 @@ Further overtime requires HR approval.
 
 ====================================================
 
-❌ MONTHLY OT EXCEEDED
+🔴 MONTHLY OT EXCEEDED
 
 Your monthly overtime has exceeded the company limit.
 
-Please contact the HR Department immediately.
+Please contact the HR Department immediately for further guidance.
 
 """
 
@@ -198,11 +206,12 @@ Please contact the HR Department immediately.
 
 ✅ MONTHLY OT STATUS
 
-Your monthly overtime is within the permitted limit.
+Your monthly overtime is within the permitted company limit.
+
+Keep maintaining your attendance.
 
 """
-
-        # =====================================================
+# =====================================================
         # Footer
         # =====================================================
 
@@ -210,13 +219,19 @@ Your monthly overtime is within the permitted limit.
 
 ====================================================
 
+If you have any questions regarding your attendance,
+please contact your Reporting Manager or the HR Department.
+
 Regards,
 
 {HR_NAME}
 
 {COMPANY_NAME}
 
-This is an automatically generated email.
+----------------------------------------------------
+
+This is an automatically generated email from
+Attendance Notification System Pro.
 
 Please do not reply to this email.
 
@@ -230,4 +245,3 @@ Please do not reply to this email.
             body
 
         )
-        

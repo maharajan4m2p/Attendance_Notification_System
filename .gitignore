@@ -1,16 +1,68 @@
+# =====================================================
+# Attendance Notification System Pro
+# .gitignore
+# =====================================================
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
-uploads/
-reports/
-logs/
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
 
-database/*.xlsx
-
+# Environment Variables
 .env
 
+# VS Code
 .vscode/
 
+# PyCharm
 .idea/
 
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+
+# Reports
+reports/
+
+# Database
+database/*.xlsx
+database/*.csv
 *.db
+*.sqlite3
+
+# Python Cache
+.pytest_cache/
+.mypy_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Render
+.render/
+
+# Temporary Files
+*.tmp
+*.temp
+
+# Backup Files
+*.bak
+*.old

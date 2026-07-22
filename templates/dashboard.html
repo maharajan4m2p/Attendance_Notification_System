@@ -8,9 +8,13 @@
 
 <title>{{ app_name }}</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+rel="stylesheet">
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+<link
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -31,13 +35,13 @@ body{
 }
 
 .navbar-brand{
-    color:white!important;
+    color:#fff!important;
     font-size:28px;
     font-weight:bold;
 }
 
 .developer{
-    color:white;
+    color:#fff;
     font-size:14px;
 }
 
@@ -48,7 +52,7 @@ body{
 .summary-card{
     border:none;
     border-radius:16px;
-    color:white;
+    color:#fff;
     padding:22px;
     transition:.25s;
     box-shadow:0 8px 20px rgba(0,0,0,.12);
@@ -74,48 +78,14 @@ body{
     font-weight:bold;
 }
 
-.blue{
-    background:#0d6efd;
-}
-
-.green{
-    background:#198754;
-}
-
-.red{
-    background:#dc3545;
-}
-
-.orange{
-    background:#fd7e14;
-}
-
-.purple{
-    background:#6f42c1;
-}
-
-.teal{
-    background:#20c997;
-}
-
-.dark{
-    background:#212529;
-}
-
-.warning-card{
-    background:#ffc107;
-    color:#000;
-}
-
-.limit-card{
-    background:#ff9800;
-    color:white;
-}
-
-.exceeded-card{
-    background:#b71c1c;
-    color:white;
-}
+.blue{background:#0d6efd;}
+.green{background:#198754;}
+.red{background:#dc3545;}
+.orange{background:#fd7e14;}
+.purple{background:#6f42c1;}
+.warning-card{background:#ffc107;color:#000;}
+.limit-card{background:#ff9800;color:#fff;}
+.exceeded-card{background:#b71c1c;color:#fff;}
 
 .card{
     border:none;
@@ -125,7 +95,7 @@ body{
 
 .table thead{
     background:#0d6efd;
-    color:white;
+    color:#fff;
 }
 
 .table td{
@@ -163,10 +133,6 @@ body{
 
 <body>
 
-<!-- ========================================= -->
-<!-- Navbar -->
-<!-- ========================================= -->
-
 <nav class="navbar navbar-expand-lg">
 
 <div class="container-fluid">
@@ -189,7 +155,8 @@ Developed by Maharajan
 
 </nav>
 
-<!-- ========================================= -->
+<div class="container-fluid mt-4">
+    <!-- ========================================= -->
 <!-- Dashboard Header -->
 <!-- ========================================= -->
 
@@ -235,6 +202,8 @@ Employees
 
 <div class="row g-4">
 
+<!-- Total Employees -->
+
 <div class="col-xl-3 col-md-6">
 
 <div class="summary-card blue">
@@ -248,6 +217,8 @@ Employees
 </div>
 
 </div>
+
+<!-- Present -->
 
 <div class="col-xl-3 col-md-6">
 
@@ -263,6 +234,8 @@ Employees
 
 </div>
 
+<!-- Late Punch -->
+
 <div class="col-xl-3 col-md-6">
 
 <div class="summary-card red">
@@ -276,6 +249,8 @@ Employees
 </div>
 
 </div>
+
+<!-- Early Out -->
 
 <div class="col-xl-3 col-md-6">
 
@@ -291,6 +266,8 @@ Employees
 
 </div>
 
+<!-- Overtime -->
+
 <div class="col-xl-3 col-md-6">
 
 <div class="summary-card purple">
@@ -305,6 +282,8 @@ Employees
 
 </div>
 
+<!-- Monthly Warning -->
+
 <div class="col-xl-3 col-md-6">
 
 <div class="summary-card warning-card">
@@ -313,11 +292,13 @@ Employees
 
 <h6>OT Warning</h6>
 
-<h2>{{ result.summary.warning|default(0) }}</h2>
+<h2>{{ result.summary.monthly_warning }}</h2>
 
 </div>
 
 </div>
+
+<!-- Monthly Limit -->
 
 <div class="col-xl-3 col-md-6">
 
@@ -327,11 +308,13 @@ Employees
 
 <h6>Limit Reached</h6>
 
-<h2>{{ result.summary.limit_reached|default(0) }}</h2>
+<h2>{{ result.summary.monthly_limit_reached }}</h2>
 
 </div>
 
 </div>
+
+<!-- Monthly Exceeded -->
 
 <div class="col-xl-3 col-md-6">
 
@@ -341,7 +324,7 @@ Employees
 
 <h6>OT Exceeded</h6>
 
-<h2>{{ result.summary.exceeded|default(0) }}</h2>
+<h2>{{ result.summary.monthly_ot_exceeded }}</h2>
 
 </div>
 
@@ -358,7 +341,7 @@ Employees
 
     <div class="col-lg-6 mb-4">
 
-        <div class="card">
+        <div class="card shadow">
 
             <div class="card-header bg-primary text-white">
 
@@ -374,7 +357,7 @@ Employees
 
             <div class="card-body">
 
-                <canvas id="attendanceChart" height="260"></canvas>
+                <canvas id="attendanceChart"></canvas>
 
             </div>
 
@@ -386,7 +369,7 @@ Employees
 
     <div class="col-lg-6 mb-4">
 
-        <div class="card">
+        <div class="card shadow">
 
             <div class="card-header bg-success text-white">
 
@@ -402,7 +385,7 @@ Employees
 
             <div class="card-body">
 
-                <canvas id="statisticsChart" height="260"></canvas>
+                <canvas id="statisticsChart"></canvas>
 
             </div>
 
@@ -418,7 +401,7 @@ Employees
 
     <div class="col-lg-6 mb-4">
 
-        <div class="card">
+        <div class="card shadow">
 
             <div class="card-header bg-warning">
 
@@ -434,7 +417,7 @@ Employees
 
             <div class="card-body">
 
-                <canvas id="monthlyOTChart" height="260"></canvas>
+                <canvas id="monthlyOTChart"></canvas>
 
             </div>
 
@@ -442,11 +425,11 @@ Employees
 
     </div>
 
-    <!-- Top OT Employees -->
+    <!-- Top Monthly OT Employees -->
 
     <div class="col-lg-6 mb-4">
 
-        <div class="card">
+        <div class="card shadow">
 
             <div class="card-header bg-danger text-white">
 
@@ -462,7 +445,7 @@ Employees
 
             <div class="card-body">
 
-                <canvas id="topOTChart" height="260"></canvas>
+                <canvas id="topOTChart"></canvas>
 
             </div>
 
@@ -471,724 +454,646 @@ Employees
     </div>
 
 </div>
+<script>
 
-<!-- ========================================= -->
-<!-- Action Buttons -->
-<!-- ========================================= -->
+const summary = {
 
-<div class="card mb-4">
+    total: {{ result.summary.total|default(0) }},
 
-<div class="card-body">
+    present: {{ result.summary.present|default(0) }},
 
-<div class="row g-3 align-items-center">
+    late: {{ result.summary.late_in|default(0) }},
 
-<div class="col-lg-4">
+    early: {{ result.summary.early_out|default(0) }},
 
-<input
+    missingIn: {{ result.summary.missing_in|default(0) }},
 
-type="text"
+    missingOut: {{ result.summary.missing_out|default(0) }},
 
-id="employeeSearch"
+    overtime: {{ result.summary.overtime|default(0) }},
 
-class="form-control form-control-lg"
+    warning: {{ result.summary.monthly_warning|default(0) }},
 
-placeholder="🔍 Search Employee ID, Name or Department">
+    limit: {{ result.summary.monthly_limit_reached|default(0) }},
 
-</div>
+    exceeded: {{ result.summary.monthly_ot_exceeded|default(0) }}
 
-<div class="col-lg-8 text-lg-end">
+};
 
-<a
+// =========================================
+// Attendance Overview
+// =========================================
 
-href="{{ url_for('download_report') }}"
+new Chart(
 
-class="btn btn-success">
+document.getElementById("attendanceChart"),
 
-<i class="fa-solid fa-file-excel"></i>
+{
 
-Download Excel
+type:"pie",
 
-</a>
+data:{
 
-<form
+labels:[
 
-action="{{ url_for('send_emails') }}"
+"Present",
 
-method="POST"
+"Late Punch",
 
-class="d-inline">
+"Early Out",
 
-<button
+"Missing In",
 
-type="submit"
+"Missing Out"
 
-class="btn btn-warning">
+],
 
-<i class="fa-solid fa-envelope"></i>
+datasets:[{
 
-Send Emails
+data:[
 
-</button>
+summary.present,
 
-</form>
+summary.late,
 
-<button
+summary.early,
 
-class="btn btn-primary"
+summary.missingIn,
 
-onclick="copyHRReport()">
+summary.missingOut
 
-<i class="fa-solid fa-copy"></i>
+]
 
-Copy HR Report
+}]
 
-</button>
+},
 
-<button
+options:{
 
-class="btn btn-success"
+responsive:true,
 
-onclick="sendHRReport()">
+maintainAspectRatio:true
 
-<i class="fa-brands fa-whatsapp"></i>
+}
 
-WhatsApp HR
+});
 
-</button>
+// =========================================
+// Attendance Statistics
+// =========================================
 
-</div>
+new Chart(
 
-</div>
+document.getElementById("statisticsChart"),
 
-</div>
+{
 
-</div>
-<!-- ========================================= -->
-<!-- Employee Filters -->
-<!-- ========================================= -->
+type:"bar",
 
-<div class="card mb-4">
+data:{
 
-    <div class="card-body">
+labels:[
 
-        <div class="d-flex flex-wrap gap-2">
+"Employees",
 
-            <button class="btn btn-primary filter-btn" data-filter="All">
-                All
-            </button>
+"Present",
 
-            <button class="btn btn-danger filter-btn" data-filter="Late">
-                Late Punch
-            </button>
+"Overtime"
 
-            <button class="btn btn-warning filter-btn" data-filter="Early">
-                Early Out
-            </button>
+],
 
-            <button class="btn btn-secondary filter-btn" data-filter="Missing">
-                Missing Punch
-            </button>
+datasets:[{
 
-            <button class="btn btn-success filter-btn" data-filter="Daily OT">
-                Daily OT
-            </button>
+label:"Attendance",
 
-            <button class="btn btn-info filter-btn" data-filter="Warning">
-                OT Warning
-            </button>
+data:[
 
-            <button class="btn btn-dark filter-btn" data-filter="Limit Reached">
-                Limit Reached
-            </button>
+summary.total,
 
-            <button class="btn btn-danger filter-btn" data-filter="Exceeded">
-                Exceeded
-            </button>
+summary.present,
 
-        </div>
+summary.overtime
 
-    </div>
+]
 
-</div>
+}]
 
-<!-- ========================================= -->
-<!-- Employee Attendance Table -->
-<!-- ========================================= -->
+},
 
-<div class="card shadow-lg mb-4">
+options:{
 
-    <div class="card-header bg-primary text-white">
+responsive:true,
 
-        <div class="d-flex justify-content-between align-items-center">
+scales:{
 
-            <h4 class="mb-0">
+y:{
 
-                <i class="fa-solid fa-users"></i>
+beginAtZero:true
 
-                Employee Attendance Details
+}
 
-            </h4>
+}
 
-            <span class="badge bg-light text-dark fs-6">
+}
 
-                {{ result.summary.total }}
+});
 
-                Employees
+// =========================================
+// Monthly OT Status
+// =========================================
 
-            </span>
+new Chart(
 
-        </div>
+document.getElementById("monthlyOTChart"),
 
-    </div>
+{
 
-    <div class="card-body">
+type:"doughnut",
 
-        <div class="table-responsive">
+data:{
 
-            <table
-                class="table table-hover table-bordered align-middle"
-                id="employeeTable">
+labels:[
 
-                <thead class="table-dark">
+"Warning",
 
-                <tr>
+"Limit Reached",
 
-                    <th>ID</th>
+"Exceeded"
 
-                    <th>Name</th>
+],
 
-                    <th>Department</th>
+datasets:[{
 
-                    <th>Designation</th>
+data:[
 
-                    <th>Date</th>
+summary.warning,
 
-                    <th>Punch In</th>
+summary.limit,
 
-                    <th>Punch Out</th>
+summary.exceeded
 
-                    <th>Daily OT</th>
+]
 
-                    <th>Monthly OT</th>
+}]
 
-                    <th>Remaining OT</th>
+},
 
-                    <th>Daily Status</th>
+options:{
 
-                    <th>Monthly Status</th>
+responsive:true
 
-                    <th>View</th>
+}
 
-                </tr>
+});
 
-                </thead>
+// =========================================
+// Top Monthly OT Employees
+// =========================================
 
-                <tbody>
+const employeeNames = [
 
-                {% for emp in result.employees %}
+{% for emp in result.top_ot_employees %}
 
-                <tr>
+"{{ emp.name }}",
 
-                    <td>{{ emp.employee_id }}</td>
+{% endfor %}
 
-                    <td><strong>{{ emp.name }}</strong></td>
+];
 
-                    <td>{{ emp.department }}</td>
+const employeeOT = [
 
-                    <td>{{ emp.designation }}</td>
+{% for emp in result.top_ot_employees %}
 
-                    <td>{{ emp.attendance_date }}</td>
+{{ emp.monthly_ot_minutes|default(0) }},
 
-                    <td>{{ emp.punch_in }}</td>
+{% endfor %}
 
-                    <td>{{ emp.punch_out }}</td>
+];
 
-                    <td>
+new Chart(
 
-                        <span class="badge bg-success">
+document.getElementById("topOTChart"),
 
-                            {{ emp.daily_ot or "00:00" }}
+{
 
-                        </span>
+type:"bar",
 
-                    </td>
+data:{
 
-                    <td>
+labels:employeeNames,
 
-                        <span class="badge bg-info text-dark">
+datasets:[{
 
-                            {{ emp.monthly_ot or "00:00" }}
+label:"Monthly OT (Minutes)",
 
-                        </span>
+data:employeeOT
 
-                    </td>
+}]
 
-                    <td>
+},
 
-                        <span class="badge bg-primary">
+options:{
 
-                            {{ emp.remaining_ot or "00:00" }}
+indexAxis:"y",
 
-                        </span>
+responsive:true,
 
-                    </td>
+scales:{
 
-                    <td>
+x:{
 
-                        {% if emp.daily_status == "Normal" %}
+beginAtZero:true
 
-                            <span class="badge bg-success">
+}
 
-                                Normal
+}
 
-                            </span>
+}
 
-                        {% elif emp.daily_status == "Warning" %}
+});
 
-                            <span class="badge bg-warning text-dark">
+</script>
 
-                                Warning
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-                            </span>
+</body>
 
-                        {% elif emp.daily_status == "Limit Reached" %}
+</html>
+<script>
 
-                            <span class="badge bg-dark">
+// =====================================================
+// Employee Search
+// =====================================================
 
-                                Limit Reached
+document.getElementById("employeeSearch").addEventListener(
 
-                            </span>
+"keyup",
 
-                        {% else %}
+function(){
 
-                            <span class="badge bg-danger">
+const keyword=this.value.toLowerCase();
 
-                                Exceeded
+const rows=document.querySelectorAll(
 
-                            </span>
+"#employeeTable tbody tr"
 
-                        {% endif %}
+);
 
-                    </td>
+rows.forEach(function(row){
 
-                    <td>
+const text=row.innerText.toLowerCase();
 
-                        {% if emp.monthly_status == "Normal" %}
+row.style.display=text.includes(keyword)?"":"none";
 
-                            <span class="badge bg-success">
+});
 
-                                Normal
+}
 
-                            </span>
+);
 
-                        {% elif emp.monthly_status == "Warning" %}
+// =====================================================
+// Employee Filter
+// =====================================================
 
-                            <span class="badge bg-warning text-dark">
+document.querySelectorAll(".filter-btn").forEach(function(button){
 
-                                Warning
+button.addEventListener(
 
-                            </span>
+"click",
 
-                        {% elif emp.monthly_status == "Limit Reached" %}
+function(){
 
-                            <span class="badge bg-dark">
+const filter=this.dataset.filter;
 
-                                Limit Reached
+const rows=document.querySelectorAll(
 
-                            </span>
+"#employeeTable tbody tr"
 
-                        {% else %}
+);
 
-                            <span class="badge bg-danger">
+rows.forEach(function(row){
 
-                                Exceeded
+if(filter==="All"){
 
-                            </span>
+row.style.display="";
 
-                        {% endif %}
+return;
 
-                    </td>
+}
 
-                    <td>
+if(
 
-                        <button
+row.innerText.toLowerCase().includes(
 
-                            class="btn btn-primary btn-sm"
+filter.toLowerCase()
 
-                            onclick="showEmployee(
+)
 
-                            '{{ emp.employee_id }}',
+){
 
-                            '{{ emp.name }}',
+row.style.display="";
 
-                            '{{ emp.department }}',
+}
 
-                            '{{ emp.designation }}',
+else{
 
-                            '{{ emp.attendance_date }}',
+row.style.display="none";
 
-                            '{{ emp.punch_in }}',
+}
 
-                            '{{ emp.punch_out }}',
+});
 
-                            '{{ emp.daily_ot or '00:00' }}',
+});
 
-                            '{{ emp.monthly_ot or '00:00' }}',
+});
 
-                            '{{ emp.remaining_ot or '00:00' }}',
+// =====================================================
+// Employee Modal
+// =====================================================
 
-                            '{{ emp.daily_status }}',
+function badge(id,status){
 
-                            '{{ emp.monthly_status }}',
+const element=document.getElementById(id);
 
-                            `{{ emp.notification }}`
+element.className="badge";
 
-                            )">
+switch(status){
 
-                            <i class="fa-solid fa-eye"></i>
+case "Normal":
 
-                            View
+element.classList.add("bg-success");
 
-                        </button>
+break;
 
-                    </td>
+case "Warning":
 
-                </tr>
+element.classList.add(
 
-                {% endfor %}
+"bg-warning",
 
-                </tbody>
+"text-dark"
 
-            </table>
+);
 
-        </div>
+break;
 
-    </div>
+case "Limit Reached":
 
-</div>
-<!-- ========================================= -->
-<!-- Employee Details Modal -->
-<!-- ========================================= -->
+element.classList.add("bg-dark");
 
-<div class="modal fade" id="employeeModal" tabindex="-1">
+break;
 
-<div class="modal-dialog modal-xl modal-dialog-centered">
+default:
 
-<div class="modal-content">
+element.classList.add("bg-danger");
 
-<div class="modal-header bg-primary text-white">
+}
 
-<h4 class="mb-0">
+element.innerHTML=status;
 
-<i class="fa-solid fa-user"></i>
+}
 
-Employee Attendance Details
+// =====================================================
+// Show Employee
+// =====================================================
 
-</h4>
+function showEmployee(
 
-<button
-type="button"
-class="btn-close btn-close-white"
-data-bs-dismiss="modal">
-</button>
+id,
 
-</div>
+name,
 
-<div class="modal-body">
+department,
 
-<div class="row">
+designation,
 
-<!-- Employee Details -->
+date,
 
-<div class="col-lg-6">
+punchIn,
 
-<div class="card mb-3">
+punchOut,
 
-<div class="card-header bg-light">
+dailyOT,
 
-<b>Employee Information</b>
+monthlyOT,
 
-</div>
+remainingOT,
 
-<div class="card-body">
+dailyStatus,
 
-<table class="table table-borderless">
+monthlyStatus,
 
-<tr>
-<th width="40%">Employee ID</th>
-<td id="mEmpId"></td>
-</tr>
+notification
 
-<tr>
-<th>Name</th>
-<td id="mName"></td>
-</tr>
+){
 
-<tr>
-<th>Department</th>
-<td id="mDepartment"></td>
-</tr>
+document.getElementById("mEmpId").innerHTML=id;
 
-<tr>
-<th>Designation</th>
-<td id="mDesignation"></td>
-</tr>
+document.getElementById("mName").innerHTML=name;
 
-<tr>
-<th>Attendance Date</th>
-<td id="mDate"></td>
-</tr>
+document.getElementById("mDepartment").innerHTML=department;
 
-</table>
+document.getElementById("mDesignation").innerHTML=designation;
 
-</div>
+document.getElementById("mDate").innerHTML=date;
 
-</div>
+document.getElementById("mPunchIn").innerHTML=punchIn;
 
-</div>
+document.getElementById("mPunchOut").innerHTML=punchOut;
 
-<!-- Attendance -->
+document.getElementById("mDailyOT").innerHTML=dailyOT;
 
-<div class="col-lg-6">
+document.getElementById("mMonthlyOT").innerHTML=monthlyOT;
 
-<div class="card mb-3">
+document.getElementById("mRemainingOT").innerHTML=remainingOT;
 
-<div class="card-header bg-light">
+badge(
 
-<b>Attendance Information</b>
+"mDailyStatus",
 
-</div>
+dailyStatus
 
-<div class="card-body">
+);
 
-<table class="table table-borderless">
+badge(
 
-<tr>
-<th width="45%">Punch In</th>
-<td id="mPunchIn"></td>
-</tr>
+"mMonthlyStatus",
 
-<tr>
-<th>Punch Out</th>
-<td id="mPunchOut"></td>
-</tr>
+monthlyStatus
 
-<tr>
-<th>Daily OT</th>
-<td><span id="mDailyOT" class="badge bg-success"></span></td>
-</tr>
+);
 
-<tr>
-<th>Monthly OT</th>
-<td><span id="mMonthlyOT" class="badge bg-info text-dark"></span></td>
-</tr>
+document.getElementById(
 
-<tr>
-<th>Remaining OT</th>
-<td><span id="mRemainingOT" class="badge bg-primary"></span></td>
-</tr>
+"mNotification"
 
-<tr>
-<th>Daily Status</th>
-<td><span id="mDailyStatus" class="badge"></span></td>
-</tr>
+).value=notification;
 
-<tr>
-<th>Monthly Status</th>
-<td><span id="mMonthlyStatus" class="badge"></span></td>
-</tr>
+new bootstrap.Modal(
 
-</table>
+document.getElementById(
 
-</div>
+"employeeModal"
 
-</div>
+)
 
-</div>
+).show();
 
-</div>
+}
 
-<!-- Notification -->
+// =====================================================
+// Copy Notification
+// =====================================================
 
-<div class="card">
+function copyNotification(){
 
-<div class="card-header bg-warning">
+navigator.clipboard.writeText(
 
-<b>
+document.getElementById(
 
-Attendance Notification
+"mNotification"
 
-</b>
+).value
 
-</div>
+);
 
-<div class="card-body">
+alert(
 
-<textarea
-id="mNotification"
-class="form-control"
-rows="10"
-readonly></textarea>
+"Notification Copied."
 
-</div>
+);
 
-</div>
+}
 
-</div>
+// =====================================================
+// Copy HR Report
+// =====================================================
 
-<div class="modal-footer">
+function copyHRReport(){
 
-<button
-class="btn btn-primary"
-onclick="copyNotification()">
+navigator.clipboard.writeText(
 
-<i class="fa-solid fa-copy"></i>
+document.getElementById(
 
-Copy
+"hrReport"
 
-</button>
+).value
 
-<button
-class="btn btn-success"
-onclick="addToReport()">
+);
 
-<i class="fa-solid fa-plus"></i>
+alert(
 
-Add To HR Report
+"HR Report Copied."
 
-</button>
+);
 
-<button
-class="btn btn-secondary"
-data-bs-dismiss="modal">
+}
 
-Close
+// =====================================================
+// Copy Late Punch Report
+// =====================================================
 
-</button>
+function copyLatePunchReport(){
 
-</div>
+navigator.clipboard.writeText(
 
-</div>
+document.getElementById(
 
-</div>
+"latePunchReport"
 
-</div>
+).value
 
-<!-- ========================================= -->
-<!-- HR Reports -->
-<!-- ========================================= -->
+);
 
-<div class="row mt-4">
+alert(
 
-<!-- HR Report -->
+"Late Punch Report Copied."
 
-<div class="col-lg-6 mb-4">
+);
 
-<div class="card shadow">
+}
 
-<div class="card-header bg-success text-white">
+// =====================================================
+// WhatsApp HR Report
+// =====================================================
 
-<h5>
+function sendHRReport(){
 
-<i class="fa-brands fa-whatsapp"></i>
+const text=encodeURIComponent(
 
-HR WhatsApp Report
+document.getElementById(
 
-</h5>
+"hrReport"
 
-</div>
+).value
 
-<div class="card-body">
+);
 
-<textarea
-id="hrReport"
-class="form-control"
-rows="16"
-readonly>{{ hr_report }}</textarea>
+window.open(
 
-<div class="mt-3">
+"https://wa.me/?text="+text,
 
-<button
-class="btn btn-success"
-onclick="copyHRReport()">
+"_blank"
 
-<i class="fa-solid fa-copy"></i>
+);
 
-Copy Report
+}
 
-</button>
+// =====================================================
+// WhatsApp Late Punch Report
+// =====================================================
 
-<button
-class="btn btn-primary"
-onclick="sendHRReport()">
+function sendLatePunchReport(){
 
-<i class="fa-brands fa-whatsapp"></i>
+const text=encodeURIComponent(
 
-WhatsApp HR
+document.getElementById(
 
-</button>
+"latePunchReport"
 
-</div>
+).value
 
-</div>
+);
 
-</div>
+window.open(
 
-</div>
+"https://wa.me/?text="+text,
 
-<!-- Late Report -->
+"_blank"
 
-<div class="col-lg-6 mb-4">
+);
 
-<div class="card shadow">
+}
 
-<div class="card-header bg-danger text-white">
+// =====================================================
+// Add Employee Notification to HR Report
+// =====================================================
 
-<h5>
+function addToReport(){
 
-<i class="fa-solid fa-clock"></i>
+const notification=document.getElementById(
 
-Late / Missing Punch Report
+"mNotification"
 
-</h5>
+).value;
 
-</div>
+const report=document.getElementById(
 
-<div class="card-body">
+"hrReport"
 
-<textarea
-id="latePunchReport"
-class="form-control"
-rows="16"
-readonly>{{ late_punch_report }}</textarea>
+);
 
-<div class="mt-3">
+report.value+="\n\n"+notification;
 
-<button
-class="btn btn-danger"
-onclick="copyLatePunchReport()">
+alert(
 
-Copy Report
+"Employee added to HR Report."
 
-</button>
+);
 
-<button
-class="btn btn-success"
-onclick="sendLatePunchReport()">
+}
 
-WhatsApp
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+</script>
 <!-- ========================================= -->
 <!-- Monthly OT Summary -->
 <!-- ========================================= -->
@@ -1198,6 +1103,8 @@ WhatsApp
     <div class="card-header bg-info text-white">
 
         <h5 class="mb-0">
+
+            <i class="fa-solid fa-business-time"></i>
 
             Monthly Overtime Summary
 
@@ -1233,39 +1140,71 @@ WhatsApp
 
                 {% for emp in result.employees %}
 
-                    <tr>
+                <tr>
 
-                        <td>{{ emp.employee_id }}</td>
+                    <td>{{ emp.employee_id }}</td>
 
-                        <td>{{ emp.name }}</td>
+                    <td>{{ emp.name }}</td>
 
-                        <td>{{ emp.monthly_ot or "00:00" }}</td>
+                    <td>
 
-                        <td>{{ emp.remaining_ot or "00:00" }}</td>
+                        <span class="badge bg-info">
 
-                        <td>
+                            {{ emp.monthly_ot or "00:00" }}
 
-                            {% if emp.monthly_status=="Normal" %}
+                        </span>
 
-                                <span class="badge bg-success">Normal</span>
+                    </td>
 
-                            {% elif emp.monthly_status=="Warning" %}
+                    <td>
 
-                                <span class="badge bg-warning text-dark">Warning</span>
+                        <span class="badge bg-primary">
 
-                            {% elif emp.monthly_status=="Limit Reached" %}
+                            {{ emp.remaining_ot or "00:00" }}
 
-                                <span class="badge bg-dark">Limit Reached</span>
+                        </span>
 
-                            {% else %}
+                    </td>
 
-                                <span class="badge bg-danger">Exceeded</span>
+                    <td>
 
-                            {% endif %}
+                        {% if emp.monthly_status == "Normal" %}
 
-                        </td>
+                        <span class="badge bg-success">
 
-                    </tr>
+                            Normal
+
+                        </span>
+
+                        {% elif emp.monthly_status == "Warning" %}
+
+                        <span class="badge bg-warning text-dark">
+
+                            Warning
+
+                        </span>
+
+                        {% elif emp.monthly_status == "Limit Reached" %}
+
+                        <span class="badge bg-dark">
+
+                            Limit Reached
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge bg-danger">
+
+                            Exceeded
+
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
 
                 {% endfor %}
 
@@ -1283,37 +1222,625 @@ WhatsApp
 <!-- Footer -->
 <!-- ========================================= -->
 
+<footer class="footer">
+
 <hr>
 
-<div class="footer">
+<p>
 
-<strong>
+Attendance Notification System Pro
 
-Attendance Notification System Pro Enterprise v8.0
+</p>
 
-</strong>
-
-<br>
+<p>
 
 Developed by Maharajan
 
-</div>
+</p>
 
+</footer>
 <script>
 
-window.dashboardData = {
+// =====================================================
+// Search Employee
+// =====================================================
 
-summary: {{ result.summary | default({}) | tojson }},
+const searchBox = document.getElementById("employeeSearch");
 
-employees: {{ result.employees | default([]) | tojson }}
+if(searchBox){
+
+searchBox.addEventListener("keyup",function(){
+
+const keyword=this.value.toLowerCase();
+
+document.querySelectorAll("#employeeTable tbody tr")
+
+.forEach(function(row){
+
+row.style.display=row.innerText.toLowerCase().includes(keyword)
+
+? ""
+
+: "none";
+
+});
+
+});
+
+}
+
+// =====================================================
+// Filter Employee
+// =====================================================
+
+document.querySelectorAll(".filter-btn").forEach(function(btn){
+
+btn.onclick=function(){
+
+const filter=this.dataset.filter.toLowerCase();
+
+document.querySelectorAll("#employeeTable tbody tr")
+
+.forEach(function(row){
+
+if(filter==="all"){
+
+row.style.display="";
+
+return;
+
+}
+
+row.style.display=row.innerText.toLowerCase().includes(filter)
+
+? ""
+
+: "none";
+
+});
 
 };
 
+});
+
+// =====================================================
+// Status Badge
+// =====================================================
+
+function setBadge(id,status){
+
+const badge=document.getElementById(id);
+
+badge.className="badge";
+
+switch(status){
+
+case "Normal":
+
+badge.classList.add("bg-success");
+
+break;
+
+case "Warning":
+
+badge.classList.add("bg-warning","text-dark");
+
+break;
+
+case "Limit Reached":
+
+badge.classList.add("bg-dark");
+
+break;
+
+default:
+
+badge.classList.add("bg-danger");
+
+}
+
+badge.innerHTML=status;
+
+}
+
+// =====================================================
+// Employee Modal
+// =====================================================
+
+function showEmployee(
+
+id,
+
+name,
+
+department,
+
+designation,
+
+date,
+
+punchIn,
+
+punchOut,
+
+dailyOT,
+
+monthlyOT,
+
+remainingOT,
+
+dailyStatus,
+
+monthlyStatus,
+
+notification
+
+){
+
+mEmpId.innerHTML=id;
+
+mName.innerHTML=name;
+
+mDepartment.innerHTML=department;
+
+mDesignation.innerHTML=designation;
+
+mDate.innerHTML=date;
+
+mPunchIn.innerHTML=punchIn;
+
+mPunchOut.innerHTML=punchOut;
+
+mDailyOT.innerHTML=dailyOT;
+
+mMonthlyOT.innerHTML=monthlyOT;
+
+mRemainingOT.innerHTML=remainingOT;
+
+setBadge("mDailyStatus",dailyStatus);
+
+setBadge("mMonthlyStatus",monthlyStatus);
+
+mNotification.value=notification;
+
+new bootstrap.Modal(
+
+document.getElementById("employeeModal")
+
+).show();
+
+}
+
+// =====================================================
+// Copy Notification
+// =====================================================
+
+function copyNotification(){
+
+navigator.clipboard.writeText(
+
+mNotification.value
+
+);
+
+alert("Notification copied successfully.");
+
+}
+
+// =====================================================
+// Copy HR Report
+// =====================================================
+
+function copyHRReport(){
+
+navigator.clipboard.writeText(
+
+hrReport.value
+
+);
+
+alert("HR Report copied successfully.");
+
+}
+
+// =====================================================
+// Copy Late Report
+// =====================================================
+
+function copyLatePunchReport(){
+
+navigator.clipboard.writeText(
+
+latePunchReport.value
+
+);
+
+alert("Late Report copied successfully.");
+
+}
+
+// =====================================================
+// WhatsApp HR Report
+// =====================================================
+
+function sendHRReport(){
+
+window.open(
+
+"https://wa.me/?text="+
+
+encodeURIComponent(hrReport.value),
+
+"_blank"
+
+);
+
+}
+
+// =====================================================
+// WhatsApp Late Report
+// =====================================================
+
+function sendLatePunchReport(){
+
+window.open(
+
+"https://wa.me/?text="+
+
+encodeURIComponent(
+
+latePunchReport.value
+
+),
+
+"_blank"
+
+);
+
+}
+
+// =====================================================
+// Add Employee to HR Report
+// =====================================================
+
+function addToReport(){
+
+hrReport.value +=
+
+"\n\n----------------------------\n\n"+
+
+mNotification.value;
+
+alert("Employee added to HR Report.");
+
+}
+
+</script>
+<!-- ========================================= -->
+<!-- Dashboard Charts -->
+<!-- ========================================= -->
+
+<script>
+
+// =============================================
+// Dashboard Summary
+// =============================================
+
+const summary = {
+
+    total: {{ result.summary.total|default(0) }},
+
+    present: {{ result.summary.present|default(0) }},
+
+    late: {{ result.summary.late_in|default(0) }},
+
+    early: {{ result.summary.early_out|default(0) }},
+
+    missingIn: {{ result.summary.missing_in|default(0) }},
+
+    missingOut: {{ result.summary.missing_out|default(0) }},
+
+    overtime: {{ result.summary.overtime|default(0) }},
+
+    warning: {{ result.summary.monthly_warning|default(0) }},
+
+    limit: {{ result.summary.monthly_limit_reached|default(0) }},
+
+    exceeded: {{ result.summary.monthly_ot_exceeded|default(0) }}
+
+};
+
+// =============================================
+// Attendance Overview
+// =============================================
+
+new Chart(
+
+document.getElementById("attendanceChart"),
+
+{
+
+type:"pie",
+
+data:{
+
+labels:[
+
+"Present",
+
+"Late Punch",
+
+"Early Out",
+
+"Missing In",
+
+"Missing Out"
+
+],
+
+datasets:[{
+
+data:[
+
+summary.present,
+
+summary.late,
+
+summary.early,
+
+summary.missingIn,
+
+summary.missingOut
+
+],
+
+backgroundColor:[
+
+"#198754",
+
+"#dc3545",
+
+"#fd7e14",
+
+"#6c757d",
+
+"#0d6efd"
+
+]
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+
+position:"bottom"
+
+}
+
+}
+
+}
+
+});
+
+// =============================================
+// Attendance Statistics
+// =============================================
+
+new Chart(
+
+document.getElementById("statisticsChart"),
+
+{
+
+type:"bar",
+
+data:{
+
+labels:[
+
+"Employees",
+
+"Present",
+
+"Overtime"
+
+],
+
+datasets:[{
+
+label:"Employees",
+
+data:[
+
+summary.total,
+
+summary.present,
+
+summary.overtime
+
+],
+
+backgroundColor:[
+
+"#0d6efd",
+
+"#198754",
+
+"#6f42c1"
+
+]
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+scales:{
+
+y:{
+
+beginAtZero:true
+
+}
+
+}
+
+}
+
+});
+
+// =============================================
+// Monthly OT Status
+// =============================================
+
+new Chart(
+
+document.getElementById("monthlyOTChart"),
+
+{
+
+type:"doughnut",
+
+data:{
+
+labels:[
+
+"Warning",
+
+"Limit Reached",
+
+"Exceeded"
+
+],
+
+datasets:[{
+
+data:[
+
+summary.warning,
+
+summary.limit,
+
+summary.exceeded
+
+],
+
+backgroundColor:[
+
+"#ffc107",
+
+"#fd7e14",
+
+"#dc3545"
+
+]
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+
+position:"bottom"
+
+}
+
+}
+
+}
+
+});
+
+// =============================================
+// Top Monthly OT Employees
+// =============================================
+
+const employeeNames=[
+
+{% for emp in result.top_ot_employees %}
+
+"{{ emp.name }}",
+
+{% endfor %}
+
+];
+
+const employeeOT=[
+
+{% for emp in result.top_ot_employees %}
+
+{{ emp.monthly_ot_minutes|default(0) }},
+
+{% endfor %}
+
+];
+
+new Chart(
+
+document.getElementById("topOTChart"),
+
+{
+
+type:"bar",
+
+data:{
+
+labels:employeeNames,
+
+datasets:[{
+
+label:"Monthly OT (Minutes)",
+
+data:employeeOT,
+
+backgroundColor:"#0d6efd"
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+indexAxis:"y",
+
+scales:{
+
+x:{
+
+beginAtZero:true
+
+}
+
+}
+
+}
+
+});
+
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap -->
 
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

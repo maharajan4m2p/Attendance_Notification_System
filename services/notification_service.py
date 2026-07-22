@@ -2,7 +2,7 @@
 =========================================================
 Attendance Notification System Pro
 Notification Service
-Version : 8.0 Enterprise (Ultra Performance)
+Version : 10.0 Enterprise
 Developed by Maharajan
 =========================================================
 """
@@ -15,9 +15,10 @@ class NotificationService:
     Features
     --------
     • Employee Attendance Notification
+    • Daily OT Notification
     • Monthly OT Notification
     • Professional Message Format
-    • High Performance
+    • HR Friendly
     """
 
     # =====================================================
@@ -32,25 +33,31 @@ class NotificationService:
 
             "Regards,",
 
-            "HR Department"
+            "HR Department",
+
+            "Attendance Notification System Pro"
 
         ]
-
-    # =====================================================
+        # =====================================================
     # Generate Employee Notification
     # =====================================================
 
     def generate_message(
-
         self,
-
         employee
-
     ):
 
         message = []
 
+        # =====================================================
+        # Employee Information
+        # =====================================================
+
         message.extend([
+
+            "📢 Attendance Notification",
+
+            "",
 
             f"👤 Employee : {employee.get('name', '')}",
 
@@ -77,38 +84,43 @@ class NotificationService:
         # =====================================================
 
         status_list = employee.get(
-
             "status",
-
             []
+        )
 
+        message.append(
+            "📋 Attendance Status"
         )
 
         if status_list:
 
-            message.append(
-
-                "Attendance Status"
-
-            )
-
             for status in status_list:
 
                 message.append(
-
                     f"• {status}"
-
                 )
 
         else:
 
             message.append(
-
-                "• On Time"
-
+                "✅ On Time"
             )
 
         message.append("")
+
+        # =====================================================
+        # Daily & Monthly Status
+        # =====================================================
+
+        message.extend([
+
+            f"📌 Daily Status : {employee.get('daily_status', 'Normal')}",
+
+            f"📊 Monthly Status : {employee.get('monthly_status', 'Normal')}",
+
+            ""
+
+        ])
 
         # =====================================================
         # Overtime Details
@@ -125,116 +137,122 @@ class NotificationService:
             ""
 
         ])
+
         # =====================================================
-        # Monthly OT Status
+        # Monthly OT Message
         # =====================================================
 
         monthly_status = employee.get(
-
             "monthly_status",
-
             "Normal"
-
         )
 
         message.extend(
 
             self.get_monthly_status_message(
-
                 monthly_status
-
             )
 
         )
+
+        message.append("")
 
         # =====================================================
         # Footer
         # =====================================================
 
         message.extend(
-
             self.footer
-
         )
 
         return "\n".join(
-
             message
-
         )
-
-    # =====================================================
+        # =====================================================
     # Check Employee Status
     # =====================================================
 
     def has_status(
-
         self,
-
         employee,
-
         keyword
-
     ):
 
         status_list = employee.get(
-
             "status",
-
             []
-
         )
+
+        if not status_list:
+
+            return False
+
+        keyword = str(
+            keyword
+        ).strip().lower()
 
         return any(
 
-            keyword.lower() in str(status).lower()
+            keyword in str(status).strip().lower()
 
             for status in status_list
 
         )
-
-    # =====================================================
+        # =====================================================
     # Get Monthly Status Message
     # =====================================================
 
     def get_monthly_status_message(
-
         self,
-
         monthly_status
-
     ):
 
-        if monthly_status == "Warning":
+        monthly_status = str(
+            monthly_status
+        ).strip()
 
-            return [
+        messages = {
 
-                "⚠️ Monthly overtime has crossed the warning limit."
+            "Normal": [
 
-            ]
+                "✅ Monthly overtime is within the permitted company limit."
 
-        elif monthly_status == "Limit Reached":
+            ],
 
-            return [
+            "Warning": [
 
-                "🚨 Monthly overtime limit reached.",
+                "⚠️ Monthly overtime has crossed the warning limit.",
+
+                "Please monitor your overtime hours carefully."
+
+            ],
+
+            "Limit Reached": [
+
+                "🚨 Monthly overtime limit has been reached.",
 
                 "Further overtime requires HR approval."
 
-            ]
+            ],
 
-        elif monthly_status == "Exceeded":
+            "Exceeded": [
 
-            return [
+                "❌ Monthly overtime limit has been exceeded.",
 
-                "❌ Monthly overtime limit exceeded.",
-
-                "Please contact the HR Department."
+                "Please contact the HR Department immediately."
 
             ]
 
-        return [
+        }
 
-            "✅ Monthly overtime is within the permitted limit."
+        return messages.get(
 
-        ]
+            monthly_status,
+
+            [
+
+                "ℹ️ Monthly overtime status is unavailable."
+
+            ]
+
+        )
