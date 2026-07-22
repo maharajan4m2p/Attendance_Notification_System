@@ -1037,7 +1037,7 @@ class AttendanceChecker:
 
             "top_ot_employees": top_ot_employees,
 
-            "employees": employees,
+            "employees": self.group_dashboard_data(employees),
 
             "hr_report": hr_report,
 
@@ -1046,6 +1046,7 @@ class AttendanceChecker:
             "processing_time": processing_time
 
         }
+        
 
         # =====================================================
         # Cleanup
@@ -1056,4 +1057,49 @@ class AttendanceChecker:
         gc.collect()
 
         return result
+
+
+    # =====================================================
+    # Dashboard Employee Grouping
+    # =====================================================
+    def group_dashboard_data(self, employees):
+
+        grouped = {}
+
+        for emp in employees:
+
+            emp_id = (
+                str(emp["employee_id"])
+                .replace(".0","")
+                .strip()
+                .upper()
+            )
+            print("Grouping ID:",repr(emp_id))
+
+            if emp_id not in grouped:
+
+                grouped[emp_id] = {
+                    "employee_id": emp["employee_id"],
+                    "name": emp["name"],
+                    "department": emp.get("department", ""),
+                    "designation": emp.get("designation", ""),
+                    "monthly_ot": emp.get("monthly_ot", "00:00"),
+                    "remaining_ot": emp.get("remaining_ot", "00:00"),
+                    "monthly_status": emp.get("monthly_status", "Normal"),
+                    "daily_data": []
+                }
+
+            grouped[emp_id]["daily_data"].append({
+                "date": emp["attendance_date"],
+                "punch_in": emp["punch_in"],
+                "punch_out": emp["punch_out"],
+                "daily_ot": emp["daily_ot"]
+            })
+            
+        print("=" * 60)
+        print("Original Employees:",len(employees))
+        print("Grouped Employees:",len(grouped))
+        print("=" * 60)
+
+        return list(grouped.values())
     

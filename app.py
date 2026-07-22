@@ -433,7 +433,12 @@ def dashboard():
 
     summary = get_summary()
 
-    employees = get_employees()
+    employees = analysis_result.get("employees",[])
+    
+    print("=" * 60)
+    print(f"Original Records : {len(get_employees())}")
+    print(f"Grouped Employees : {len(employees)}")
+    print("=" * 60)
 
     logger.info(
 
