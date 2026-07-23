@@ -1126,6 +1126,10 @@ alert(
 
                         <th>Name</th>
 
+                        <th>Previous OT</th>
+
+                        <th>Daily OT</th>
+
                         <th>Monthly OT</th>
 
                         <th>Remaining OT</th>
@@ -1138,77 +1142,63 @@ alert(
 
                 <tbody>
 
-                {% for emp in result.employees %}
+{% for emp in result.employees %}
 
-                <tr>
+<tr>
 
-                    <td>{{ emp.employee_id }}</td>
+    <td>{{ emp.employee_id }}</td>
 
-                    <td>{{ emp.name }}</td>
+    <td>{{ emp.name }}</td>
 
-                    <td>
+<!-- Previous OT -->
+<td>
+    <span class="badge bg-secondary">
+        {{ emp.previous_ot or "00:00" }}
+    </span>
+</td>
 
-                        <span class="badge bg-info">
+<!-- Daily OT -->
+<td>
+    <span class="badge bg-warning text-dark">
+        {{ emp.daily_ot or "00:00" }}
+    </span>
+</td>
 
-                            {{ emp.monthly_ot or "00:00" }}
+    <!-- Monthly OT -->
+    <td>
+        <span class="badge bg-info">
+            {{ emp.monthly_ot or "00:00" }}
+        </span>
+    </td>
 
-                        </span>
+    <!-- Remaining OT -->
+    <td>
+        <span class="badge bg-primary">
+            {{ emp.remaining_ot or "00:00" }}
+        </span>
+    </td>
 
-                    </td>
+    <!-- Status -->
+    <td>
+        {% if emp.monthly_status == "Normal" %}
+            <span class="badge bg-success">Normal</span>
 
-                    <td>
+        {% elif emp.monthly_status == "Warning" %}
+            <span class="badge bg-warning text-dark">Warning</span>
 
-                        <span class="badge bg-primary">
+        {% elif emp.monthly_status == "Limit Reached" %}
+            <span class="badge bg-dark">Limit Reached</span>
 
-                            {{ emp.remaining_ot or "00:00" }}
+        {% else %}
+            <span class="badge bg-danger">Exceeded</span>
+        {% endif %}
+    </td>
 
-                        </span>
+</tr>
 
-                    </td>
+{% endfor %}
 
-                    <td>
-
-                        {% if emp.monthly_status == "Normal" %}
-
-                        <span class="badge bg-success">
-
-                            Normal
-
-                        </span>
-
-                        {% elif emp.monthly_status == "Warning" %}
-
-                        <span class="badge bg-warning text-dark">
-
-                            Warning
-
-                        </span>
-
-                        {% elif emp.monthly_status == "Limit Reached" %}
-
-                        <span class="badge bg-dark">
-
-                            Limit Reached
-
-                        </span>
-
-                        {% else %}
-
-                        <span class="badge bg-danger">
-
-                            Exceeded
-
-                        </span>
-
-                        {% endif %}
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-                </tbody>
+</tbody>
 
             </table>
 

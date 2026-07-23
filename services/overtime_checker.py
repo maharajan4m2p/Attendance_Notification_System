@@ -225,9 +225,10 @@ class OvertimeManager:
 
         employee["daily_ot_minutes"] = overtime_minutes
 
-        employee["daily_ot"] = self.minutes_to_time(
-            overtime_minutes
-        )
+        if employee.get("daily_ot", "00:00") == "00:00":
+            employee["daily_ot"] = self.minutes_to_time(
+                overtime_minutes
+            )
 
         # -----------------------------------------
         # Daily Status
@@ -298,6 +299,11 @@ class OvertimeManager:
             )
 
         )
+        daily_minutes = employee.get("daily_ot_minutes", 0)
+
+        previous_minutes = max(0, monthly_minutes - daily_minutes)
+
+        employee["previous_ot"] = self.minutes_to_time(previous_minutes)
 
         remaining_minutes = int(
 
@@ -418,19 +424,32 @@ class OvertimeManager:
         # Calculate Daily Overtime
         # -----------------------------------------
 
-        daily_ot_minutes = self.calculate_daily_ot(
-            out_time
+        #Usee uploaded OT first
+        daily_ot_minutes = employee.get(
+            "daily_ot_minutes",
+         0
         )
+
+        # If uploaded OT is not available,
+        # calculate from punch out time.
+        if daily_ot_minutes <= 0:
+
+            daily_ot_minutes = self.calculate_daily_ot(
+                out_time
+            )
 
         # -----------------------------------------
         # Daily Validation
         # -----------------------------------------
 
+        # Use Daily OT from Excel if available
+        if employee.get("daily_ot", "00:00") != "00:00":
+            daily_ot_minutes = self.time_to_minutes(employee["daily_ot"])
+
         employee = self.check_daily_limit(
             employee,
             daily_ot_minutes
         )
-
         # -----------------------------------------
         # Update Monthly Database
         # -----------------------------------------

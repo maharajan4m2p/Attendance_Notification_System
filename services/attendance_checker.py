@@ -722,6 +722,22 @@ class AttendanceChecker:
                 daily_ot = "00:00"
 
             employee["daily_ot"] = daily_ot
+
+            # -----------------------------------------
+            # Convert Daily OT to Minutes
+            # -----------------------------------------
+
+            if ":" in daily_ot:
+
+                hours, minutes = daily_ot.split(":")
+
+                employee["daily_ot_minutes"] = (
+                    int(hours) * 60 + int(minutes)
+                )
+
+            else:
+
+                employee["daily_ot_minutes"] = 0
             # =====================================================
             # Attendance Validation
             # =====================================================
@@ -792,11 +808,23 @@ class AttendanceChecker:
                 employee,
                 out_time
             )
+            # -----------------------------------------
+            # Preserve uploaded Daily OT
+            # -----------------------------------------
 
-            # Preserve OT from CSV if available
-            if employee["daily_ot"] == "00:00":
+            employee["daily_ot"] = daily_ot
 
-                employee["daily_ot"] = daily_ot
+            if ":" in daily_ot:
+
+                hours, minutes = daily_ot.split(":")
+
+                employee["daily_ot_minutes"] = (
+                    int(hours) * 60 + int(minutes)
+                )
+
+            else:
+
+                employee["daily_ot_minutes"] = 0
 
             # -----------------------------------------
             # Daily OT Employee
@@ -1102,4 +1130,3 @@ class AttendanceChecker:
         print("=" * 60)
 
         return list(grouped.values())
-    

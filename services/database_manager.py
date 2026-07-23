@@ -644,8 +644,13 @@ class DatabaseManager:
 
         )
 
-        monthly_total = previous_total + daily_ot_minutes
+        # Previous OT before today's upload
+        employee["previous_ot_minutes"] = previous_total
+        employee["previous_ot"] = self.minutes_to_time(
+            previous_total
+        )
 
+        monthly_total = previous_total + daily_ot_minutes
         remaining_ot = self.calculate_remaining_ot(
 
             monthly_total
@@ -739,6 +744,8 @@ class DatabaseManager:
         # -----------------------------------------
 
         employee["daily_ot_minutes"] = daily_ot_minutes
+        
+        employee["previous_ot_minutes"] = previous_total
 
         employee["monthly_ot_minutes"] = monthly_total
 
@@ -749,6 +756,13 @@ class DatabaseManager:
             daily_ot_minutes
 
         )
+        
+        employee["previous_ot"] = self.minutes_to_time(
+        
+            previous_total
+        
+        )
+        
 
         employee["monthly_ot"] = self.minutes_to_time(
 
