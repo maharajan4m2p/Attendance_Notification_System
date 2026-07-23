@@ -238,19 +238,18 @@ class AttendanceChecker:
         # Clean Column Names
         # -----------------------------------------
 
-        dataframe.columns = [
+        dataframe.columns = (
+            dataframe.columns
+                .astype(str)
+                .str.strip()
+                .str.replace("\n", " ", regex=False)
+                .str.replace("\r", " ", regex=False)
+        )
 
-            str(column)
-
-            .strip()
-
-            .replace("\n", " ")
-
-            .replace("\r", " ")
-
-            for column in dataframe.columns
-
-        ]
+        print("=" * 60)
+        print("Columns Found:")
+        print(dataframe.columns.tolist())
+        print("=" * 60)
 
         dataframe.dropna(
 
@@ -259,6 +258,21 @@ class AttendanceChecker:
             inplace=True
 
         )
+        # -----------------------------------------
+        # Rename Different Employee Number Columns
+        # -----------------------------------------
+
+        column_mapping = {
+            "Employee Number": "Employee No",
+            "EmployeeNo": "Employee No",
+            "Employee_No": "Employee No",
+            "Emp No": "Employee No",
+            "EMPLOYEE NO": "Employee No",
+            "Employee Code": "Employee No",
+            "Emp Code": "Employee No"
+        }
+
+        dataframe.rename(columns=column_mapping, inplace=True)
 
         dataframe.reset_index(
 
@@ -272,12 +286,14 @@ class AttendanceChecker:
         # Remove Empty Employee Rows
         # -----------------------------------------
 
+        if "Employee No" not in dataframe.columns:
+
+            raise ValueError(
+                f"Employee No column not found.\nAvailable Columns:\n{dataframe.columns.tolist()}"
+            )
+
         dataframe = dataframe.loc[
-
-            dataframe["Employee No"]
-
-            .notna()
-
+            dataframe["Employee No"].notna()
         ]
 
         dataframe.reset_index(
@@ -458,6 +474,14 @@ class AttendanceChecker:
             if column not in dataframe.columns
 
         ]
+        print("=" * 60)
+        print("Required Columns:")
+        print(self.required_columns)
+        print()
+
+        print("Uploaded Columns:")
+        print(dataframe.columns.tolist())
+        print("=" * 60)
 
         if missing_columns:
 
