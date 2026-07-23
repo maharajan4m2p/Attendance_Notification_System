@@ -433,11 +433,27 @@ def dashboard():
 
     summary = get_summary()
 
-    employees = analysis_result.get("employees",[])
-    
+    employees = analysis_result.get("employees", [])
+
+    print("=" * 60)
+    print("SUMMARY")
+    print(summary)
+    print("=" * 60)
+
     print("=" * 60)
     print(f"Original Records : {len(get_employees())}")
-    print(f"Grouped Employees : {len(employees)}")
+    print(f"Dashboard Employees : {len(employees)}")
+    print("=" * 60)
+
+    print("=" * 60)
+    print("Top 5 Employees")
+    for emp in employees[:5]:
+        print(
+            emp["employee_id"],
+            emp["name"],
+            emp["monthly_ot"],
+            emp["monthly_status"]
+        )
     print("=" * 60)
 
     logger.info(

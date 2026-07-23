@@ -43,6 +43,11 @@ class DatabaseManager:
     def __init__(self):
 
         self.database = MONTHLY_OT_DATABASE
+        
+        print("=" * 60)
+        print("Database File")
+        print(self.database)
+        print("=" * 60)
 
         self.dataframe = None
 
@@ -134,6 +139,14 @@ class DatabaseManager:
                 engine="openpyxl"
 
             )
+        
+            print("=" * 60)
+            print("MONTHLY OT DATABASE LOADED")
+            print(f"Database Path : {self.database}")
+            print(f"Records Loaded: {len(self.dataframe)}")
+            print("First 5 Records:")
+            print(self.dataframe.head())
+            print("=" * 60)
 
         except Exception as error:
 
@@ -509,6 +522,11 @@ class DatabaseManager:
                 engine="openpyxl"
 
             )
+            print("=" * 60)
+            print("MONTHLY OT DATABASE SAVED")
+            print(f"Database Path : {self.database}")
+            print(f"Records Saved : {len(self.dataframe)}")
+            print("=" * 60)
 
             print("=" * 60)
             print("Monthly OT Backup Created Successfully")
@@ -793,6 +811,15 @@ class DatabaseManager:
             monthly_status == EXCEEDED_STATUS
 
         )
+        print("=" * 60)
+        print("DATABASE UPDATED")
+        print(f"Employee ID : {employee_id}")
+        print(f"Date        : {attendance_date}")
+        print(f"Previous OT : {previous_total}")
+        print(f"Daily OT    : {daily_ot_minutes}")
+        print(f"Monthly OT  : {monthly_total}")
+        print(f"Status      : {monthly_status}")
+        print("=" * 60)
 
         return employee
     # =====================================================
@@ -871,6 +898,12 @@ class DatabaseManager:
                 engine="openpyxl"
 
             )
+            
+            print("=" * 60)
+            print("MONTHLY OT DATABASE SAVED")
+            print(f"Database Path : {self.database}")
+            print(f"Records Saved : {len(self.dataframe)}")
+            print("=" * 60)
 
             self.modified = False
 
