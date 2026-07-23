@@ -705,23 +705,28 @@ class AttendanceChecker:
             # Daily OT
             # -----------------------------------------
 
-            daily_ot = str(
+            daily_ot = str(row.get("OT HRS", "")).strip()
 
-                row.get(
-
-                    "OT HRS",
-
+            # If OT HRS is empty or zero, use Late OUT(HH:MM)
+            if daily_ot in ("", "0", "0.0", "0.00", "00:00"):
+                daily_ot = str(
                     row.get(
-
-                        "OT",
-
-                        "0.00"
-
+                        "Late OUT(HH:MM)",
+                        "00:00"
                     )
+                ).strip()
 
-                )
+            if "." in daily_ot and ":" not in daily_ot:
+                try:
+                    h, m = daily_ot.split(".")
+                    daily_ot = f"{int(h):02d}:{int(m):02d}"
+                except:
+                    daily_ot = "00:00"
 
-            ).strip()
+            if ":" not in daily_ot:
+                daily_ot = "00:00"
+
+            employee["daily_ot"] = daily_ot
 
             if "." in daily_ot:
 
