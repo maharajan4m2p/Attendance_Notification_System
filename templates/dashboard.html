@@ -1059,6 +1059,17 @@ alert(
 
     </div>
 
+<div class="mb-3">
+
+    <span class="badge bg-primary fs-6">
+
+        Total Selected
+
+        <span id="selectedCount">{{ result.employees|length }}</span> 
+    </span>
+
+</div>
+
     <div class="table-responsive">
 
             <table
@@ -1215,6 +1226,7 @@ document.querySelectorAll(".filter-btn").forEach(function(btn){
     btn.onclick = function(){
 
         const filter = this.dataset.filter;
+        let count = 0;
 
         document.querySelectorAll("#monthlyOTTable tbody tr")
         .forEach(function(row){
@@ -1222,11 +1234,13 @@ document.querySelectorAll(".filter-btn").forEach(function(btn){
             if(filter === "All"){
 
                 row.style.display = "";
+                count++;
 
             }
             else if(row.dataset.status === filter){
 
                 row.style.display = "";
+                count++;
 
             }
             else{
@@ -1236,6 +1250,8 @@ document.querySelectorAll(".filter-btn").forEach(function(btn){
             }
 
         });
+
+        document.getElementById("selectedCount").innerHTML = count;
 
     };
 
