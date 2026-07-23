@@ -305,17 +305,26 @@ class OvertimeManager:
 
         employee["previous_ot"] = self.minutes_to_time(previous_minutes)
 
-        remaining_minutes = int(
-
-            employee.get(
-
-                "remaining_ot_minutes",
-
-                0
-
-            )
-
+        remaining_value = employee.get(
+            "remaining_ot_minutes",
+            0
         )
+
+        if isinstance(remaining_value, str):
+
+            if ":" in remaining_value:
+
+                remaining_minutes = self.time_to_minutes(
+                    remaining_value
+                )
+
+            else:
+
+                remaining_minutes = int(float(remaining_value))
+
+        else:
+
+            remaining_minutes = int(remaining_value)
 
         # -----------------------------------------
         # Convert Time
@@ -338,48 +347,32 @@ class OvertimeManager:
         employee["remaining_ot_minutes"] = remaining_minutes
 
         # -----------------------------------------
-        # Monthly Status
+        # Monthly Status (25 Hours Limit)
         # -----------------------------------------
+
+        remaining_minutes = max(
+            self.monthly_limit - monthly_minutes,
+            0
+        )
+
+        employee["remaining_ot_minutes"] = remaining_minutes
+        employee["remaining_ot"] = self.minutes_to_time(remaining_minutes)
 
         if monthly_minutes > self.monthly_limit:
 
             employee["monthly_status"] = EXCEEDED_STATUS
 
-            employee["monthly_message"] = (
-
-                "Monthly overtime exceeded company limit."
-
-            )
-
         elif monthly_minutes == self.monthly_limit:
 
             employee["monthly_status"] = LIMIT_REACHED_STATUS
 
-            employee["monthly_message"] = (
-
-                "Monthly overtime limit reached."
-
-            )
-
-        elif monthly_minutes >= self.monthly_warning:
+        elif remaining_minutes <= 180:      # 3 Hours remaining
 
             employee["monthly_status"] = WARNING_STATUS
-
-            employee["monthly_message"] = (
-
-                "Monthly overtime warning."
-
-            )
 
         else:
 
             employee["monthly_status"] = NORMAL_STATUS
-
-            employee["monthly_message"] = (
-
-                "Monthly overtime within limit."
-
-            )
 
         # -----------------------------------------
         # Dashboard Flags
@@ -425,10 +418,10 @@ class OvertimeManager:
         # -----------------------------------------
 
         #Usee uploaded OT first
-        daily_ot_minutes = employee.get(
-            "daily_ot_minutes",
-         0
-        )
+        daily_ot_minutes = employee.get("daily_ot_minutes", 0)
+
+        if isinstance(daily_ot_minutes, str):
+            daily_ot_minutes = self.time_to_minutes(daily_ot_minutes)
 
         # If uploaded OT is not available,
         # calculate from punch out time.

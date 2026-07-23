@@ -379,13 +379,10 @@ class DatabaseManager:
 
         monthly_limit = MONTHLY_OT_LIMIT * 60
 
-        remaining = monthly_limit - monthly_total
-
-        if remaining < 0:
-
-            remaining = 0
-
-        return int(remaining)
+        return max(
+            monthly_limit - monthly_total,
+            0
+        )
 
     # =====================================================
     # Get Monthly Status
@@ -396,20 +393,18 @@ class DatabaseManager:
         monthly_total
     ):
 
-        warning_limit = MONTHLY_OT_WARNING * 60
-
         monthly_limit = MONTHLY_OT_LIMIT * 60
 
-        if monthly_total > monthly_limit:
+        remaining = monthly_limit - monthly_total
 
+        if monthly_total > monthly_limit:
             return EXCEEDED_STATUS
 
         elif monthly_total == monthly_limit:
-
             return LIMIT_REACHED_STATUS
 
-        elif monthly_total >= warning_limit:
-
+        # Warning only when 3 hours or less remain
+        elif remaining <= 180:
             return WARNING_STATUS
 
         return NORMAL_STATUS
@@ -613,7 +608,8 @@ class DatabaseManager:
                 )
 
             )
-
+        if isinstance(daily_ot_minutes, str):
+            daily_ot_minutes = self.time_to_minutes(daily_ot_minutes)
         daily_ot_minutes = int(daily_ot_minutes)
 
         # -----------------------------------------
@@ -651,16 +647,12 @@ class DatabaseManager:
         )
 
         monthly_total = previous_total + daily_ot_minutes
-        remaining_ot = self.calculate_remaining_ot(
-
-            monthly_total
-
-        )
-
+        remaining_ot = max(
+            (MONTHLY_OT_LIMIT * 60) - monthly_total,
+            0
+            )
         monthly_status = self.get_monthly_status(
-
             monthly_total
-
         )
 
         # -----------------------------------------
@@ -749,7 +741,9 @@ class DatabaseManager:
 
         employee["monthly_ot_minutes"] = monthly_total
 
-        employee["remaining_ot_minutes"] = remaining_ot
+        employee["remaining_ot_minutes"] = self.minutes_to_time(
+            remaining_ot
+        )
 
         employee["daily_ot"] = self.minutes_to_time(
 
