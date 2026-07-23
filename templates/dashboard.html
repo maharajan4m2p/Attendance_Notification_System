@@ -722,92 +722,6 @@ beginAtZero:true
 <script>
 
 // =====================================================
-// Employee Search
-// =====================================================
-
-document.getElementById("employeeSearch").addEventListener(
-
-"keyup",
-
-function(){
-
-const keyword=this.value.toLowerCase();
-
-const rows=document.querySelectorAll(
-
-"#employeeTable tbody tr"
-
-);
-
-rows.forEach(function(row){
-
-const text=row.innerText.toLowerCase();
-
-row.style.display=text.includes(keyword)?"":"none";
-
-});
-
-}
-
-);
-
-// =====================================================
-// Employee Filter
-// =====================================================
-
-document.querySelectorAll(".filter-btn").forEach(function(button){
-
-button.addEventListener(
-
-"click",
-
-function(){
-
-const filter=this.dataset.filter;
-
-const rows=document.querySelectorAll(
-
-"#employeeTable tbody tr"
-
-);
-
-rows.forEach(function(row){
-
-if(filter==="All"){
-
-row.style.display="";
-
-return;
-
-}
-
-if(
-
-row.innerText.toLowerCase().includes(
-
-filter.toLowerCase()
-
-)
-
-){
-
-row.style.display="";
-
-}
-
-else{
-
-row.style.display="none";
-
-}
-
-});
-
-});
-
-});
-
-// =====================================================
 // Employee Modal
 // =====================================================
 
@@ -1114,9 +1028,42 @@ alert(
 
     <div class="card-body">
 
-        <div class="table-responsive">
+    <!-- Monthly OT Filter -->
 
-            <table class="table table-bordered table-striped">
+    <div class="mb-3">
+
+        <button class="btn btn-primary btn-sm filter-btn"
+                data-filter="All">
+            All
+        </button>
+
+        <button class="btn btn-success btn-sm filter-btn"
+                data-filter="Normal">
+            Normal
+        </button>
+
+        <button class="btn btn-warning btn-sm filter-btn"
+                data-filter="Warning">
+            Warning
+        </button>
+
+        <button class="btn btn-dark btn-sm filter-btn"
+                data-filter="Limit Reached">
+            Limit Reached
+        </button>
+
+        <button class="btn btn-danger btn-sm filter-btn"
+                data-filter="Exceeded">
+            Exceeded
+        </button>
+
+    </div>
+
+    <div class="table-responsive">
+
+            <table
+                id="monthlyOTTable"
+                class="table table-bordered table-striped">
 
                 <thead class="table-dark">
 
@@ -1144,7 +1091,7 @@ alert(
 
 {% for emp in result.employees %}
 
-<tr>
+<tr data-status="{{ emp.monthly_status}}">
 
     <td>{{ emp.employee_id }}</td>
 
@@ -1243,7 +1190,7 @@ searchBox.addEventListener("keyup",function(){
 
 const keyword=this.value.toLowerCase();
 
-document.querySelectorAll("#employeeTable tbody tr")
+document.querySelectorAll("#monthlyOTTable tbody tr")
 
 .forEach(function(row){
 
@@ -1265,31 +1212,32 @@ row.style.display=row.innerText.toLowerCase().includes(keyword)
 
 document.querySelectorAll(".filter-btn").forEach(function(btn){
 
-btn.onclick=function(){
+    btn.onclick = function(){
 
-const filter=this.dataset.filter.toLowerCase();
+        const filter = this.dataset.filter;
 
-document.querySelectorAll("#employeeTable tbody tr")
+        document.querySelectorAll("#monthlyOTTable tbody tr")
+        .forEach(function(row){
 
-.forEach(function(row){
+            if(filter === "All"){
 
-if(filter==="all"){
+                row.style.display = "";
 
-row.style.display="";
+            }
+            else if(row.dataset.status === filter){
 
-return;
+                row.style.display = "";
 
-}
+            }
+            else{
 
-row.style.display=row.innerText.toLowerCase().includes(filter)
+                row.style.display = "none";
 
-? ""
+            }
 
-: "none";
+        });
 
-});
-
-};
+    };
 
 });
 
@@ -1455,15 +1403,10 @@ alert("Late Report copied successfully.");
 
 function sendHRReport(){
 
-window.open(
-
-"https://wa.me/?text="+
-
-encodeURIComponent(hrReport.value),
-
-"_blank"
-
-);
+    window.open(
+        "https://wa.me/?text=" + encodeURIComponent(hrReport.value),
+        "_blank"
+    );
 
 }
 
