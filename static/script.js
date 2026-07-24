@@ -3,7 +3,6 @@
 Attendance Notification System Pro
 JavaScript
 Version : 10.0 Enterprise
-Developed by Maharajan
 =========================================================
 */
 
@@ -489,7 +488,5 @@ console.log("Attendance Notification System Pro");
 console.log("JavaScript Version : 10.0 Enterprise");
 
 console.log("JavaScript Initialized Successfully");
-
-console.log("Developed by Maharajan");
 
 console.log("==========================================");

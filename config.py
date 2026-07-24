@@ -3,7 +3,6 @@
 Attendance Notification System Pro
 Enterprise Configuration
 Version : 10.0 Enterprise
-Developed by Maharajan
 =========================================================
 """
 
@@ -16,8 +15,6 @@ import os
 APP_NAME = "Attendance Notification System Pro"
 
 VERSION = "10.0 Enterprise"
-
-AUTHOR = "Maharajan"
 
 BUILD = "Enterprise Release v10"
 
@@ -570,8 +567,6 @@ AUTO_OPEN_REPORT = False
 REPORT_DATE_FORMAT = "%d-%b-%Y"
 
 REPORT_TIME_FORMAT = "%I:%M %p"
-
-REPORT_AUTHOR = AUTHOR
 
 REPORT_COMPANY = COMPANY_NAME
 

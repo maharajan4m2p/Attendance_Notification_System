@@ -3,7 +3,6 @@
 Attendance Notification System Pro
 Main Flask Application
 Version : 10.0 Enterprise
-Developed by Maharajan
 =========================================================
 """
 
@@ -747,8 +746,6 @@ def application_info():
         "application": APP_NAME,
 
         "version": VERSION,
-
-        "developer": "Maharajan",
 
         "status": "Running"
 

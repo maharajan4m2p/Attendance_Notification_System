@@ -3,7 +3,6 @@
 Attendance Notification System Pro
 Email Template
 Version : 10.0 Enterprise
-Developed by Maharajan
 =========================================================
 """
 

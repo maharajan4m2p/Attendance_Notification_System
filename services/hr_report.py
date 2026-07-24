@@ -3,7 +3,6 @@
 Attendance Notification System Pro
 HR Report Generator
 Version : 10.0 Enterprise
-Developed by Maharajan
 =========================================================
 """
 

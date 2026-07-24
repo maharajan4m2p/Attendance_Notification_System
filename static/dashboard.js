@@ -3,7 +3,6 @@
 Attendance Notification System Pro
 Dashboard JavaScript
 Version : 10.0 Enterprise
-Developed by Maharajan
 =========================================================
 */
 
@@ -1021,7 +1020,5 @@ console.log("Attendance Notification System Pro");
 console.log("Dashboard JavaScript Initialized Successfully");
 
 console.log("Version : 10.0 Enterprise");
-
-console.log("Developed by Maharajan");
 
 console.log("==================================================");

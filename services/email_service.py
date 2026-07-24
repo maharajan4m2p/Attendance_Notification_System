@@ -3,7 +3,6 @@
 Attendance Notification System Pro
 Email Service
 Version : 10.0 Enterprise
-Developed by Maharajan
 =========================================================
 """
 
