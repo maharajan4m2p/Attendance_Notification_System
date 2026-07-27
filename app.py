@@ -2,68 +2,54 @@
 =========================================================
 Attendance Notification System Pro
 Main Flask Application
-Version : 10.0 Enterprise
+Version : 13.0 Enterprise
+Developed by Maharajan
 =========================================================
 """
 
-import os
 import logging
+import os
 import traceback
 
 from flask import (
     Flask,
+    flash,
+    redirect,
     render_template,
     request,
-    redirect,
-    url_for,
-    flash,
-    send_file
+    send_file,
+    url_for
 )
 
 from werkzeug.utils import secure_filename
 
 from config import (
-
     APP_NAME,
-
     VERSION,
-
     SECRET_KEY,
-
     DEBUG,
-
     HOST,
-
     PORT,
-
     UPLOAD_FOLDER,
-
     REPORT_FOLDER,
-
     ALLOWED_EXTENSIONS,
-
     MAX_CONTENT_LENGTH
-
 )
 
 from services.attendance_checker import AttendanceChecker
-
 from services.report_generator import ReportGenerator
-
 from services.notification_service import NotificationService
-
 from services.email_service import EmailService
-
+from services.database_manager import DatabaseManager
+from services.hr_report import HRReportGenerator
+from services.overtime_manager import OvertimeManager
 # =====================================================
-# Logging Configuration
+# Logging
 # =====================================================
 
 logging.basicConfig(
-
     level=logging.INFO,
-
     format="%(asctime)s | %(levelname)s | %(message)s"
-
 )
 
 logger = logging.getLogger(__name__)
@@ -76,38 +62,33 @@ app = Flask(__name__)
 
 app.secret_key = SECRET_KEY
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config.update(
+    SECRET_KEY=SECRET_KEY,
+    UPLOAD_FOLDER=UPLOAD_FOLDER,
+    REPORT_FOLDER=REPORT_FOLDER,
+    MAX_CONTENT_LENGTH=MAX_CONTENT_LENGTH
+)
 
-app.config["REPORT_FOLDER"] = REPORT_FOLDER
-
-app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 # =====================================================
 # Create Required Folders
 # =====================================================
 
-REQUIRED_FOLDERS = (
-
-    app.config["UPLOAD_FOLDER"],
-
-    app.config["REPORT_FOLDER"]
-
-)
-
-for folder in REQUIRED_FOLDERS:
-
+for folder in (
+    UPLOAD_FOLDER,
+    REPORT_FOLDER
+):
     os.makedirs(
-
         folder,
-
         exist_ok=True
-
     )
 
 # =====================================================
-# Initialize Services
+# Initialize Enterprise Services
 # =====================================================
 
 attendance_checker = AttendanceChecker()
+
+database_manager = DatabaseManager()
 
 report_generator = ReportGenerator()
 
@@ -115,62 +96,62 @@ notification_service = NotificationService()
 
 email_service = EmailService()
 
-logger.info("All services initialized successfully.")
+hr_report_generator = HRReportGenerator()
+
+overtime_manager = OvertimeManager()
+
+logger.info("=" * 70)
+logger.info(APP_NAME)
+logger.info(f"Version : {VERSION}")
+logger.info("Enterprise Services Initialized Successfully")
+logger.info("=" * 70)
 
 # =====================================================
-# Global Runtime Variables
+# Runtime Variables
 # =====================================================
 
 analysis_result = None
 
 report_path = None
 
+monthly_report_path = None
+
+database_report_path = None
+
 uploaded_file = None
-
-# =====================================================
-# Application Startup
-# =====================================================
-
-logger.info("=" * 60)
-
-logger.info(APP_NAME)
-
-logger.info(f"Version : {VERSION}")
-
-logger.info("Application initialized successfully.")
-
-logger.info("=" * 60)
 # =====================================================
 # Utility Functions
 # =====================================================
 
 def allowed_file(filename):
     """
-    Check whether the uploaded file extension is allowed.
+    Validate uploaded file extension.
     """
 
-    if not filename:
+    return (
 
-        return False
+        filename
 
-    if "." not in filename:
+        and "." in filename
 
-        return False
+        and filename.rsplit(".", 1)[1].lower()
 
-    extension = filename.rsplit(".", 1)[1].lower()
+        in ALLOWED_EXTENSIONS
 
-    return extension in ALLOWED_EXTENSIONS
+    )
 
+
+# =====================================================
+# Save Uploaded File
+# =====================================================
 
 def save_uploaded_file(file):
-    """
-    Save uploaded file securely.
 
-    Returns:
-        str : Saved file path
-    """
+    filename = secure_filename(
 
-    filename = secure_filename(file.filename)
+        file.filename
+
+    )
 
     filepath = os.path.join(
 
@@ -184,17 +165,18 @@ def save_uploaded_file(file):
 
     logger.info(
 
-        f"Uploaded file saved : {filepath}"
+        f"Uploaded File : {filepath}"
 
     )
 
     return filepath
 
 
+# =====================================================
+# Get Employees
+# =====================================================
+
 def get_employees():
-    """
-    Return employee list safely.
-    """
 
     global analysis_result
 
@@ -211,10 +193,11 @@ def get_employees():
     )
 
 
+# =====================================================
+# Get Summary
+# =====================================================
+
 def get_summary():
-    """
-    Return attendance summary safely.
-    """
 
     global analysis_result
 
@@ -229,6 +212,113 @@ def get_summary():
         {}
 
     )
+
+
+# =====================================================
+# Get Dashboard
+# =====================================================
+
+def get_dashboard():
+
+    global analysis_result
+
+    if analysis_result is None:
+
+        return database_manager.get_dashboard_summary()
+
+    return analysis_result.get(
+
+        "dashboard",
+
+        database_manager.get_dashboard_summary()
+
+    )
+
+
+# =====================================================
+# Get HR Report
+# =====================================================
+
+def get_hr_report():
+
+    global analysis_result
+
+    if analysis_result is None:
+
+        return ""
+
+    return analysis_result.get(
+
+        "hr_report",
+
+        ""
+
+    )
+
+
+# =====================================================
+# Get Late Punch Report
+# =====================================================
+
+def get_late_punch_report():
+
+    global analysis_result
+
+    if analysis_result is None:
+
+        return ""
+
+    return analysis_result.get(
+
+        "late_punch_report",
+
+        ""
+
+    )
+
+
+# =====================================================
+# Get WhatsApp Report
+# =====================================================
+
+def get_whatsapp_report():
+
+    global analysis_result
+
+    if analysis_result is None:
+
+        return ""
+
+    return analysis_result.get(
+
+        "whatsapp_hr_report",
+
+        ""
+
+    )
+
+
+# =====================================================
+# Reset Runtime
+# =====================================================
+
+def reset_runtime():
+
+    global analysis_result
+    global report_path
+    global monthly_report_path
+    global database_report_path
+    global uploaded_file
+
+    analysis_result = None
+
+    report_path = None
+
+    monthly_report_path = None
+
+    database_report_path = None
+
+    uploaded_file = None
     # =====================================================
 # Home Page
 # =====================================================
@@ -236,13 +326,17 @@ def get_summary():
 @app.route("/")
 def home():
 
+    dashboard = database_manager.get_dashboard_summary()
+
     return render_template(
 
         "index.html",
 
         app_name=APP_NAME,
 
-        version=VERSION
+        version=VERSION,
+
+        dashboard=dashboard
 
     )
 
@@ -252,16 +346,15 @@ def home():
 # =====================================================
 
 @app.route(
-
     "/upload",
-
     methods=["POST"]
-
 )
 def upload_file():
 
     global analysis_result
     global report_path
+    global monthly_report_path
+    global database_report_path
     global uploaded_file
 
     try:
@@ -272,76 +365,63 @@ def upload_file():
 
         if "attendance_file" not in request.files:
 
-            flash("Please select an attendance file.")
-
-            return redirect(
-
-                url_for("home")
-
+            flash(
+                "Please select an attendance file.",
+                "warning"
             )
+
+            return redirect(url_for("home"))
 
         file = request.files["attendance_file"]
 
-        if file.filename is None or file.filename.strip() == "":
+        if file.filename == "":
 
-            flash("No file selected.")
-
-            return redirect(
-
-                url_for("home")
-
+            flash(
+                "No file selected.",
+                "warning"
             )
+
+            return redirect(url_for("home"))
 
         if not allowed_file(file.filename):
 
             flash(
-
-                "Only .xlsx, .xls and .csv files are supported."
-
+                "Only XLSX, XLS and CSV files are supported.",
+                "danger"
             )
 
-            return redirect(
-
-                url_for("home")
-
-            )
+            return redirect(url_for("home"))
 
         # -----------------------------------------
         # Save Uploaded File
         # -----------------------------------------
 
-        uploaded_file = save_uploaded_file(
-
-            file
-
-        )
+        uploaded_file = save_uploaded_file(file)
 
         logger.info(
-
-            "Attendance processing started."
-
+            f"Processing : {uploaded_file}"
         )
 
         # -----------------------------------------
-        # Attendance Processing
+        # Process Attendance
         # -----------------------------------------
 
         analysis_result = attendance_checker.process_excel(
-
             uploaded_file
-
         )
 
         employees = analysis_result.get(
-
             "employees",
-
             []
+        )
 
+        summary = analysis_result.get(
+            "summary",
+            {}
         )
 
         # -----------------------------------------
-        # Generate Employee Notifications
+        # Generate Notifications
         # -----------------------------------------
 
         for employee in employees:
@@ -349,15 +429,13 @@ def upload_file():
             employee["notification"] = (
 
                 notification_service.generate_message(
-
                     employee
-
                 )
 
             )
 
         # -----------------------------------------
-        # Generate Excel Report
+        # Attendance Report
         # -----------------------------------------
 
         report_path = report_generator.generate_excel(
@@ -368,15 +446,57 @@ def upload_file():
 
         )
 
-        logger.info(
+        # -----------------------------------------
+        # Monthly OT Report
+        # -----------------------------------------
 
-            "Attendance processing completed successfully."
+        monthly_report_path = (
+
+            report_generator.generate_monthly_ot_report(
+
+                employees,
+
+                "Monthly_OT_Report.xlsx"
+
+            )
 
         )
 
+        # -----------------------------------------
+        # Monthly Database Export
+        # -----------------------------------------
+
+        database_report_path = (
+
+            report_generator.export_monthly_database(
+
+                "Monthly_OT_Database.xlsx"
+
+            )
+
+        )
+
+        logger.info("=" * 70)
+
+        logger.info(
+            f"Employees : {len(employees)}"
+        )
+
+        logger.info(
+            f"Present : {summary.get('present',0)}"
+        )
+
+        logger.info(
+            f"Overtime : {summary.get('overtime',0)}"
+        )
+
+        logger.info("=" * 70)
+
         flash(
 
-            f"Attendance processed successfully. Total Employees: {len(employees)}"
+            f"Attendance processed successfully. {len(employees)} employees processed.",
+
+            "success"
 
         )
 
@@ -388,17 +508,15 @@ def upload_file():
 
     except Exception as error:
 
-        logger.exception(
-
-            "Attendance processing failed."
-
-        )
+        logger.exception(error)
 
         traceback.print_exc()
 
         flash(
 
-            f"Processing Failed: {error}"
+            f"Processing Failed : {error}",
+
+            "danger"
 
         )
 
@@ -415,51 +533,98 @@ def upload_file():
 def dashboard():
 
     global analysis_result
+    global report_path
+    global monthly_report_path
+    global database_report_path
 
     if analysis_result is None:
 
         flash(
-
-            "Please upload an attendance file first."
-
+            "Please upload an attendance file first.",
+            "warning"
         )
 
         return redirect(
-
             url_for("home")
-
         )
+
+    # -----------------------------------------
+    # Load Data
+    # -----------------------------------------
+
+    employees = get_employees()
 
     summary = get_summary()
 
-    employees = analysis_result.get("employees", [])
+    dashboard = get_dashboard()
 
-    print("=" * 60)
-    print("SUMMARY")
-    print(summary)
-    print("=" * 60)
+    hr_report = get_hr_report()
 
-    print("=" * 60)
-    print(f"Original Records : {len(get_employees())}")
-    print(f"Dashboard Employees : {len(employees)}")
-    print("=" * 60)
+    late_punch_report = get_late_punch_report()
 
-    print("=" * 60)
-    print("Top 5 Employees")
-    for emp in employees[:5]:
-        print(
-            emp["employee_id"],
-            emp["name"],
-            emp["monthly_ot"],
-            emp["monthly_status"]
-        )
-    print("=" * 60)
+    whatsapp_report = get_whatsapp_report()
 
-    logger.info(
+    # -----------------------------------------
+    # Sort by Monthly OT
+    # -----------------------------------------
 
-        f"Dashboard opened | Employees : {len(employees)}"
+    employees = sorted(
+
+        employees,
+
+        key=lambda employee: employee.get(
+
+            "monthly_ot_minutes",
+
+            0
+
+        ),
+
+        reverse=True
 
     )
+
+    # -----------------------------------------
+    # Top OT Employees
+    # -----------------------------------------
+
+    top_ot = employees[:10]
+
+    # -----------------------------------------
+    # Dashboard Logging
+    # -----------------------------------------
+
+    logger.info("=" * 70)
+
+    logger.info("Dashboard Loaded Successfully")
+
+    logger.info(f"Employees            : {len(employees)}")
+
+    logger.info(f"Present              : {summary.get('present',0)}")
+
+    logger.info(f"Absent               : {summary.get('absent',0)}")
+
+    logger.info(f"Late Punch           : {summary.get('late_in',0)}")
+
+    logger.info(f"Early Out            : {summary.get('early_out',0)}")
+
+    logger.info(f"Missing Punch In     : {summary.get('missing_in',0)}")
+
+    logger.info(f"Missing Punch Out    : {summary.get('missing_out',0)}")
+
+    logger.info(f"Overtime Employees   : {summary.get('overtime',0)}")
+
+    logger.info(f"Monthly Warning      : {summary.get('monthly_warning',0)}")
+
+    logger.info(f"Limit Reached        : {summary.get('monthly_limit_reached',0)}")
+
+    logger.info(f"OT Exceeded          : {summary.get('monthly_ot_exceeded',0)}")
+
+    logger.info("=" * 70)
+
+    # -----------------------------------------
+    # Render Dashboard
+    # -----------------------------------------
 
     return render_template(
 
@@ -469,33 +634,31 @@ def dashboard():
 
         version=VERSION,
 
-        result=analysis_result,
+        employees=employees,
 
         summary=summary,
 
-        employees=employees,
+        dashboard=dashboard,
 
-        hr_report=analysis_result.get(
+        top_ot=top_ot,
 
-            "hr_report",
+        hr_report=hr_report,
 
-            ""
+        late_punch_report=late_punch_report,
 
-        ),
+        whatsapp_report=whatsapp_report,
 
-        late_punch_report=analysis_result.get(
+        attendance_report=report_path,
 
-            "late_punch_report",
+        monthly_report=monthly_report_path,
 
-            ""
+        database_report=database_report_path,
 
-        ),
-
-        report_generated=report_path is not None
+        report_generated=(report_path is not None)
 
     )
     # =====================================================
-# Download Excel Report
+# Download Attendance Report
 # =====================================================
 
 @app.route("/download")
@@ -503,58 +666,60 @@ def download_report():
 
     global report_path
 
-    if not report_path:
+    if not report_path or not os.path.exists(report_path):
 
-        flash(
+        flash("Attendance report not found.", "warning")
 
-            "Attendance report has not been generated yet."
-
-        )
-
-        return redirect(
-
-            url_for("dashboard")
-
-        )
-
-    if not os.path.exists(report_path):
-
-        logger.error(
-
-            f"Report file not found : {report_path}"
-
-        )
-
-        flash(
-
-            "Report file not found."
-
-        )
-
-        return redirect(
-
-            url_for("dashboard")
-
-        )
-
-    logger.info(
-
-        f"Downloading report : {report_path}"
-
-    )
+        return redirect(url_for("dashboard"))
 
     return send_file(
-
         report_path,
-
         as_attachment=True,
+        download_name=os.path.basename(report_path)
+    )
 
-        download_name=os.path.basename(
 
-            report_path
+# =====================================================
+# Download Monthly OT Report
+# =====================================================
 
-        )
+@app.route("/download_monthly")
+def download_monthly():
 
+    global monthly_report_path
+
+    if not monthly_report_path or not os.path.exists(monthly_report_path):
+
+        flash("Monthly OT report not found.", "warning")
+
+        return redirect(url_for("dashboard"))
+
+    return send_file(
+        monthly_report_path,
+        as_attachment=True,
+        download_name=os.path.basename(monthly_report_path)
+    )
+
+
+# =====================================================
+# Download Monthly Database
+# =====================================================
+
+@app.route("/download_database")
+def download_database():
+
+    global database_report_path
+
+    if not database_report_path or not os.path.exists(database_report_path):
+
+        flash("Database report not found.", "warning")
+
+        return redirect(url_for("dashboard"))
+
+    return send_file(
+        database_report_path,
+        as_attachment=True,
+        download_name=os.path.basename(database_report_path)
     )
 
 
@@ -562,162 +727,40 @@ def download_report():
 # Send Employee Emails
 # =====================================================
 
-@app.route(
-
-    "/send_emails",
-
-    methods=["POST"]
-
-)
-def send_emails():
-
-    global analysis_result
+@app.route("/send_emails", methods=["POST"])
+def send_batch():
 
     if analysis_result is None:
 
-        flash(
+        flash("Upload attendance first.", "warning")
 
-            "Please upload an attendance file first."
+        return redirect(url_for("home"))
 
-        )
+    result = email_service.send_batch(
 
-        return redirect(
-
-            url_for("home")
-
-        )
-
-    employees = get_employees()
-
-    if not employees:
-
-        flash(
-
-            "No employee records available."
-
-        )
-
-        return redirect(
-
-            url_for("dashboard")
-
-        )
-
-    logger.info(
-
-        f"Sending emails to {len(employees)} employees."
+        get_employees()
 
     )
 
-    try:
+    flash(
 
-        result = email_service.send_batch(
+        f"Sent: {result['sent']} | Failed: {result['failed']} | "
+        f"Skipped: {result['skipped']} | "
+        f"Success: {result['success_rate']}%",
 
-            employees
+        "success"
 
-        )
-
-        logger.info(
-
-            f"Email Summary : {result}"
-
-        )
-
-        flash(
-
-            f"Email Completed | "
-
-            f"Sent : {result['sent']} | "
-
-            f"Failed : {result['failed']} | "
-
-            f"Skipped : {result['skipped']} | "
-
-            f"Success : {result['success_rate']}%"
-
-        )
-
-    except Exception:
-
-        logger.exception(
-
-            "Email sending failed."
-
-        )
-
-        flash(
-
-            "Failed to send employee emails."
-
-        )
+    )
 
     return redirect(
 
         url_for("dashboard")
 
     )
-    # =====================================================
-# Error Handlers
-# =====================================================
-
-@app.errorhandler(404)
-def page_not_found(error):
-
-    logger.warning(
-
-        f"404 Error : {request.path}"
-
-    )
-
-    return (
-
-        render_template(
-
-            "404.html",
-
-            app_name=APP_NAME,
-
-            version=VERSION
-
-        ),
-
-        404
-
-    )
-
-
-@app.errorhandler(500)
-def internal_server_error(error):
-
-    logger.exception(
-
-        "Internal Server Error"
-
-    )
-
-    traceback.print_exc()
-
-    return (
-
-        render_template(
-
-            "500.html",
-
-            app_name=APP_NAME,
-
-            version=VERSION,
-
-            error=str(error)
-
-        ),
-
-        500
-
-    )
 
 
 # =====================================================
-# Health Check
+# Health API
 # =====================================================
 
 @app.route("/health")
@@ -731,15 +774,15 @@ def health():
 
         "version": VERSION
 
-    }, 200
+    }
 
 
 # =====================================================
-# Application Information API
+# Application Information
 # =====================================================
 
 @app.route("/info")
-def application_info():
+def info():
 
     return {
 
@@ -747,28 +790,66 @@ def application_info():
 
         "version": VERSION,
 
-        "status": "Running"
+        "dashboard": database_manager.get_dashboard_summary()
 
-    }, 200
-    # =====================================================
+    }
+
+
+# =====================================================
+# 404 Error
+# =====================================================
+
+@app.errorhandler(404)
+def page_not_found(error):
+
+    return render_template(
+
+        "404.html",
+
+        app_name=APP_NAME,
+
+        version=VERSION
+
+    ), 404
+
+
+# =====================================================
+# 500 Error
+# =====================================================
+
+@app.errorhandler(500)
+def internal_error(error):
+
+    logger.exception(error)
+
+    return render_template(
+
+        "500.html",
+
+        app_name=APP_NAME,
+
+        version=VERSION,
+
+        error=str(error)
+
+    ), 500
+
+
+# =====================================================
 # Run Application
 # =====================================================
 
 if __name__ == "__main__":
 
-    logger.info("=" * 60)
+    logger.info("=" * 70)
 
     logger.info(APP_NAME)
 
     logger.info(f"Version : {VERSION}")
 
-    logger.info("Attendance Notification System Pro Started")
+    logger.info("Attendance Notification System Started")
 
-    logger.info(f"Host : {HOST}")
-
-    logger.info(f"Port : {PORT}")
-
-    logger.info("=" * 60)
+    logger.info("=" * 70)
 
     app.run(
 

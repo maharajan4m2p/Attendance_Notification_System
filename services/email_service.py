@@ -1,8 +1,8 @@
 """
 =========================================================
 Attendance Notification System Pro
-Email Service
-Version : 10.0 Enterprise
+Enterprise Email Service
+Version : 13.0 Enterprise
 =========================================================
 """
 
@@ -12,13 +12,15 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from config import (
+    COMPANY_NAME,
     SMTP_SERVER,
     SMTP_PORT,
     SMTP_USERNAME,
     SMTP_PASSWORD,
-    EMAIL_SUBJECT,
     EMAIL_TIMEOUT,
-    EMAIL_RETRY_COUNT
+    USE_TLS,
+    EMAIL_SUBJECT,
+    HR_REPORT_SUBJECT
 )
 
 
@@ -28,299 +30,146 @@ class EmailService:
 
     Features
     --------
-    • SMTP Connection Reuse
-    • Batch Email Sending
-    • Automatic Reconnection
-    • Retry Support
-    • Context Manager Support
-    • Enterprise Performance
+    • Employee Email
+    • HR Email
+    • Batch Email
+    • SMTP Connection Test
+    • HTML Email Support
     """
-
-    # =====================================================
-    # Initialize
-    # =====================================================
 
     def __init__(self):
 
-        self.smtp_server = SMTP_SERVER
+        self.company = COMPANY_NAME
 
-        self.smtp_port = SMTP_PORT
+        self.server = SMTP_SERVER
+
+        self.port = SMTP_PORT
 
         self.username = SMTP_USERNAME
 
         self.password = SMTP_PASSWORD
 
-        self.subject = EMAIL_SUBJECT
-
         self.timeout = EMAIL_TIMEOUT
 
-        self.retry_count = EMAIL_RETRY_COUNT
-
-        self.connection = None
-     
-    # =====================================================
-    # Connect SMTP Server
-    # =====================================================
-
-    def connect(self):
-
-        if self.connection is not None:
-
-            return self.connection
-
-        for attempt in range(
-
-            1,
-
-            self.retry_count + 1
-
-        ):
-
-            try:
-
-                server = smtplib.SMTP(
-
-                    self.smtp_server,
-
-                    self.smtp_port,
-
-                    timeout=self.timeout
-
-                )
-
-                server.ehlo()
-
-                server.starttls()
-
-                server.ehlo()
-
-                server.login(
-
-                    self.username,
-
-                    self.password
-
-                )
-
-                self.connection = server
-
-                print("=" * 60)
-
-                print("SMTP Connected Successfully")
-
-                print(f"Attempt : {attempt}")
-
-                print("=" * 60)
-
-                return self.connection
-
-            except Exception as error:
-
-                print("=" * 60)
-
-                print(
-
-                    f"SMTP Connection Attempt {attempt} Failed"
-
-                )
-
-                print(error)
-
-                print("=" * 60)
-
-                self.connection = None
-
-        return None
-    # =====================================================
-    # Disconnect SMTP Server
-    # =====================================================
-
-    def disconnect(self):
-
-        if self.connection is None:
-
-            return
-
-        try:
-
-            self.connection.quit()
-
-            print("=" * 60)
-
-            print("SMTP Connection Closed")
-
-            print("=" * 60)
-
-        except Exception as error:
-
-            print("=" * 60)
-
-            print("SMTP Disconnect Failed")
-
-            print(error)
-
-            print("=" * 60)
-
-        finally:
-
-            self.connection = None
-            # =====================================================
-    # Check SMTP Connection
-    # =====================================================
-
-    def is_connected(self):
-
-        if self.connection is None:
-
-            return False
-
-        try:
-
-            status = self.connection.noop()
-
-            return status[0] == 250
-
-        except Exception:
-
-            self.connection = None
-
-            return False
+        self.use_tls = USE_TLS
         # =====================================================
-    # Reconnect SMTP Server
-    # =====================================================
-
-    def reconnect(self):
-
-        print("=" * 60)
-
-        print("Reconnecting SMTP Server...")
-
-        print("=" * 60)
-
-        self.disconnect()
-
-        return self.connect()
-    # =====================================================
     # Send Email
     # =====================================================
 
     def send_email(
         self,
-        employee
+        receiver,
+        subject,
+        body,
+        html=False
     ):
 
-        email = str(
-            employee.get(
-                "email",
-                ""
-            )
-        ).strip()
+        # ------------------------------------------
+        # Validate Email
+        # ------------------------------------------
 
-        if not email:
+        if not receiver:
 
-            print("Employee email not found.")
+            print("Receiver email is empty.")
 
             return False
 
-        body = str(
-            employee.get(
-                "notification",
-                ""
-            )
-        ).strip()
+        if not self.username or not self.password:
 
-        if not body:
-
-            print(f"No notification found for {email}")
+            print("SMTP username/password not configured.")
 
             return False
 
-        subject = employee.get(
-            "email_subject",
-            self.subject
-        )
+        try:
 
-        if not self.is_connected():
+            message = MIMEMultipart()
 
-            if self.reconnect() is None:
+            message["From"] = f"{self.company} <{self.username}>"
 
-                return False
+            message["To"] = receiver
 
-        for attempt in range(
+            message["Subject"] = subject
 
-            1,
+            # ------------------------------------------
+            # Email Body
+            # ------------------------------------------
 
-            self.retry_count + 1
-
-        ):
-
-            try:
-
-                message = MIMEMultipart()
-
-                message["From"] = self.username
-
-                message["To"] = email
-
-                message["Subject"] = subject
+            if html:
 
                 message.attach(
 
                     MIMEText(
-
                         body,
-
-                        "plain",
-
+                        "html",
                         "utf-8"
-
                     )
 
                 )
 
-                if self.connection is None:
-                    return False
-                
-                self.connection.sendmail(
+            else:
 
-                    self.username,
+                message.attach(
 
-                    email,
-
-                    message.as_string()
+                    MIMEText(
+                        body,
+                        "plain",
+                        "utf-8"
+                    )
 
                 )
 
-                print("=" * 60)
+            # ------------------------------------------
+            # SMTP Connection
+            # ------------------------------------------
 
-                print(f"Email Sent Successfully : {email}")
+            smtp = smtplib.SMTP(
 
-                print(f"Attempt : {attempt}")
+                self.server,
 
-                print("=" * 60)
+                self.port,
 
-                return True
+                timeout=self.timeout
 
-            except Exception as error:
+            )
 
-                print("=" * 60)
+            smtp.ehlo()
 
-                print(f"Email Send Failed : {email}")
+            if self.use_tls:
 
-                print(f"Attempt : {attempt}")
+                smtp.starttls()
 
-                print(error)
+                smtp.ehlo()
 
-                print("=" * 60)
+            smtp.login(
 
-                self.connection = None
+                self.username,
 
-                if attempt < self.retry_count:
+                self.password
 
-                    self.reconnect()
+            )
 
-        return False
-    # =====================================================
+            smtp.sendmail(
+
+                self.username,
+
+                receiver,
+
+                message.as_string()
+
+            )
+
+            smtp.quit()
+
+            print(f"Email sent successfully to {receiver}")
+
+            return True
+
+        except Exception as error:
+
+            print(f"Email Sending Failed: {error}")
+
+            return False
+        # =====================================================
     # Send Batch Emails
     # =====================================================
 
@@ -329,139 +178,104 @@ class EmailService:
         employees
     ):
 
-        total = len(employees)
-
         sent = 0
 
         failed = 0
 
         skipped = 0
 
-        print("=" * 60)
+        total = len(employees)
 
-        print(f"Sending {total} Emails...")
+        for employee in employees:
 
-        print("=" * 60)
+            receiver = str(
 
-        if total == 0:
+                employee.get(
+                    "email",
+                    ""
+                )
 
-            return {
+            ).strip()
 
-                "total": 0,
+            # ------------------------------------------
+            # Skip if Email Not Available
+            # ------------------------------------------
 
-                "sent": 0,
+            if receiver == "":
 
-                "failed": 0,
+                skipped += 1
 
-                "skipped": 0,
+                continue
 
-                "success_rate": 0
+            # ------------------------------------------
+            # Subject
+            # ------------------------------------------
 
-            }
+            subject = EMAIL_SUBJECT
 
-        if not self.is_connected():
+            # ------------------------------------------
+            # Body
+            # ------------------------------------------
 
-            if self.connect() is None:
+            body = employee.get(
 
-                return {
+                "notification",
 
-                    "total": total,
+                "Attendance notification."
 
-                    "sent": 0,
+            )
 
-                    "failed": total,
+            # ------------------------------------------
+            # Send Email
+            # ------------------------------------------
 
-                    "skipped": 0,
+            success = self.send_email(
 
-                    "success_rate": 0
+                receiver,
 
-                }
+                subject,
 
-        try:
+                body,
 
-            for index, employee in enumerate(
+                html=False
 
-                employees,
+            )
 
-                start=1
+            if success:
 
-            ):
+                sent += 1
 
-                if index % 25 == 0 or index == total:
+                print(
 
-                    progress = round(
+                    f"✓ Email Sent : {receiver}"
 
-                        (index / total) * 100,
+                )
 
-                        1
+            else:
 
-                    )
+                failed += 1
 
-                    print(
+                print(
 
-                        f"Processed {index}/{total} ({progress}%)"
+                    f"✗ Email Failed : {receiver}"
 
-                    )
+                )
 
-                email = str(
+        # ------------------------------------------
+        # Summary
+        # ------------------------------------------
 
-                    employee.get(
+        success_rate = 0
 
-                        "email",
+        if (sent + failed) > 0:
 
-                        ""
+            success_rate = round(
 
-                    )
+                (sent / (sent + failed)) * 100,
 
-                ).strip()
+                2
 
-                if not email:
-
-                    skipped += 1
-
-                    continue
-
-                if self.send_email(
-
-                    employee
-
-                ):
-
-                    sent += 1
-
-                else:
-
-                    failed += 1
-
-        finally:
-
-            self.disconnect()
-
-        success_rate = round(
-
-            (sent / total) * 100,
-
-            2
-
-        )
-
-        print("=" * 60)
-
-        print("Email Batch Completed")
-
-        print("=" * 60)
-
-        print(f"Total        : {total}")
-
-        print(f"Sent         : {sent}")
-
-        print(f"Failed       : {failed}")
-
-        print(f"Skipped      : {skipped}")
-
-        print(f"Success Rate : {success_rate}%")
-
-        print("=" * 60)
+            )
 
         return {
 
@@ -477,72 +291,69 @@ class EmailService:
 
         }
         # =====================================================
-    # Reset SMTP Connection
+    # Test SMTP Connection
     # =====================================================
 
-    def reset(self):
-
-        self.disconnect()
-
-        self.connection = None
-
-        print("=" * 60)
-
-        print("SMTP Connection Reset")
-
-        print("=" * 60)
-
-    # =====================================================
-    # Context Manager
-    # =====================================================
-
-    def __enter__(self):
-
-        if not self.is_connected():
-
-            self.connect()
-
-        return self
-
-    def __exit__(
-        self,
-        exc_type,
-        exc_value,
-        traceback
-    ):
-
-        self.disconnect()
-
-        if exc_type is not None:
-
-            print("=" * 60)
-
-            print("SMTP Exception Occurred")
-
-            print(exc_value)
-
-            print("=" * 60)
-
-        return False
-
-    # =====================================================
-    # Cleanup
-    # =====================================================
-
-    def close(self):
-
-        self.disconnect()
-
-    # =====================================================
-    # Destructor
-    # =====================================================
-
-    def __del__(self):
+    def test_connection(self):
 
         try:
 
-            self.disconnect()
+            smtp = smtplib.SMTP(
+                self.server,
+                self.port,
+                timeout=self.timeout
+            )
 
-        except Exception:
+            smtp.ehlo()
 
-            pass
+            if self.use_tls:
+
+                smtp.starttls()
+
+                smtp.ehlo()
+
+            smtp.login(
+                self.username,
+                self.password
+            )
+
+            smtp.quit()
+
+            print("SMTP Connection Successful.")
+
+            return True
+
+        except Exception as error:
+
+            print(f"SMTP Connection Failed : {error}")
+
+            return False
+
+    # =====================================================
+    # Send HR Report
+    # =====================================================
+
+    def send_hr_report(
+        self,
+        hr_email,
+        report
+    ):
+
+        if not hr_email:
+
+            return False
+
+        return self.send_email(
+
+            receiver=hr_email,
+
+            subject=HR_REPORT_SUBJECT,
+
+            body=report,
+
+            html=False
+
+        )
+        # =====================================================
+# End of Email Service
+# =====================================================

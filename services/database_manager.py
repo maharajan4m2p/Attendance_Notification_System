@@ -1,8 +1,8 @@
 """
 =========================================================
 Attendance Notification System Pro
-Database Manager
-Version : 10.0 Enterprise
+Enterprise Database Manager
+Version : 12.0 Enterprise
 =========================================================
 """
 
@@ -13,8 +13,8 @@ import pandas as pd
 
 from config import (
     MONTHLY_OT_DATABASE,
-    MONTHLY_OT_LIMIT,
-    MONTHLY_OT_WARNING,
+    MONTHLY_DATABASE_COLUMNS,
+    MONTHLY_OT_LIMIT_MINUTES,
     NORMAL_STATUS,
     WARNING_STATUS,
     LIMIT_REACHED_STATUS,
@@ -24,15 +24,8 @@ from config import (
 
 class DatabaseManager:
     """
-    Enterprise Monthly OT Database Manager
-
-    Features
-    --------
-    • Monthly OT Tracking
-    • Employee History
-    • Duplicate Prevention
-    • Automatic Backup
-    • High Performance
+    Enterprise Monthly OT Database
+    One Employee = One Record
     """
 
     # =====================================================
@@ -42,183 +35,249 @@ class DatabaseManager:
     def __init__(self):
 
         self.database = MONTHLY_OT_DATABASE
-        
-        print("=" * 60)
-        print("Database File")
-        print(self.database)
-        print("=" * 60)
 
-        self.dataframe = None
+        self.columns = MONTHLY_DATABASE_COLUMNS
 
-        self.modified = False
-
-        self.columns = [
-
-            "Employee ID",
-
-            "Employee Name",
-
-            "Department",
-
-            "Designation",
-
-            "Month",
-
-            "Date",
-
-            "Daily OT Minutes",
-
-            "Monthly OT Minutes",
-
-            "Remaining OT Minutes",
-
-            "Daily Status",
-
-            "Monthly Status",
-
-            "Notification Sent"
-
-        ]
-
-        # Create database if it does not exist
         self.create_database()
 
-        # Load database into memory
-        self.load()
-        # =====================================================
+    # =====================================================
     # Create Database
     # =====================================================
 
     def create_database(self):
 
         if os.path.exists(self.database):
-
             return
 
         dataframe = pd.DataFrame(
-
             columns=self.columns
-
         )
 
         dataframe.to_excel(
-
             self.database,
-
             index=False,
-
             engine="openpyxl"
-
         )
-
-        print("=" * 60)
-        print("Monthly OT Database Created Successfully")
-        print("=" * 60)
 
     # =====================================================
     # Load Database
     # =====================================================
 
-    def load(self):
-
-        if self.dataframe is not None:
-
-            return self.dataframe
+    def load_database(self):
 
         if not os.path.exists(self.database):
-
             self.create_database()
 
         try:
 
-            self.dataframe = pd.read_excel(
-
+            dataframe = pd.read_excel(
                 self.database,
-
                 engine="openpyxl"
-
             )
-        
-            print("=" * 60)
-            print("MONTHLY OT DATABASE LOADED")
-            print(f"Database Path : {self.database}")
-            print(f"Records Loaded: {len(self.dataframe)}")
-            print("First 5 Records:")
-            print(self.dataframe.head())
-            print("=" * 60)
+
+            # Ensure all required columns exist
+            for column in self.columns:
+
+                if column not in dataframe.columns:
+                    dataframe[column] = ""
+
+            dataframe = dataframe[self.columns]
+
+            dataframe.fillna(
+                "",
+                inplace=True
+            )
+
+            return dataframe
 
         except Exception as error:
 
-            print("=" * 60)
-            print(f"Database Load Failed : {error}")
-            print("Creating Empty Database...")
-            print("=" * 60)
+            print(f"Database Error : {error}")
 
-            self.dataframe = pd.DataFrame(
-
+            dataframe = pd.DataFrame(
                 columns=self.columns
-
             )
 
-        # -----------------------------------------
-        # Ensure Required Columns
-        # -----------------------------------------
+            dataframe.to_excel(
+                self.database,
+                index=False,
+                engine="openpyxl"
+            )
 
-        for column in self.columns:
+            return dataframe
 
-            if column not in self.dataframe.columns:
-
-                self.dataframe[column] = ""
-
-        self.dataframe = self.dataframe[
-
-            self.columns
-
-        ]
-
-        self.dataframe.fillna(
-
-            "",
-
-            inplace=True
-
-        )
-
-        # -----------------------------------------
-        # Convert Numeric Columns
-        # -----------------------------------------
-
-        numeric_columns = [
-
-            "Daily OT Minutes",
-
-            "Monthly OT Minutes",
-
-            "Remaining OT Minutes"
-
-        ]
-
-        for column in numeric_columns:
-
-            self.dataframe[column] = pd.to_numeric(
-
-                self.dataframe[column],
-
-                errors="coerce"
-
-            ).fillna(0).astype(int)
-
-        print("=" * 60)
-        print(
-
-            f"Monthly OT Records Loaded : {len(self.dataframe)}"
-
-        )
-        print("=" * 60)
-
-        return self.dataframe
     # =====================================================
-    # Convert HH:MM -> Minutes
+    # Save Database
+    # =====================================================
+
+    def save_database(self, dataframe):
+
+        dataframe = dataframe[self.columns]
+
+        dataframe.to_excel(
+            self.database,
+            index=False,
+            engine="openpyxl"
+        )
+        # =====================================================
+    # Find Employee
+    # =====================================================
+
+    def find_employee(
+        self,
+        dataframe,
+        employee_id
+    ):
+
+        employee_id = str(employee_id).strip()
+
+        if "Employee ID" not in dataframe.columns:
+            return None
+
+        dataframe["Employee ID"] = (
+            dataframe["Employee ID"]
+            .astype(str)
+            .str.strip()
+        )
+
+        result = dataframe.index[
+            dataframe["Employee ID"] == employee_id
+        ]
+
+        if len(result) == 0:
+            return None
+
+        return int(result[0])
+
+    # =====================================================
+    # Employee Exists
+    # =====================================================
+
+    def employee_exists(
+        self,
+        employee_id
+    ):
+
+        dataframe = self.load_database()
+
+        return (
+            self.find_employee(
+                dataframe,
+                employee_id
+            ) is not None
+        )
+
+    # =====================================================
+    # Create Employee
+    # =====================================================
+
+    def create_employee(
+        self,
+        dataframe,
+        employee
+    ):
+
+        record = {}
+
+        # -----------------------------------------
+        # Basic Information
+        # -----------------------------------------
+
+        record["Employee ID"] = str(
+            employee.get(
+                "employee_id",
+                ""
+            )
+        ).strip()
+
+        record["Employee Name"] = employee.get(
+            "name",
+            ""
+        )
+
+        record["Department"] = employee.get(
+            "department",
+            ""
+        )
+
+        record["Designation"] = employee.get(
+            "designation",
+            ""
+        )
+
+        record["Email"] = employee.get(
+            "email",
+            ""
+        )
+
+        record["Phone"] = employee.get(
+            "phone",
+            ""
+        )
+
+        # -----------------------------------------
+        # Day1 -> Day31
+        # -----------------------------------------
+
+        for day in range(1, 32):
+            record[f"Day{day}"] = "00:00"
+
+        # -----------------------------------------
+        # Monthly Information
+        # -----------------------------------------
+
+        record["Monthly OT"] = "00:00"
+        record["Monthly OT Minutes"] = 0
+
+        record["Remaining OT"] = "25:00"
+        record["Remaining OT Minutes"] = MONTHLY_OT_LIMIT_MINUTES
+
+        record["Monthly Status"] = NORMAL_STATUS
+
+        record["Last Updated"] = datetime.now().strftime(
+            "%d-%b-%Y %H:%M"
+        )
+
+        dataframe.loc[len(dataframe)] = record
+
+        return len(dataframe) - 1
+    # =====================================================
+    # Get Employee
+    # =====================================================
+
+    def get_employee(
+        self,
+        employee_id
+    ):
+
+        dataframe = self.load_database()
+
+        index = self.find_employee(
+            dataframe,
+            employee_id
+        )
+
+        if index is None:
+            return None
+
+        employee = dataframe.loc[index].to_dict()
+
+        return employee
+
+    # =====================================================
+    # Get All Employees
+    # =====================================================
+
+    def get_all_employees(self):
+
+        dataframe = self.load_database()
+
+        return dataframe.to_dict(
+            orient="records"
+        )
+
+    # =====================================================
+    # Convert HH:MM to Minutes
     # =====================================================
 
     def time_to_minutes(
@@ -229,86 +288,32 @@ class DatabaseManager:
         if value is None:
             return 0
 
-        if pd.isna(value):
-            return 0
-
-        # -----------------------------------------
-        # Already Numeric
-        # -----------------------------------------
-
-        if isinstance(value, (int, float)):
-
-            return int(value)
-
         value = str(value).strip()
 
         if value in (
-
             "",
-
-            "-",
-
-            "--",
-
-            "0",
-
-            "0.0",
-
             "00:00",
-
-            "00:00:00",
-
             "nan",
-
-            "NaN",
-
             "None",
-
-            "N/A"
-
+            "-"
         ):
-
             return 0
-
-        # -----------------------------------------
-        # HH:MM
-        # -----------------------------------------
-
-        if ":" in value:
-
-            try:
-
-                hours, minutes = value.split(":")
-
-                return (
-
-                    int(hours) * 60
-
-                    +
-
-                    int(minutes)
-
-                )
-
-            except Exception:
-
-                return 0
-
-        # -----------------------------------------
-        # Decimal Minutes
-        # -----------------------------------------
 
         try:
 
-            return int(float(value))
+            hours, minutes = value.split(":")
+
+            return (
+                int(hours) * 60 +
+                int(minutes)
+            )
 
         except Exception:
 
             return 0
 
-
     # =====================================================
-    # Convert Minutes -> HH:MM
+    # Convert Minutes to HH:MM
     # =====================================================
 
     def minutes_to_time(
@@ -322,221 +327,16 @@ class DatabaseManager:
 
         except Exception:
 
-            return "00:00"
+            minutes = 0
 
-        if minutes <= 0:
-
-            return "00:00"
+        if minutes < 0:
+            minutes = 0
 
         hours = minutes // 60
-
         mins = minutes % 60
 
         return f"{hours:02d}:{mins:02d}"
     # =====================================================
-    # Calculate Monthly Total
-    # =====================================================
-
-    def calculate_monthly_total(
-        self,
-        dataframe,
-        employee_id,
-        month
-    ):
-
-        if dataframe.empty:
-
-            return 0
-
-        employee_rows = dataframe.loc[
-
-            (
-                dataframe["Employee ID"].astype(str)
-                ==
-                str(employee_id)
-            )
-
-            &
-
-            (
-                dataframe["Month"].astype(str)
-                ==
-                str(month)
-            )
-
-        ]
-
-        if employee_rows.empty:
-
-            return 0
-
-        total = pd.to_numeric(
-
-            employee_rows["Daily OT Minutes"],
-
-            errors="coerce"
-
-        ).fillna(0).sum()
-
-        return int(total)
-
-    # =====================================================
-    # Calculate Remaining OT
-    # =====================================================
-
-    def calculate_remaining_ot(
-        self,
-        monthly_total
-    ):
-
-        monthly_limit = MONTHLY_OT_LIMIT * 60
-
-        return max(
-            monthly_limit - monthly_total,
-            0
-        )
-
-    # =====================================================
-    # Get Monthly Status
-    # =====================================================
-
-    def get_monthly_status(
-        self,
-        monthly_total
-    ):
-
-        monthly_limit = MONTHLY_OT_LIMIT * 60
-
-        remaining = monthly_limit - monthly_total
-
-        if monthly_total > monthly_limit:
-            return EXCEEDED_STATUS
-
-        elif monthly_total == monthly_limit:
-            return LIMIT_REACHED_STATUS
-
-        # Warning only when 3 hours or less remain
-        elif remaining <= 180:
-            return WARNING_STATUS
-
-        return NORMAL_STATUS
-    # =====================================================
-    # Remove Duplicate Attendance
-    # =====================================================
-
-    def remove_duplicate(
-        self,
-        dataframe,
-        employee_id,
-        attendance_date
-    ):
-
-        if dataframe.empty:
-
-            return dataframe
-
-        dataframe = dataframe.loc[
-
-            ~(
-                (
-                    dataframe["Employee ID"].astype(str)
-                    ==
-                    str(employee_id)
-                )
-
-                &
-
-                (
-                    dataframe["Date"].astype(str)
-                    ==
-                    str(attendance_date)
-                )
-            )
-
-        ].copy()
-
-        dataframe.reset_index(
-
-            drop=True,
-
-            inplace=True
-
-        )
-
-        return dataframe
-
-    # =====================================================
-    # Notification Required
-    # =====================================================
-
-    def notification_required(
-        self,
-        monthly_status
-    ):
-
-        if monthly_status == WARNING_STATUS:
-
-            return "Warning"
-
-        elif monthly_status == LIMIT_REACHED_STATUS:
-
-            return "Limit Reached"
-
-        elif monthly_status == EXCEEDED_STATUS:
-
-            return "Exceeded"
-
-        return ""
-
-    # =====================================================
-    # Backup Database
-    # =====================================================
-
-    def backup_database(self):
-
-        if self.dataframe is None:
-
-            return
-
-        if self.dataframe.empty:
-
-            return
-
-        try:
-
-            backup_file = self.database.replace(
-
-                ".xlsx",
-
-                "_backup.xlsx"
-
-            )
-
-            self.dataframe.to_excel(
-
-                backup_file,
-
-                index=False,
-
-                engine="openpyxl"
-
-            )
-            print("=" * 60)
-            print("MONTHLY OT DATABASE SAVED")
-            print(f"Database Path : {self.database}")
-            print(f"Records Saved : {len(self.dataframe)}")
-            print("=" * 60)
-
-            print("=" * 60)
-            print("Monthly OT Backup Created Successfully")
-            print("=" * 60)
-
-        except Exception as error:
-
-            print("=" * 60)
-            print(f"Database Backup Failed : {error}")
-            print("=" * 60)
-            # =====================================================
     # Update Employee
     # =====================================================
 
@@ -545,7 +345,7 @@ class DatabaseManager:
         employee
     ):
 
-        dataframe = self.load()
+        dataframe = self.load_database()
 
         employee_id = str(
             employee.get(
@@ -554,374 +354,339 @@ class DatabaseManager:
             )
         ).strip()
 
-        employee_name = str(
-            employee.get(
-                "name",
-                ""
-            )
-        ).strip()
+        index = self.find_employee(
+            dataframe,
+            employee_id
+        )
 
-        department = str(
-            employee.get(
-                "department",
-                ""
+        if index is None:
+            index = self.create_employee(
+                dataframe,
+                employee
             )
-        ).strip()
 
-        designation = str(
-            employee.get(
-                "designation",
-                ""
-            )
-        ).strip()
+        # ------------------------------------------
+        # Update Employee Details
+        # ------------------------------------------
 
-        attendance_date = str(
-            employee.get(
-                "attendance_date",
-                datetime.now().strftime("%Y-%m-%d")
-            )
-        ).strip()
+        dataframe.at[index, "Employee Name"] = employee.get(
+            "name",
+            ""
+        )
 
-        # -----------------------------------------
-        # Month
-        # -----------------------------------------
+        dataframe.at[index, "Department"] = employee.get(
+            "department",
+            ""
+        )
+
+        dataframe.at[index, "Designation"] = employee.get(
+            "designation",
+            ""
+        )
+
+        dataframe.at[index, "Email"] = employee.get(
+            "email",
+            ""
+        )
+
+        dataframe.at[index, "Phone"] = employee.get(
+            "phone",
+            ""
+        )
+
+        # ------------------------------------------
+        # Attendance Date → Day Number
+        # ------------------------------------------
+
+        attendance_date = employee.get(
+            "attendance_date",
+            ""
+        )
 
         try:
 
-            month = datetime.strptime(
-
+            day = pd.to_datetime(
                 attendance_date,
-
-                "%Y-%m-%d"
-
-            ).strftime("%Y-%m")
+                dayfirst=True
+            ).day
 
         except Exception:
 
-            month = datetime.now().strftime("%Y-%m")
+            day = datetime.now().day
 
-        # -----------------------------------------
-        # Daily OT Minutes
-        # -----------------------------------------
+        day_column = f"Day{day}"
 
-        daily_ot_minutes = employee.get(
+        if day_column not in dataframe.columns:
+            dataframe[day_column] = "00:00"
 
-            "daily_ot_minutes",
+        # ------------------------------------------
+        # Save Today's OT
+        # ------------------------------------------
 
-            None
-
+        daily_ot = employee.get(
+            "daily_ot",
+            "00:00"
         )
 
-        if daily_ot_minutes is None:
+        if not daily_ot:
+            daily_ot = "00:00"
 
-            daily_ot_minutes = self.time_to_minutes(
+        dataframe.at[
+            index,
+            day_column
+        ] = daily_ot
 
-                employee.get(
+        # ------------------------------------------
+        # Calculate Monthly OT
+        # ------------------------------------------
 
-                    "daily_ot",
+        total_minutes = 0
 
-                    "00:00"
+        for day in range(1, 32):
 
-                )
+            column = f"Day{day}"
 
+            if column not in dataframe.columns:
+                dataframe[column] = "00:00"
+
+            value = dataframe.at[index, column]
+
+            total_minutes += self.time_to_minutes(
+                value
             )
-        if isinstance(daily_ot_minutes, str):
-            daily_ot_minutes = self.time_to_minutes(daily_ot_minutes)
-        daily_ot_minutes = int(daily_ot_minutes)
 
-        # -----------------------------------------
-        # Remove Duplicate Record
-        # -----------------------------------------
-
-        dataframe = self.remove_duplicate(
-
-            dataframe,
-
-            employee_id,
-
-            attendance_date
-
-        )
-
-        # -----------------------------------------
+        # ------------------------------------------
         # Monthly OT
-        # -----------------------------------------
+        # ------------------------------------------
 
-        previous_total = self.calculate_monthly_total(
-
-            dataframe,
-
-            employee_id,
-
-            month
-
+        monthly_ot = self.minutes_to_time(
+            total_minutes
         )
 
-        # Previous OT before today's upload
-        employee["previous_ot_minutes"] = previous_total
-        employee["previous_ot"] = self.minutes_to_time(
-            previous_total
+        dataframe.at[
+            index,
+            "Monthly OT Minutes"
+        ] = total_minutes
+
+        dataframe.at[
+            index,
+            "Monthly OT"
+        ] = monthly_ot
+
+        # ------------------------------------------
+        # Remaining OT
+        # ------------------------------------------
+
+        remaining_minutes = max(
+            0,
+            MONTHLY_OT_LIMIT_MINUTES - total_minutes
         )
 
-        monthly_total = previous_total + daily_ot_minutes
-        remaining_ot = max(
-            (MONTHLY_OT_LIMIT * 60) - monthly_total,
-            0
-            )
-        monthly_status = self.get_monthly_status(
-            monthly_total
+        remaining_ot = self.minutes_to_time(
+            remaining_minutes
         )
 
-        # -----------------------------------------
-        # Daily Status
-        # -----------------------------------------
+        dataframe.at[
+            index,
+            "Remaining OT Minutes"
+        ] = remaining_minutes
 
-        if daily_ot_minutes > 60:
+        dataframe.at[
+            index,
+            "Remaining OT"
+        ] = remaining_ot
 
-            daily_status = EXCEEDED_STATUS
+        # ------------------------------------------
+        # Monthly Status
+        # ------------------------------------------
 
-        elif daily_ot_minutes == 60:
+        if total_minutes > MONTHLY_OT_LIMIT_MINUTES:
 
-            daily_status = LIMIT_REACHED_STATUS
+            status = EXCEEDED_STATUS
 
-        elif daily_ot_minutes >= 45:
+        elif total_minutes == MONTHLY_OT_LIMIT_MINUTES:
 
-            daily_status = WARNING_STATUS
+            status = LIMIT_REACHED_STATUS
+
+        elif total_minutes >= (21 * 60):
+
+            status = WARNING_STATUS
 
         else:
 
-            daily_status = NORMAL_STATUS
+            status = NORMAL_STATUS
 
-        notification = self.notification_required(
+        dataframe.at[
+            index,
+            "Monthly Status"
+        ] = status
 
-            monthly_status
-
+        dataframe.at[
+            index,
+            "Last Updated"
+        ] = datetime.now().strftime(
+            "%d-%b-%Y %H:%M"
         )
 
-        # -----------------------------------------
-        # Save Record
-        # -----------------------------------------
+        # ------------------------------------------
+        # Save Database
+        # ------------------------------------------
 
-        new_row = {
-
-            "Employee ID": employee_id,
-
-            "Employee Name": employee_name,
-
-            "Department": department,
-
-            "Designation": designation,
-
-            "Month": month,
-
-            "Date": attendance_date,
-
-            "Daily OT Minutes": daily_ot_minutes,
-
-            "Monthly OT Minutes": monthly_total,
-
-            "Remaining OT Minutes": remaining_ot,
-
-            "Daily Status": daily_status,
-
-            "Monthly Status": monthly_status,
-
-            "Notification Sent": notification
-
-        }
-
-        dataframe = pd.concat(
-
-            [
-
-                dataframe,
-
-                pd.DataFrame([new_row])
-
-            ],
-
-            ignore_index=True
-
+        self.save_database(
+            dataframe
         )
 
-        self.dataframe = dataframe
+        # ------------------------------------------
+        # Return Updated Employee
+        # ------------------------------------------
 
-        self.modified = True
+        employee["monthly_ot"] = monthly_ot
+        employee["monthly_ot_minutes"] = total_minutes
 
-        # -----------------------------------------
-        # Update Employee Dictionary
-        # -----------------------------------------
+        employee["remaining_ot"] = remaining_ot
+        employee["remaining_ot_minutes"] = remaining_minutes
 
-        employee["daily_ot_minutes"] = daily_ot_minutes
-        
-        employee["previous_ot_minutes"] = previous_total
-
-        employee["monthly_ot_minutes"] = monthly_total
-
-        employee["remaining_ot_minutes"] = self.minutes_to_time(
-            remaining_ot
-        )
-
-        employee["daily_ot"] = self.minutes_to_time(
-
-            daily_ot_minutes
-
-        )
-        
-        employee["previous_ot"] = self.minutes_to_time(
-        
-            previous_total
-        
-        )
-        
-
-        employee["monthly_ot"] = self.minutes_to_time(
-
-            monthly_total
-
-        )
-
-        employee["remaining_ot"] = self.minutes_to_time(
-
-            remaining_ot
-
-        )
-
-        employee["daily_status"] = daily_status
-
-        employee["monthly_status"] = monthly_status
-
-        employee["notification_status"] = notification
-
-        employee["warning"] = (
-
-            monthly_status == WARNING_STATUS
-
-        )
-
-        employee["limit_reached"] = (
-
-            monthly_status == LIMIT_REACHED_STATUS
-
-        )
-
-        employee["ot_exceeded"] = (
-
-            monthly_status == EXCEEDED_STATUS
-
-        )
-        print("=" * 60)
-        print("DATABASE UPDATED")
-        print(f"Employee ID : {employee_id}")
-        print(f"Date        : {attendance_date}")
-        print(f"Previous OT : {previous_total}")
-        print(f"Daily OT    : {daily_ot_minutes}")
-        print(f"Monthly OT  : {monthly_total}")
-        print(f"Status      : {monthly_status}")
-        print("=" * 60)
+        employee["monthly_status"] = status
 
         return employee
     # =====================================================
-    # Save Database
+    # Dashboard Summary
     # =====================================================
 
-    def save(self):
+    def get_dashboard_summary(self):
 
-        if self.dataframe is None:
+        dataframe = self.load_database()
 
-            return
+        summary = {
+            "total": len(dataframe),
+            "present": 0,
+            "late_in": 0,
+            "early_out": 0,
+            "missing_in": 0,
+            "missing_out": 0,
+            "overtime": 0,
+            "monthly_warning": 0,
+            "monthly_limit_reached": 0,
+            "monthly_ot_exceeded": 0
+        }
 
-        if not self.modified:
+        if dataframe.empty:
+            return summary
 
-            print("=" * 60)
-            print("No Database Changes Found")
-            print("=" * 60)
+        for _, employee in dataframe.iterrows():
 
-            return
-
-        try:
-
-            print("=" * 60)
-            print("Saving Monthly OT Database...")
-            print("=" * 60)
-
-            # -----------------------------------------
-            # Sort Records
-            # -----------------------------------------
-
-            self.dataframe["Employee ID"] = (
-                self.dataframe["Employee ID"]
-                .astype(str)
+            monthly_minutes = int(
+                employee.get(
+                    "Monthly OT Minutes",
+                    0
+                )
             )
 
-            self.dataframe["Month"] = (
-                self.dataframe["Month"]
-                .astype(str)
-            )
+            if monthly_minutes > 0:
+                summary["overtime"] += 1
 
-            self.dataframe["Date"] = (
-                self.dataframe["Date"]
-                .astype(str)
-            )
+            status = str(
+                employee.get(
+                    "Monthly Status",
+                    NORMAL_STATUS
+                )
+            ).strip()
 
-            self.dataframe.sort_values(
+            if status == WARNING_STATUS:
+                summary["monthly_warning"] += 1
 
-                by=[
+            elif status == LIMIT_REACHED_STATUS:
+                summary["monthly_limit_reached"] += 1
 
-                    "Employee ID",
+            elif status == EXCEEDED_STATUS:
+                summary["monthly_ot_exceeded"] += 1
 
-                    "Month",
+        return summary
 
-                    "Date"
+    # =====================================================
+    # Monthly Reset
+    # =====================================================
 
-                ],
+    def monthly_reset(self):
 
-                ascending=True,
+        dataframe = self.load_database()
 
-                inplace=True,
+        for index in dataframe.index:
 
-                ignore_index=True
+            for day in range(1, 32):
+                dataframe.at[index, f"Day{day}"] = "00:00"
 
-            )
+            dataframe.at[index, "Monthly OT"] = "00:00"
+            dataframe.at[index, "Monthly OT Minutes"] = 0
+            dataframe.at[index, "Remaining OT"] = "25:00"
+            dataframe.at[index, "Remaining OT Minutes"] = MONTHLY_OT_LIMIT_MINUTES
+            dataframe.at[index, "Monthly Status"] = NORMAL_STATUS
+            dataframe.at[index, "Last Updated"] = datetime.now().strftime("%d-%b-%Y")
 
-            # -----------------------------------------
-            # Save Excel
-            # -----------------------------------------
+        self.save_database(dataframe)
 
-            self.dataframe.to_excel(
+    # =====================================================
+    # Employee Count
+    # =====================================================
 
-                self.database,
+    def employee_count(self):
 
-                index=False,
+        dataframe = self.load_database()
 
-                engine="openpyxl"
+        return len(dataframe)
 
-            )
-            
-            print("=" * 60)
-            print("MONTHLY OT DATABASE SAVED")
-            print(f"Database Path : {self.database}")
-            print(f"Records Saved : {len(self.dataframe)}")
-            print("=" * 60)
+    # =====================================================
+    # Delete Employee
+    # =====================================================
 
-            self.modified = False
+    def delete_employee(
+        self,
+        employee_id
+    ):
 
-            # -----------------------------------------
-            # Backup
-            # -----------------------------------------
+        dataframe = self.load_database()
 
-            self.backup_database()
+        index = self.find_employee(
+            dataframe,
+            employee_id
+        )
 
-            print("=" * 60)
-            print("Monthly OT Database Saved Successfully")
-            print("=" * 60)
+        if index is None:
+            return False
 
-        except Exception as error:
+        dataframe = dataframe.drop(index=index)
 
-            print("=" * 60)
-            print(f"Database Save Failed : {error}")
-            print("=" * 60)
+        dataframe.reset_index(
+            drop=True,
+            inplace=True
+        )
 
+        self.save_database(dataframe)
+
+        return True
+
+    # =====================================================
+    # Remove Duplicate Employees
+    # =====================================================
+
+    def remove_duplicate_employees(self):
+
+        dataframe = self.load_database()
+
+        dataframe.drop_duplicates(
+            subset=["Employee ID"],
+            keep="last",
+            inplace=True
+        )
+
+        dataframe.reset_index(
+            drop=True,
+            inplace=True
+        )
+
+        self.save_database(dataframe)
+
+        return len(dataframe)
 
     # =====================================================
     # Finalize Database
@@ -929,8 +694,19 @@ class DatabaseManager:
 
     def finalize(self):
 
-        self.save()
+        self.remove_duplicate_employees()
 
-        print("=" * 60)
-        print("Monthly OT Database Finalized")
-        print("=" * 60)
+        dataframe = self.load_database()
+
+        dataframe.sort_values(
+            by="Employee ID",
+            inplace=True
+        )
+
+        dataframe.reset_index(
+            drop=True,
+            inplace=True
+        )
+
+        self.save_database(dataframe)
+        

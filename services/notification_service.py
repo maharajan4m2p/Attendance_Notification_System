@@ -1,44 +1,48 @@
 """
 =========================================================
 Attendance Notification System Pro
-Notification Service
-Version : 10.0 Enterprise
+Enterprise Notification Service
+Version : 13.0 Enterprise
 =========================================================
 """
+
+from datetime import datetime
+
+from config import (
+    COMPANY_NAME,
+    MONTHLY_OT_LIMIT_HOURS,
+    WARNING_STATUS,
+    LIMIT_REACHED_STATUS,
+    EXCEEDED_STATUS
+)
 
 
 class NotificationService:
     """
     Enterprise Notification Service
 
-    Features
-    --------
-    • Employee Attendance Notification
-    • Daily OT Notification
-    • Monthly OT Notification
-    • Professional Message Format
-    • HR Friendly
+    Generates:
+        • Employee Notification
+        • HR Notification
+        • WhatsApp Notification
+        • Monthly OT Warning
+        • Monthly OT Limit
+        • Monthly OT Exceeded
     """
-
-    # =====================================================
-    # Initialize
-    # =====================================================
 
     def __init__(self):
 
-        self.footer = [
+        self.company = COMPANY_NAME
 
-            "",
+        self.monthly_limit = MONTHLY_OT_LIMIT_HOURS
 
-            "Regards,",
+        self.generated_time = datetime.now().strftime(
+            "%d-%b-%Y %H:%M"
+        )
 
-            "HR Department",
-
-            "Attendance Notification System Pro"
-
-        ]
+        self.separator = "=" * 60
         # =====================================================
-    # Generate Employee Notification
+    # Employee Notification
     # =====================================================
 
     def generate_message(
@@ -48,210 +52,489 @@ class NotificationService:
 
         message = []
 
-        # =====================================================
-        # Employee Information
-        # =====================================================
+        message.append(self.separator)
+        message.append(self.company)
+        message.append("EMPLOYEE ATTENDANCE NOTIFICATION")
+        message.append(self.separator)
+        message.append(f"Generated On : {self.generated_time}")
+        message.append("")
 
-        message.extend([
+        # ------------------------------------------
+        # Employee Details
+        # ------------------------------------------
 
-            "📢 Attendance Notification",
-
-            "",
-
-            f"👤 Employee : {employee.get('name', '')}",
-
-            f"🆔 Employee ID : {employee.get('employee_id', '')}",
-
-            f"🏢 Department : {employee.get('department', '')}",
-
-            f"💼 Designation : {employee.get('designation', '')}",
-
-            "",
-
-            f"📅 Attendance Date : {employee.get('attendance_date', '')}",
-
-            f"🕘 Punch In : {employee.get('punch_in', '--')}",
-
-            f"🕔 Punch Out : {employee.get('punch_out', '--')}",
-
-            ""
-
-        ])
-
-        # =====================================================
-        # Attendance Status
-        # =====================================================
-
-        status_list = employee.get(
-            "status",
-            []
+        message.append(
+            f"Employee ID      : {employee.get('employee_id', '')}"
         )
 
         message.append(
-            "📋 Attendance Status"
+            f"Employee Name    : {employee.get('name', '')}"
         )
 
-        if status_list:
+        message.append(
+            f"Department       : {employee.get('department', '')}"
+        )
 
-            for status in status_list:
+        message.append(
+            f"Designation      : {employee.get('designation', '')}"
+        )
+
+        message.append("")
+
+        # ------------------------------------------
+        # Attendance Details
+        # ------------------------------------------
+
+        message.append(
+            f"Attendance Date  : {employee.get('attendance_date', '')}"
+        )
+
+        message.append(
+            f"Punch In         : {employee.get('punch_in', '--')}"
+        )
+
+        message.append(
+            f"Punch Out        : {employee.get('punch_out', '--')}"
+        )
+
+        message.append("")
+
+        # ------------------------------------------
+        # Attendance Status
+        # ------------------------------------------
+
+        message.append("Attendance Status")
+
+        for status in employee.get("status", []):
+
+            message.append(
+                f"• {status}"
+            )
+
+        if len(employee.get("status", [])) == 0:
+
+            message.append("• On Time")
+
+        message.append("")
+
+        # ------------------------------------------
+        # Overtime Details
+        # ------------------------------------------
+
+        message.append(
+            f"Daily OT         : {employee.get('daily_ot', '00:00')}"
+        )
+
+        message.append(
+            f"Monthly OT       : {employee.get('monthly_ot', '00:00')}"
+        )
+
+        message.append(
+            f"Remaining OT     : {employee.get('remaining_ot', '25:00')}"
+        )
+
+        message.append(
+            f"Monthly Status   : {employee.get('monthly_status', 'Normal')}"
+        )
+
+        message.append("")
+
+        # ------------------------------------------
+        # Notification
+        # ------------------------------------------
+
+        monthly_status = employee.get(
+            "monthly_status",
+            ""
+        )
+
+        if monthly_status == WARNING_STATUS:
+
+            message.append(
+                "⚠ Monthly overtime is approaching the allowed limit."
+            )
+
+        elif monthly_status == LIMIT_REACHED_STATUS:
+
+            message.append(
+                "⚠ Monthly overtime limit has been reached."
+            )
+
+        elif monthly_status == EXCEEDED_STATUS:
+
+            message.append(
+                "🚨 Monthly overtime limit has been exceeded. Please contact HR."
+            )
+
+        else:
+
+            message.append(
+                "✓ Attendance processed successfully."
+            )
+
+        message.append("")
+        message.append("Thank you.")
+        message.append(self.company)
+
+        return "\n".join(message)
+    # =====================================================
+    # Monthly OT Warning
+    # =====================================================
+
+    def monthly_warning_message(
+        self,
+        employee
+    ):
+
+        message = []
+
+        message.append(self.separator)
+        message.append(self.company)
+        message.append("MONTHLY OVERTIME WARNING")
+        message.append(self.separator)
+        message.append("")
+
+        message.append(
+            f"Dear {employee.get('name','Employee')},"
+        )
+
+        message.append("")
+
+        message.append(
+            "Your monthly overtime is approaching the allowed limit."
+        )
+
+        message.append("")
+
+        message.append(
+            f"Monthly OT     : {employee.get('monthly_ot','00:00')}"
+        )
+
+        message.append(
+            f"Remaining OT   : {employee.get('remaining_ot','00:00')}"
+        )
+
+        message.append(
+            f"Status         : {employee.get('monthly_status','Normal')}"
+        )
+
+        message.append("")
+
+        message.append(
+            "Please plan your working hours accordingly."
+        )
+
+        message.append("")
+        message.append("Thank You")
+        message.append(self.company)
+
+        return "\n".join(message)
+
+    # =====================================================
+    # Monthly OT Limit Reached
+    # =====================================================
+
+    def limit_reached_message(
+        self,
+        employee
+    ):
+
+        message = []
+
+        message.append(self.separator)
+        message.append(self.company)
+        message.append("MONTHLY OVERTIME LIMIT REACHED")
+        message.append(self.separator)
+        message.append("")
+
+        message.append(
+            f"Dear {employee.get('name','Employee')},"
+        )
+
+        message.append("")
+
+        message.append(
+            "You have reached the monthly overtime limit."
+        )
+
+        message.append("")
+
+        message.append(
+            f"Monthly OT     : {employee.get('monthly_ot','00:00')}"
+        )
+
+        message.append(
+            f"Remaining OT   : {employee.get('remaining_ot','00:00')}"
+        )
+
+        message.append(
+            f"Status         : {employee.get('monthly_status','Normal')}"
+        )
+
+        message.append("")
+
+        message.append(
+            "Please contact HR if additional overtime is required."
+        )
+
+        message.append("")
+        message.append("Thank You")
+        message.append(self.company)
+
+        return "\n".join(message)
+
+    # =====================================================
+    # Monthly OT Exceeded
+    # =====================================================
+
+    def exceeded_message(
+        self,
+        employee
+    ):
+
+        message = []
+
+        message.append(self.separator)
+        message.append(self.company)
+        message.append("MONTHLY OVERTIME EXCEEDED")
+        message.append(self.separator)
+        message.append("")
+
+        message.append(
+            f"Dear {employee.get('name','Employee')},"
+        )
+
+        message.append("")
+
+        message.append(
+            "Your monthly overtime has exceeded the allowed limit."
+        )
+
+        message.append("")
+
+        message.append(
+            f"Monthly OT     : {employee.get('monthly_ot','00:00')}"
+        )
+
+        message.append(
+            f"Remaining OT   : {employee.get('remaining_ot','00:00')}"
+        )
+
+        message.append(
+            f"Status         : {employee.get('monthly_status','Exceeded')}"
+        )
+
+        message.append("")
+
+        message.append(
+            "Please contact your HR department immediately."
+        )
+
+        message.append("")
+        message.append("Thank You")
+        message.append(self.company)
+
+        return "\n".join(message)
+    # =====================================================
+    # HR Notification
+    # =====================================================
+
+    def hr_notification(
+        self,
+        employee
+    ):
+
+        message = []
+
+        message.append(self.separator)
+        message.append(self.company)
+        message.append("HR NOTIFICATION")
+        message.append(self.separator)
+
+        message.append(
+            f"Employee ID      : {employee.get('employee_id','')}"
+        )
+
+        message.append(
+            f"Employee Name    : {employee.get('name','')}"
+        )
+
+        message.append(
+            f"Department       : {employee.get('department','')}"
+        )
+
+        message.append(
+            f"Designation      : {employee.get('designation','')}"
+        )
+
+        message.append("")
+
+        message.append(
+            f"Attendance Date  : {employee.get('attendance_date','')}"
+        )
+
+        message.append(
+            f"Punch In         : {employee.get('punch_in','--')}"
+        )
+
+        message.append(
+            f"Punch Out        : {employee.get('punch_out','--')}"
+        )
+
+        message.append("")
+
+        message.append(
+            f"Daily OT         : {employee.get('daily_ot','00:00')}"
+        )
+
+        message.append(
+            f"Monthly OT       : {employee.get('monthly_ot','00:00')}"
+        )
+
+        message.append(
+            f"Remaining OT     : {employee.get('remaining_ot','25:00')}"
+        )
+
+        message.append(
+            f"Monthly Status   : {employee.get('monthly_status','Normal')}"
+        )
+
+        message.append("")
+
+        if employee.get("status"):
+
+            message.append("Attendance Remarks")
+
+            for status in employee["status"]:
 
                 message.append(
                     f"• {status}"
                 )
 
-        else:
+        return "\n".join(message)
 
-            message.append(
-                "✅ On Time"
-            )
+    # =====================================================
+    # WhatsApp Message
+    # =====================================================
 
+    def whatsapp_message(
+        self,
+        employee
+    ):
+
+        message = []
+
+        message.append(f"🏢 {self.company}")
         message.append("")
-
-        # =====================================================
-        # Daily & Monthly Status
-        # =====================================================
-
-        message.extend([
-
-            f"📌 Daily Status : {employee.get('daily_status', 'Normal')}",
-
-            f"📊 Monthly Status : {employee.get('monthly_status', 'Normal')}",
-
-            ""
-
-        ])
-
-        # =====================================================
-        # Overtime Details
-        # =====================================================
-
-        message.extend([
-
-            f"🕒 Daily OT : {employee.get('daily_ot', '00:00')}",
-
-            f"📅 Monthly OT : {employee.get('monthly_ot', '00:00')}",
-
-            f"⏳ Remaining OT : {employee.get('remaining_ot', '00:00')}",
-
-            ""
-
-        ])
-
-        # =====================================================
-        # Monthly OT Message
-        # =====================================================
-
-        monthly_status = employee.get(
-            "monthly_status",
-            "Normal"
+        message.append(
+            f"👤 {employee.get('name','')}"
         )
 
-        message.extend(
-
-            self.get_monthly_status_message(
-                monthly_status
-            )
-
+        message.append(
+            f"🆔 {employee.get('employee_id','')}"
         )
 
         message.append("")
 
-        # =====================================================
-        # Footer
-        # =====================================================
-
-        message.extend(
-            self.footer
+        message.append(
+            f"🕘 IN : {employee.get('punch_in','--')}"
         )
 
-        return "\n".join(
-            message
+        message.append(
+            f"🕕 OUT : {employee.get('punch_out','--')}"
         )
-        # =====================================================
-    # Check Employee Status
+
+        message.append("")
+
+        message.append(
+            f"🕒 Daily OT : {employee.get('daily_ot','00:00')}"
+        )
+
+        message.append(
+            f"📅 Monthly OT : {employee.get('monthly_ot','00:00')}"
+        )
+
+        message.append(
+            f"⏳ Remaining : {employee.get('remaining_ot','25:00')}"
+        )
+
+        message.append("")
+
+        if employee.get("status"):
+
+            message.append("Status")
+
+            for status in employee["status"]:
+
+                message.append(f"• {status}")
+
+        message.append("")
+        message.append("Thank You")
+
+        return "\n".join(message)
+
+    # =====================================================
+    # Notification Summary
     # =====================================================
 
-    def has_status(
+    def notification_summary(
         self,
-        employee,
-        keyword
+        employees
     ):
 
-        status_list = employee.get(
-            "status",
-            []
-        )
+        summary = {
 
-        if not status_list:
+            "total": len(employees),
 
-            return False
+            "warning": 0,
 
-        keyword = str(
-            keyword
-        ).strip().lower()
+            "limit_reached": 0,
 
-        return any(
+            "exceeded": 0,
 
-            keyword in str(status).strip().lower()
+            "late": 0,
 
-            for status in status_list
+            "early": 0,
 
-        )
-        # =====================================================
-    # Get Monthly Status Message
-    # =====================================================
+            "missing": 0,
 
-    def get_monthly_status_message(
-        self,
-        monthly_status
-    ):
-
-        monthly_status = str(
-            monthly_status
-        ).strip()
-
-        messages = {
-
-            "Normal": [
-
-                "✅ Monthly overtime is within the permitted company limit."
-
-            ],
-
-            "Warning": [
-
-                "⚠️ Monthly overtime has crossed the warning limit.",
-
-                "Please monitor your overtime hours carefully."
-
-            ],
-
-            "Limit Reached": [
-
-                "🚨 Monthly overtime limit has been reached.",
-
-                "Further overtime requires HR approval."
-
-            ],
-
-            "Exceeded": [
-
-                "❌ Monthly overtime limit has been exceeded.",
-
-                "Please contact the HR Department immediately."
-
-            ]
+            "overtime": 0
 
         }
 
-        return messages.get(
+        for employee in employees:
 
-            monthly_status,
+            monthly_status = employee.get(
+                "monthly_status",
+                ""
+            )
 
-            [
+            if monthly_status == WARNING_STATUS:
+                summary["warning"] += 1
 
-                "ℹ️ Monthly overtime status is unavailable."
+            elif monthly_status == LIMIT_REACHED_STATUS:
+                summary["limit_reached"] += 1
 
-            ]
+            elif monthly_status == EXCEEDED_STATUS:
+                summary["exceeded"] += 1
 
-        )
+            for status in employee.get("status", []):
+
+                if "Late Punch" in status:
+                    summary["late"] += 1
+
+                elif "Early Out" in status:
+                    summary["early"] += 1
+
+                elif "Missing Punch" in status:
+                    summary["missing"] += 1
+
+                elif "Daily OT" in status:
+                    summary["overtime"] += 1
+
+        return summary
+
+
+# =====================================================
+# End of Notification Service
+# =====================================================

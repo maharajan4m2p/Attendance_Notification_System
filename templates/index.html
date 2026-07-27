@@ -14,11 +14,12 @@
     content="Attendance Notification System Pro">
 
 <meta
-    name="author">
+    name="author"
+    content="Maharajan">
 
 <title>
 
-{{ app_name }}
+{{ app_name }} - Enterprise
 
 </title>
 
@@ -37,23 +38,17 @@
 <style>
 
 /* =====================================================
-   Global Styles
+   Global
 ===================================================== */
 
 *{
-
     margin:0;
-
     padding:0;
-
     box-sizing:border-box;
-
 }
 
 html{
-
     scroll-behavior:smooth;
-
 }
 
 body{
@@ -98,7 +93,7 @@ body{
 
 .developer{
 
-    color:#fff;
+    color:white;
 
     font-size:14px;
 
@@ -110,13 +105,13 @@ body{
 
 .upload-card{
 
-    background:#ffffff;
+    background:white;
 
     border-radius:22px;
 
     padding:40px;
 
-    margin-top:50px;
+    margin-top:45px;
 
     box-shadow:0 10px 30px rgba(0,0,0,.12);
 
@@ -166,13 +161,47 @@ body{
 
 .btn-upload{
 
-    padding:14px 35px;
-
-    font-size:18px;
+    padding:14px 40px;
 
     border-radius:12px;
 
+    font-size:18px;
+
     font-weight:600;
+
+}
+
+/* =====================================================
+   Dashboard Cards
+===================================================== */
+
+.dashboard-card{
+
+    border-radius:18px;
+
+    background:white;
+
+    padding:22px;
+
+    text-align:center;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+    transition:.3s;
+
+}
+
+.dashboard-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.dashboard-card i{
+
+    font-size:34px;
+
+    margin-bottom:12px;
 
 }
 
@@ -182,15 +211,15 @@ body{
 
 .feature-card{
 
-    background:#ffffff;
+    background:white;
 
     border-radius:18px;
 
     padding:25px;
 
-    height:100%;
-
     text-align:center;
+
+    height:100%;
 
     box-shadow:0 5px 15px rgba(0,0,0,.08);
 
@@ -215,34 +244,34 @@ body{
 }
 
 /* =====================================================
+   Progress
+===================================================== */
+
+.progress{
+
+    height:30px;
+
+    border-radius:12px;
+
+}
+
+/* =====================================================
    Footer
 ===================================================== */
 
 .footer{
 
-    margin-top:50px;
+    margin-top:60px;
 
-    padding:25px;
+    padding:30px;
 
     text-align:center;
 
     color:#666;
 
-    font-size:14px;
-
 }
 
-/* =====================================================
-   Responsive
-===================================================== */
-
 @media(max-width:768px){
-
-    .upload-card{
-
-        padding:25px;
-
-    }
 
     .navbar-brand{
 
@@ -250,9 +279,9 @@ body{
 
     }
 
-    .developer{
+    .upload-card{
 
-        display:none;
+        padding:25px;
 
     }
 
@@ -272,62 +301,23 @@ body{
     <div class="container">
 
         <a
-
             class="navbar-brand"
-
             href="{{ url_for('home') }}"
-
         >
 
             <i class="fa-solid fa-user-check me-2"></i>
 
-            Attendance Notification System Pro
+            {{ app_name }}
 
         </a>
 
-        <button
+        <div class="ms-auto text-white">
 
-            class="navbar-toggler"
+            <strong>
 
-            type="button"
+                Version {{ version }}
 
-            data-bs-toggle="collapse"
-
-            data-bs-target="#navbarMenu"
-
-            aria-controls="navbarMenu"
-
-            aria-expanded="false"
-
-            aria-label="Toggle navigation"
-
-        >
-
-            <span class="navbar-toggler-icon"></span>
-
-        </button>
-
-        <div
-
-            class="collapse navbar-collapse"
-
-            id="navbarMenu"
-
-        >
-
-            <ul class="navbar-nav ms-auto">
-
-                <li class="nav-item">
-
-                    <span class="developer">
-
-                        <i class="fa-solid fa-code me-1"></i>
-
-                    </span>
-
-                </li>
-
-            </ul>
+            </strong>
 
         </div>
 
@@ -336,6 +326,105 @@ body{
 </nav>
 
 <!-- ========================================= -->
+<!-- Dashboard Summary -->
+<!-- ========================================= -->
+
+<div class="container mt-4">
+
+    <div class="row g-3">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="dashboard-card">
+
+                <i class="fa-solid fa-users text-primary"></i>
+
+                <h2>
+
+                    {{ dashboard.total }}
+
+                </h2>
+
+                <p class="mb-0">
+
+                    Employees
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="dashboard-card">
+
+                <i class="fa-solid fa-business-time text-success"></i>
+
+                <h2>
+
+                    {{ dashboard.overtime }}
+
+                </h2>
+
+                <p class="mb-0">
+
+                    OT Employees
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="dashboard-card">
+
+                <i class="fa-solid fa-triangle-exclamation text-warning"></i>
+
+                <h2>
+
+                    {{ dashboard.monthly_warning }}
+
+                </h2>
+
+                <p class="mb-0">
+
+                    OT Warning
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="dashboard-card">
+
+                <i class="fa-solid fa-ban text-danger"></i>
+
+                <h2>
+
+                    {{ dashboard.monthly_ot_exceeded }}
+
+                </h2>
+
+                <p class="mb-0">
+
+                    OT Exceeded
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ========================================= -->
 <!-- Upload Section -->
 <!-- ========================================= -->
 
@@ -343,11 +432,9 @@ body{
 
     <div class="row justify-content-center">
 
-        <div class="col-xl-8 col-lg-9">
+        <div class="col-xl-9 col-lg-10">
 
             <div class="upload-card text-center">
-
-                <!-- Upload Icon -->
 
                 <div class="upload-icon">
 
@@ -355,9 +442,7 @@ body{
 
                 </div>
 
-                <!-- Heading -->
-
-                <h2 class="fw-bold mb-3">
+                <h2 class="fw-bold">
 
                     Upload Attendance File
 
@@ -365,294 +450,214 @@ body{
 
                 <p class="text-muted mb-4">
 
-                    Upload today's attendance Excel or CSV file to automatically generate attendance analysis, overtime calculations, HR reports, employee notifications, email alerts, and professional Excel reports.
+                    Upload today's attendance Excel or CSV file to automatically calculate attendance,
+                    daily overtime, monthly overtime, HR reports and employee notifications.
 
                 </p>
 
-                <!-- Enterprise Features -->
+                <!-- Flash Messages -->
 
-                <div class="row g-3 mb-4">
+                {% with messages = get_flashed_messages(with_categories=true) %}
 
-                    <div class="col-md-4">
+                {% if messages %}
 
-                        <div class="border rounded-3 p-3 h-100">
+                {% for category, message in messages %}
 
-                            <i class="fa-solid fa-users fa-2x text-primary mb-2"></i>
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
 
-                            <h6 class="fw-bold">
+                    <i class="fa-solid fa-circle-info me-2"></i>
 
-                                Employee Analysis
+                    {{ message }}
 
-                            </h6>
+                    <button
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                    </button>
 
-                            <small class="text-muted">
+                </div>
 
-                                Attendance Processing
+                {% endfor %}
 
-                            </small>
+                {% endif %}
+
+                {% endwith %}
+
+                <!-- Upload Form -->
+
+                <form
+
+                    id="uploadForm"
+
+                    action="{{ url_for('upload_file') }}"
+
+                    method="POST"
+
+                    enctype="multipart/form-data">
+
+                    <label
+
+                        class="upload-box w-100"
+
+                        for="attendance_file">
+
+                        <i class="fa-solid fa-file-excel fa-4x text-success mb-3"></i>
+
+                        <h4>
+
+                            Select Attendance File
+
+                        </h4>
+
+                        <p class="text-muted">
+
+                            Drag & Drop or Click Here
+
+                        </p>
+
+                        <input
+
+                            id="attendance_file"
+
+                            type="file"
+
+                            name="attendance_file"
+
+                            class="form-control mt-3"
+
+                            accept=".xlsx,.xls,.csv"
+
+                            required>
+
+                    </label>
+
+                    <!-- File Information -->
+
+                    <div
+                        id="fileInfo"
+                        class="mt-4"
+                        style="display:none;">
+
+                        <div class="alert alert-primary">
+
+                            <strong>Selected File</strong>
+
+                            <br>
+
+                            <span id="fileName"></span>
+
+                            <br>
+
+                            <small id="fileSize"></small>
 
                         </div>
 
                     </div>
 
-                    <div class="col-md-4">
+                    <button
 
-                        <div class="border rounded-3 p-3 h-100">
+                        id="uploadButton"
 
-                            <i class="fa-solid fa-business-time fa-2x text-success mb-2"></i>
+                        type="submit"
 
-                            <h6 class="fw-bold">
+                        class="btn btn-primary btn-upload mt-3">
 
-                                Daily & Monthly OT
+                        <i class="fa-solid fa-upload me-2"></i>
 
-                            </h6>
+                        Upload & Process
 
-                            <small class="text-muted">
+                    </button>
 
-                                Automatic Calculation
+                </form>
 
-                            </small>
+                <!-- Progress -->
 
-                        </div>
+                <div
 
-                    </div>
+                    id="progressContainer"
 
-                    <div class="col-md-4">
+                    class="progress mt-4"
 
-                        <div class="border rounded-3 p-3 h-100">
+                    style="display:none;">
 
-                            <i class="fa-solid fa-file-excel fa-2x text-warning mb-2"></i>
+                    <div
 
-                            <h6 class="fw-bold">
+                        id="progressBar"
 
-                                Excel Reports
+                        class="progress-bar progress-bar-striped progress-bar-animated"
 
-                            </h6>
+                        style="width:0%;">
 
-                            <small class="text-muted">
-
-                                Enterprise Format
-
-                            </small>
-
-                        </div>
+                        0%
 
                     </div>
 
                 </div>
 
-                <!-- ========================================= -->
-                <!-- Flash Messages -->
-                <!-- ========================================= -->
-                {% with messages = get_flashed_messages() %}
+                <!-- Features -->
 
-{% if messages %}
+                <hr class="my-5">
 
-{% for message in messages %}
+                <div class="row text-start">
 
-<div
+                    <div class="col-md-6">
 
-    class="alert alert-info alert-dismissible fade show mt-3"
+                        <h5>
 
-    role="alert"
+                            <i class="fa-solid fa-file-excel text-success me-2"></i>
 
->
+                            Supported Files
 
-    <i class="fa-solid fa-circle-info me-2"></i>
+                        </h5>
 
-    {{ message }}
+                        <ul>
 
-    <button
+                            <li>.xlsx</li>
 
-        type="button"
+                            <li>.xls</li>
 
-        class="btn-close"
+                            <li>.csv</li>
 
-        data-bs-dismiss="alert"
+                        </ul>
 
-    ></button>
+                    </div>
 
-</div>
+                    <div class="col-md-6">
 
-{% endfor %}
+                        <h5>
 
-{% endif %}
+                            <i class="fa-solid fa-circle-info text-primary me-2"></i>
 
-{% endwith %}
+                            Processing Includes
 
-<!-- ========================================= -->
-<!-- Upload Form -->
-<!-- ========================================= -->
+                        </h5>
 
-<form
+                        <ul>
 
-    id="uploadForm"
+                            <li>Attendance Analysis</li>
 
-    action="{{ url_for('upload_file') }}"
+                            <li>Late / Early Detection</li>
 
-    method="POST"
+                            <li>Daily OT</li>
 
-    enctype="multipart/form-data"
+                            <li>Monthly OT</li>
 
-    class="mt-4"
+                            <li>Employee Notifications</li>
 
->
+                            <li>HR Reports</li>
 
-    <label
+                            <li>Excel Reports</li>
 
-        for="attendance_file"
+                        </ul>
 
-        class="upload-box d-block"
+                    </div>
 
-    >
+                </div>
 
-        <i class="fa-solid fa-file-excel fa-3x text-success mb-3"></i>
+            </div>
 
-        <h5 class="fw-bold">
-
-            Choose Attendance File
-
-        </h5>
-
-        <p class="text-muted mb-3">
-
-            Drag & Drop your Excel (.xlsx, .xls) or CSV (.csv) file here,
-
-            or click to browse.
-
-        </p>
-
-        <input
-
-            id="attendance_file"
-
-            type="file"
-
-            name="attendance_file"
-
-            class="form-control"
-
-            accept=".xlsx,.xls,.csv"
-
-            required
-
-        >
-
-    </label>
-
-    <div class="mt-4">
-
-        <button
-
-            type="submit"
-
-            class="btn btn-primary btn-upload"
-
-        >
-
-            <i class="fa-solid fa-upload me-2"></i>
-
-            Upload & Process
-
-        </button>
+        </div>
 
     </div>
-
-</form>
-
-<!-- ========================================= -->
-<!-- Progress Bar -->
-<!-- ========================================= -->
-
-<div
-
-    id="progressContainer"
-
-    class="progress mt-4"
-
-    style="display:none;"
-
->
-
-    <div
-
-        id="progressBar"
-
-        class="progress-bar progress-bar-striped progress-bar-animated"
-
-        role="progressbar"
-
-        style="width:0%;"
-
-        aria-valuemin="0"
-
-        aria-valuemax="100"
-
-    >
-
-        0%
-
-    </div>
-
-</div>
-
-<hr class="my-5">
-
-<div class="row text-start">
-
-    <div class="col-md-6">
-
-        <h5>
-
-            <i class="fa-solid fa-file-excel text-success me-2"></i>
-
-            Supported Files
-
-        </h5>
-
-        <ul>
-
-            <li>Excel (.xlsx)</li>
-
-            <li>Excel (.xls)</li>
-
-            <li>CSV (.csv)</li>
-
-        </ul>
-
-    </div>
-
-    <div class="col-md-6">
-
-        <h5>
-
-            <i class="fa-solid fa-circle-info text-primary me-2"></i>
-
-            Instructions
-
-        </h5>
-
-        <ul>
-
-            <li>Select today's attendance file.</li>
-
-            <li>Click <strong>Upload & Process</strong>.</li>
-
-            <li>Wait until processing completes.</li>
-
-            <li>The dashboard opens automatically.</li>
-
-        </ul>
-
-    </div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
 
 </div>
 <!-- ========================================= -->
@@ -671,7 +676,7 @@ body{
 
         <p class="text-muted">
 
-            Powerful attendance management, overtime tracking, notifications and reporting.
+            Attendance • Daily OT • Monthly OT • HR Reports • Employee Notifications
 
         </p>
 
@@ -679,21 +684,22 @@ body{
 
     <div class="row g-4">
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-4">
 
             <div class="feature-card">
 
-                <i class="fa-solid fa-business-time"></i>
+                <i class="fa-solid fa-clock"></i>
 
-                <h5 class="fw-bold mt-3">
+                <h5 class="fw-bold">
 
-                    Daily & Monthly Overtime
+                    Daily & Monthly OT
 
                 </h5>
 
                 <p>
 
-                    Automatically calculates daily overtime, updates the monthly OT database, monitors warning limits, limit reached employees, exceeded employees and remaining overtime.
+                    Automatically calculates daily overtime, updates monthly OT,
+                    remaining OT and employee status.
 
                 </p>
 
@@ -701,21 +707,22 @@ body{
 
         </div>
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-4">
 
             <div class="feature-card">
 
-                <i class="fa-solid fa-chart-line"></i>
+                <i class="fa-solid fa-chart-column"></i>
 
-                <h5 class="fw-bold mt-3">
+                <h5 class="fw-bold">
 
-                    Enterprise Dashboard
+                    Dashboard
 
                 </h5>
 
                 <p>
 
-                    Interactive dashboard with attendance summary, charts, employee search, filters, HR reports and overtime analytics.
+                    Live employee summary, OT warning,
+                    exceeded employees and attendance analytics.
 
                 </p>
 
@@ -723,21 +730,23 @@ body{
 
         </div>
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-4">
 
             <div class="feature-card">
 
                 <i class="fa-solid fa-envelope"></i>
 
-                <h5 class="fw-bold mt-3">
+                <h5 class="fw-bold">
 
-                    Automatic Notifications
+                    Notifications
 
                 </h5>
 
                 <p>
 
-                    Automatically generates employee notifications, HR WhatsApp reports, email alerts and downloadable reports.
+                    Automatic employee notification,
+                    HR report,
+                    Email and WhatsApp report generation.
 
                 </p>
 
@@ -745,21 +754,24 @@ body{
 
         </div>
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-4">
 
             <div class="feature-card">
 
                 <i class="fa-solid fa-database"></i>
 
-                <h5 class="fw-bold mt-3">
+                <h5 class="fw-bold">
 
-                    Monthly OT Database
+                    Monthly Database
 
                 </h5>
 
                 <p>
 
-                    Stores monthly overtime history with duplicate protection, automatic updates and backup support.
+                    Stores Day1-Day31 overtime,
+                    Monthly OT,
+                    Remaining OT,
+                    Monthly Status.
 
                 </p>
 
@@ -767,13 +779,13 @@ body{
 
         </div>
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-4">
 
             <div class="feature-card">
 
                 <i class="fa-solid fa-users"></i>
 
-                <h5 class="fw-bold mt-3">
+                <h5 class="fw-bold">
 
                     Employee Management
 
@@ -781,7 +793,11 @@ body{
 
                 <p>
 
-                    View attendance, overtime status, remaining OT, monthly status and notification history from one dashboard.
+                    Search employees,
+                    View attendance,
+                    Monthly OT,
+                    Remaining OT,
+                    Employee Status.
 
                 </p>
 
@@ -789,21 +805,23 @@ body{
 
         </div>
 
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-4">
 
             <div class="feature-card">
 
                 <i class="fa-solid fa-file-excel"></i>
 
-                <h5 class="fw-bold mt-3">
+                <h5 class="fw-bold">
 
-                    Professional Reports
+                    Excel Reports
 
                 </h5>
 
                 <p>
 
-                    Export beautifully formatted Excel reports with automatic filters, colors, summaries and column sizing.
+                    Attendance Report,
+                    Monthly OT Report,
+                    Employee Database Export.
 
                 </p>
 
@@ -823,7 +841,7 @@ body{
 
     <strong>
 
-        Attendance Notification System Pro
+        {{ app_name }}
 
     </strong>
 
@@ -831,240 +849,124 @@ body{
 
     <span>
 
-        Version 10.0 Enterprise
+        Version {{ version }}
 
     </span>
 
-    <br>
-
     <br><br>
+
+    <small>
+
+        ADISTHAM VENTURES PRIVATE LIMITED
+
+    </small>
+
+    <br>
 
     <small class="text-muted">
 
-        Daily Attendance • Monthly OT • HR Reports • Employee Notifications • Email Alerts • Excel Reports
+        Attendance • Overtime • Reports • Notifications
 
     </small>
 
 </footer>
 
+<!-- Bootstrap -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-// =====================================================
-// Attendance Notification System Pro
-// Enterprise JavaScript v10.0
-// =====================================================
+
+<script>
 
 "use strict";
 
 const uploadForm = document.getElementById("uploadForm");
+
 const fileInput = document.getElementById("attendance_file");
+
 const progressContainer = document.getElementById("progressContainer");
+
 const progressBar = document.getElementById("progressBar");
-const uploadBox = document.querySelector(".upload-box");
 
-// =====================================================
-// Configuration
-// =====================================================
+const uploadButton = document.getElementById("uploadButton");
 
-const ALLOWED_EXTENSIONS = [
+const fileInfo = document.getElementById("fileInfo");
 
-    "xlsx",
+const fileName = document.getElementById("fileName");
 
-    "xls",
+const fileSize = document.getElementById("fileSize");
 
-    "csv"
+if(fileInput){
 
-];
+    fileInput.addEventListener("change",function(){
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
+        if(!this.files.length){
 
-// =====================================================
-// File Validation
-// =====================================================
-
-if (fileInput) {
-
-    fileInput.addEventListener("change", function () {
-
-        if (!this.files.length) {
+            fileInfo.style.display="none";
 
             return;
 
         }
 
-        const file = this.files[0];
+        const file=this.files[0];
 
-        const extension = file.name
+        fileInfo.style.display="block";
 
-            .split(".")
+        fileName.textContent=file.name;
 
-            .pop()
-
-            .toLowerCase();
-
-        if (!ALLOWED_EXTENSIONS.includes(extension)) {
-
-            alert("Only Excel (.xlsx, .xls) and CSV (.csv) files are allowed.");
-
-            this.value = "";
-
-            return;
-
-        }
-
-        if (file.size > MAX_FILE_SIZE) {
-
-            alert("File size should not exceed 25 MB.");
-
-            this.value = "";
-
-            return;
-
-        }
-
-        console.log("Selected File:", file.name);
+        fileSize.textContent=(file.size/1024/1024).toFixed(2)+" MB";
 
     });
 
 }
 
-// =====================================================
-// Upload Progress
-// =====================================================
+if(uploadForm){
 
-if (uploadForm) {
+    uploadForm.addEventListener("submit",function(){
 
-    uploadForm.addEventListener("submit", function () {
+        uploadButton.disabled=true;
 
-        progressContainer.style.display = "block";
+        uploadButton.innerHTML=
 
-        let progress = 0;
+        "<i class='fa-solid fa-spinner fa-spin me-2'></i>Processing...";
 
-        progressBar.style.width = "0%";
+        progressContainer.style.display="block";
 
-        progressBar.textContent = "0%";
+        let progress=0;
 
-        const timer = setInterval(function () {
+        const timer=setInterval(function(){
 
-            progress += 4;
+            progress+=2;
 
-            if (progress >= 96) {
+            if(progress>=95){
 
-                progress = 96;
+                progress=95;
 
                 clearInterval(timer);
 
             }
 
-            progressBar.style.width = progress + "%";
+            progressBar.style.width=progress+"%";
 
-            progressBar.textContent = progress + "%";
+            progressBar.innerHTML=progress+"%";
 
-        }, 120);
-
-    });
-
-}
-
-// =====================================================
-// Drag & Drop Upload
-// =====================================================
-
-if (uploadBox) {
-
-    uploadBox.addEventListener("dragover", function (event) {
-
-        event.preventDefault();
-
-        uploadBox.style.background = "#dbeafe";
-
-        uploadBox.style.borderColor = "#2563eb";
-
-    });
-
-    uploadBox.addEventListener("dragleave", function () {
-
-        uploadBox.style.background = "#f8fbff";
-
-        uploadBox.style.borderColor = "#0d6efd";
-
-    });
-
-    uploadBox.addEventListener("drop", function (event) {
-
-        event.preventDefault();
-
-        uploadBox.style.background = "#f8fbff";
-
-        uploadBox.style.borderColor = "#0d6efd";
-
-        if (event.dataTransfer.files.length) {
-
-            fileInput.files = event.dataTransfer.files;
-
-            fileInput.dispatchEvent(new Event("change"));
-
-        }
+        },100);
 
     });
 
 }
 
-// =====================================================
-// Prevent Multiple Submit
-// =====================================================
+console.log("================================");
 
-if (uploadForm) {
+console.log("Attendance Notification System");
 
-    uploadForm.addEventListener("submit", function () {
+console.log("Enterprise Version {{ version }}");
 
-        const button = this.querySelector("button[type='submit']");
+console.log("Home Page Loaded");
 
-        if (button) {
+console.log("================================");
 
-            button.disabled = true;
+</script>
 
-            button.innerHTML =
+</body>
 
-                "<i class='fa-solid fa-spinner fa-spin me-2'></i>Processing Attendance...";
-
-        }
-
-    });
-
-}
-
-// =====================================================
-// Keyboard Shortcut
-// =====================================================
-
-document.addEventListener("keydown", function (event) {
-
-    if (event.key === "Escape") {
-
-        if (progressContainer) {
-
-            progressContainer.style.display = "none";
-
-        }
-
-    }
-
-});
-
-// =====================================================
-// Page Loaded
-// =====================================================
-
-window.addEventListener("load", function () {
-
-    console.log("======================================");
-
-    console.log("Attendance Notification System Pro");
-
-    console.log("Version : 10.0 Enterprise");
-
-    console.log("Upload Page Loaded Successfully");
-
-    console.log("======================================");
-
-});
+</html>

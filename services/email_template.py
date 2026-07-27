@@ -1,18 +1,23 @@
 """
 =========================================================
 Attendance Notification System Pro
-Email Template
-Version : 10.0 Enterprise
+Enterprise Email Template
+Version : 13.0 Enterprise
 =========================================================
 """
 
+from datetime import datetime
+
 from config import (
     COMPANY_NAME,
-    HR_NAME,
     SHIFT_START,
     SHIFT_END,
     DAILY_OT_LIMIT,
-    MONTHLY_OT_LIMIT
+    MONTHLY_OT_LIMIT_HOURS,
+    NORMAL_STATUS,
+    WARNING_STATUS,
+    LIMIT_REACHED_STATUS,
+    EXCEEDED_STATUS,
 )
 
 
@@ -22,49 +27,34 @@ class EmailTemplate:
 
     Features
     --------
-    • Employee Attendance Summary
-    • Daily Attendance Status
-    • Monthly Overtime Status
-    • Company Policy
-    • Professional Email Format
+    ✓ Employee Attendance Summary
+    ✓ Daily Attendance Status
+    ✓ Monthly OT Status
+    ✓ Company Policy
+    ✓ Professional Email Format
+    ✓ HTML Email Support
     """
-
-    # =====================================================
-    # Initialize
-    # =====================================================
 
     def __init__(self):
 
+        self.company = COMPANY_NAME
+
         self.subject = (
             f"{COMPANY_NAME} - Attendance Notification"
+        )
+
+        self.generated_on = datetime.now().strftime(
+            "%d-%b-%Y %H:%M"
         )
         # =====================================================
     # Generate Email
     # =====================================================
 
-    def generate(
+    def generate(self, employee):
 
-        self,
+        status = employee.get("status", [])
 
-        employee
-
-    ):
-
-        status = employee.get(
-
-            "status",
-
-            []
-
-        )
-
-        if isinstance(
-
-            status,
-
-            list
-
-        ):
+        if isinstance(status, list):
 
             status_text = ", ".join(status)
 
@@ -79,7 +69,7 @@ class EmailTemplate:
         body = f"""
 Dear {employee.get('name', 'Employee')},
 
-Greetings from {COMPANY_NAME}.
+Greetings from {self.company}.
 
 Your attendance has been processed successfully.
 
@@ -117,11 +107,11 @@ OVERTIME DETAILS
 
 Daily OT           : {employee.get('daily_ot', '00:00')}
 
-Daily Status       : {employee.get('daily_status', 'Normal')}
+Daily Status       : {employee.get('daily_status', NORMAL_STATUS)}
 
 Monthly OT         : {employee.get('monthly_ot', '00:00')}
 
-Monthly Status     : {employee.get('monthly_status', 'Normal')}
+Monthly Status     : {employee.get('monthly_status', NORMAL_STATUS)}
 
 Remaining OT       : {employee.get('remaining_ot', '00:00')}
 
@@ -139,21 +129,18 @@ Shift Timing       : {SHIFT_START} - {SHIFT_END}
 
 Daily OT Limit     : {DAILY_OT_LIMIT} Minutes
 
-Monthly OT Limit   : {MONTHLY_OT_LIMIT} Hours
+Monthly OT Limit   : {MONTHLY_OT_LIMIT_HOURS} Hours
 """
 # =====================================================
         # Monthly OT Status
         # =====================================================
 
         monthly_status = employee.get(
-
             "monthly_status",
-
-            "Normal"
-
+            NORMAL_STATUS
         )
 
-        if monthly_status == "Warning":
+        if monthly_status == WARNING_STATUS:
 
             body += """
 
@@ -163,13 +150,13 @@ Monthly OT Limit   : {MONTHLY_OT_LIMIT} Hours
 
 Your monthly overtime has crossed the company warning limit.
 
-Please monitor your overtime hours carefully.
+Please monitor your overtime carefully.
 
 Contact your Reporting Manager if additional overtime is required.
 
 """
 
-        elif monthly_status == "Limit Reached":
+        elif monthly_status == LIMIT_REACHED_STATUS:
 
             body += """
 
@@ -183,7 +170,7 @@ Any additional overtime requires prior approval from the HR Department.
 
 """
 
-        elif monthly_status == "Exceeded":
+        elif monthly_status == EXCEEDED_STATUS:
 
             body += """
 
@@ -193,7 +180,7 @@ Any additional overtime requires prior approval from the HR Department.
 
 Your monthly overtime has exceeded the company limit.
 
-Please contact the HR Department immediately for further guidance.
+Please contact the HR Department immediately.
 
 """
 
@@ -210,7 +197,8 @@ Your monthly overtime is within the permitted company limit.
 Keep maintaining your attendance.
 
 """
-# =====================================================
+
+        # =====================================================
         # Footer
         # =====================================================
 
@@ -221,15 +209,18 @@ Keep maintaining your attendance.
 If you have any questions regarding your attendance,
 please contact your Reporting Manager or the HR Department.
 
+Generated On : {self.generated_on}
+
 Regards,
 
-{HR_NAME}
+HR Department
 
-{COMPANY_NAME}
+{self.company}
 
 ----------------------------------------------------
 
 This is an automatically generated email from
+
 Attendance Notification System Pro.
 
 Please do not reply to this email.
@@ -238,9 +229,6 @@ Please do not reply to this email.
 """
 
         return (
-
             self.subject,
-
             body
-
         )
