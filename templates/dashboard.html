@@ -35,9 +35,9 @@ body{
 
 }
 
-/* =====================================================
+/* ==========================================
 Navbar
-===================================================== */
+========================================== */
 
 .navbar{
 
@@ -59,15 +59,15 @@ Navbar
 
 .version{
 
-    color:white;
+    color:#fff;
 
     font-size:15px;
 
 }
 
-/* =====================================================
+/* ==========================================
 Summary Cards
-===================================================== */
+========================================== */
 
 .summary-card{
 
@@ -123,7 +123,7 @@ Summary Cards
 
     background:#ffc107;
 
-    color:black;
+    color:#000;
 
 }
 
@@ -139,9 +139,9 @@ Summary Cards
 
 }
 
-/* =====================================================
+/* ==========================================
 Cards
-===================================================== */
+========================================== */
 
 .card{
 
@@ -159,9 +159,9 @@ Cards
 
 }
 
-/* =====================================================
+/* ==========================================
 Table
-===================================================== */
+========================================== */
 
 .table thead{
 
@@ -179,9 +179,9 @@ Table
 
 }
 
-/* =====================================================
+/* ==========================================
 Buttons
-===================================================== */
+========================================== */
 
 .btn{
 
@@ -189,9 +189,9 @@ Buttons
 
 }
 
-/* =====================================================
+/* ==========================================
 Footer
-===================================================== */
+========================================== */
 
 .footer{
 
@@ -218,6 +218,9 @@ Footer
 </style>
 
 </head>
+
+<body>
+
 <!-- ========================================= -->
 <!-- Dashboard Actions -->
 <!-- ========================================= -->
@@ -231,6 +234,8 @@ Footer
             <div class="col-lg-3">
 
                 <a
+
+                    id="attendanceDownload"
 
                     href="{{ url_for('download_report') }}"
 
@@ -248,6 +253,8 @@ Footer
 
                 <a
 
+                    id="monthlyDownload"
+
                     href="{{ url_for('download_monthly') }}"
 
                     class="btn btn-warning w-100">
@@ -263,6 +270,8 @@ Footer
             <div class="col-lg-3">
 
                 <a
+
+                    id="databaseDownload"
 
                     href="{{ url_for('download_database') }}"
 
@@ -280,15 +289,17 @@ Footer
 
                 <form
 
+                    id="emailForm"
+
                     action="{{ url_for('send_batch') }}"
 
                     method="POST">
 
                     <button
 
-                        class="btn btn-danger w-100"
+                        type="submit"
 
-                        type="submit">
+                        class="btn btn-danger w-100">
 
                         <i class="fa-solid fa-envelope me-2"></i>
 
@@ -307,16 +318,22 @@ Footer
 </div>
 
 <!-- ========================================= -->
-<!-- Search Employee -->
+<!-- Search + Monthly OT Filter -->
 <!-- ========================================= -->
 
 <div class="card mt-4">
 
     <div class="card-body">
 
-        <div class="row">
+        <div class="row g-3 align-items-end">
 
             <div class="col-md-6">
+
+                <label class="form-label fw-bold">
+
+                    Search Employee
+
+                </label>
 
                 <input
 
@@ -327,6 +344,52 @@ Footer
                     class="form-control"
 
                     placeholder="Search Employee ID / Name / Department...">
+
+            </div>
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-bold">
+
+                    Monthly OT Status
+
+                </label>
+
+                <select
+
+                    id="otStatusFilter"
+
+                    class="form-select">
+
+                    <option value="All">All</option>
+
+                    <option value="Normal">Normal</option>
+
+                    <option value="Warning">Warning</option>
+
+                    <option value="Limit Reached">Limit Reached</option>
+
+                    <option value="Exceeded">Exceeded</option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <button
+
+                    type="button"
+
+                    class="btn btn-secondary w-100"
+
+                    onclick="clearSearch()">
+
+                    <i class="fa-solid fa-filter-circle-xmark me-2"></i>
+
+                    Clear Filter
+
+                </button>
 
             </div>
 
@@ -385,7 +448,7 @@ Footer
 
                         <th>Remaining OT</th>
 
-                        <th>Status</th>
+                        <th>Monthly Status</th>
 
                         <th>Action</th>
 
@@ -397,7 +460,17 @@ Footer
 
                 {% for emp in employees %}
 
-                <tr>
+                <tr
+
+                    data-status="{{ emp.monthly_status }}"
+
+                    data-id="{{ emp.employee_id }}"
+
+                    data-name="{{ emp.name }}"
+
+                    data-department="{{ emp.department }}"
+
+                    data-designation="{{ emp.designation }}">
 
                     <td>{{ emp.employee_id }}</td>
 
@@ -487,31 +560,31 @@ Footer
 
                             onclick="showEmployee(
 
-                            '{{ emp.employee_id }}',
+                                '{{ emp.employee_id }}',
 
-                            '{{ emp.name }}',
+                                '{{ emp.name }}',
 
-                            '{{ emp.department }}',
+                                '{{ emp.department }}',
 
-                            '{{ emp.designation }}',
+                                '{{ emp.designation }}',
 
-                            '{{ emp.attendance_date }}',
+                                '{{ emp.attendance_date }}',
 
-                            '{{ emp.punch_in }}',
+                                '{{ emp.punch_in }}',
 
-                            '{{ emp.punch_out }}',
+                                '{{ emp.punch_out }}',
 
-                            '{{ emp.daily_ot }}',
+                                '{{ emp.daily_ot }}',
 
-                            '{{ emp.monthly_ot }}',
+                                '{{ emp.monthly_ot }}',
 
-                            '{{ emp.remaining_ot }}',
+                                '{{ emp.remaining_ot }}',
 
-                            '{{ emp.daily_status }}',
+                                '{{ emp.daily_status }}',
 
-                            '{{ emp.monthly_status }}',
+                                '{{ emp.monthly_status }}',
 
-                            `{{ emp.notification|default('', true) }}`
+                                `{{ emp.notification|default('', true) }}`
 
                             )">
 
@@ -534,7 +607,6 @@ Footer
     </div>
 
 </div>
-
 <!-- ========================================= -->
 <!-- Top 10 Monthly OT Employees -->
 <!-- ========================================= -->
@@ -577,6 +649,8 @@ Footer
 
         <h5 class="mb-0">
 
+            <i class="fa-solid fa-file-lines me-2"></i>
+
             HR Report
 
         </h5>
@@ -595,13 +669,15 @@ Footer
 
             readonly>{{ hr_report }}</textarea>
 
-        <div class="mt-3">
+        <div class="mt-3 d-flex gap-2">
 
             <button
 
                 class="btn btn-primary"
 
                 onclick="copyHRReport()">
+
+                <i class="fa-solid fa-copy me-2"></i>
 
                 Copy HR Report
 
@@ -612,6 +688,8 @@ Footer
                 class="btn btn-success"
 
                 onclick="sendHRReport()">
+
+                <i class="fa-brands fa-whatsapp me-2"></i>
 
                 WhatsApp HR Report
 
@@ -633,6 +711,8 @@ Footer
 
         <h5 class="mb-0">
 
+            <i class="fa-solid fa-clock me-2"></i>
+
             Late Punch Report
 
         </h5>
@@ -651,13 +731,15 @@ Footer
 
             readonly>{{ late_punch_report }}</textarea>
 
-        <div class="mt-3">
+        <div class="mt-3 d-flex gap-2">
 
             <button
 
                 class="btn btn-primary"
 
                 onclick="copyLatePunchReport()">
+
+                <i class="fa-solid fa-copy me-2"></i>
 
                 Copy
 
@@ -668,6 +750,8 @@ Footer
                 class="btn btn-success"
 
                 onclick="sendLatePunchReport()">
+
+                <i class="fa-brands fa-whatsapp me-2"></i>
 
                 WhatsApp
 
@@ -683,31 +767,48 @@ Footer
 <!-- ========================================= -->
 
 <div
+
     class="modal fade"
+
     id="employeeModal"
-    tabindex="-1">
+
+    tabindex="-1"
+
+    aria-hidden="true">
 
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
 
         <div class="modal-content">
 
+            <!-- =============================== -->
+            <!-- Header -->
+            <!-- =============================== -->
+
             <div class="modal-header bg-primary text-white">
 
                 <h5 class="modal-title">
 
-                    <i class="fa-solid fa-user"></i>
+                    <i class="fa-solid fa-user me-2"></i>
 
                     Employee Details
 
                 </h5>
 
                 <button
+
                     type="button"
+
                     class="btn-close btn-close-white"
+
                     data-bs-dismiss="modal">
+
                 </button>
 
             </div>
+
+            <!-- =============================== -->
+            <!-- Body -->
+            <!-- =============================== -->
 
             <div class="modal-body">
 
@@ -715,7 +816,7 @@ Footer
 
                 <div class="row">
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
 
                         <strong>Employee ID</strong>
 
@@ -723,7 +824,7 @@ Footer
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
 
                         <strong>Name</strong>
 
@@ -731,7 +832,7 @@ Footer
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
 
                         <strong>Department</strong>
 
@@ -739,11 +840,7 @@ Footer
 
                     </div>
 
-                </div>
-
-                <div class="row">
-
-                    <div class="col-md-4">
+                    <div class="col-md-3">
 
                         <strong>Designation</strong>
 
@@ -751,21 +848,17 @@ Footer
 
                     </div>
 
-                    <div class="col-md-4">
+                </div>
 
-                        <strong>Date</strong>
+                <div class="row">
+
+                    <div class="col-md-3">
+
+                        <strong>Attendance Date</strong>
 
                         <p id="mDate"></p>
 
                     </div>
-
-                </div>
-
-                <hr>
-
-                <!-- Attendance -->
-
-                <div class="row">
 
                     <div class="col-md-3">
 
@@ -791,17 +884,17 @@ Footer
 
                     </div>
 
-                    <div class="col-md-3">
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4">
 
                         <strong>Monthly OT</strong>
 
                         <p id="mMonthlyOT"></p>
 
                     </div>
-
-                </div>
-
-                <div class="row">
 
                     <div class="col-md-4">
 
@@ -811,24 +904,34 @@ Footer
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-2">
 
                         <strong>Daily Status</strong>
 
+                        <br>
+
                         <span
+
                             id="mDailyStatus"
+
                             class="badge">
+
                         </span>
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-2">
 
                         <strong>Monthly Status</strong>
 
+                        <br>
+
                         <span
+
                             id="mMonthlyStatus"
+
                             class="badge">
+
                         </span>
 
                     </div>
@@ -847,7 +950,9 @@ Footer
 
                 <div class="table-responsive">
 
-                    <table class="table table-bordered table-sm">
+                    <table
+
+                        class="table table-bordered table-sm">
 
                         <thead class="table-primary">
 
@@ -873,7 +978,9 @@ Footer
 
                                 {% for day in range(1,32) %}
 
-                                <td id="mDay{{ day }}">
+                                <td
+
+                                    id="mDay{{ day }}">
 
                                     --
 
@@ -891,7 +998,7 @@ Footer
 
                 <hr>
 
-                <!-- Notification -->
+                <!-- Employee Notification -->
 
                 <label class="form-label">
 
@@ -913,6 +1020,10 @@ Footer
 
             </div>
 
+            <!-- =============================== -->
+            <!-- Footer -->
+            <!-- =============================== -->
+
             <div class="modal-footer">
 
                 <button
@@ -921,7 +1032,7 @@ Footer
 
                     onclick="copyNotification()">
 
-                    <i class="fa-solid fa-copy"></i>
+                    <i class="fa-solid fa-copy me-2"></i>
 
                     Copy
 
@@ -933,7 +1044,7 @@ Footer
 
                     onclick="addToReport()">
 
-                    <i class="fa-solid fa-plus"></i>
+                    <i class="fa-solid fa-plus me-2"></i>
 
                     Add To HR Report
 
@@ -945,7 +1056,7 @@ Footer
 
                     onclick="window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('mNotification').value),'_blank')">
 
-                    <i class="fa-brands fa-whatsapp"></i>
+                    <i class="fa-brands fa-whatsapp me-2"></i>
 
                     WhatsApp
 
@@ -968,68 +1079,156 @@ Footer
     </div>
 
 </div>
-<script>
-
 "use strict";
 
 // ==============================================
-// Employee Search
+// Employee Search + Monthly OT Filter
 // ==============================================
 
-const employeeSearch = document.getElementById("employeeSearch");
+const employeeSearch =
+    document.getElementById("employeeSearch");
 
-if (employeeSearch) {
+const otStatusFilter =
+    document.getElementById("otStatusFilter");
 
-    employeeSearch.addEventListener("keyup", function () {
+function filterEmployees() {
 
-        const keyword = this.value.toLowerCase();
+    const keyword =
+        employeeSearch.value.toLowerCase().trim();
 
-        document.querySelectorAll("#employeeTable tbody tr").forEach(function (row) {
+    const status =
+        otStatusFilter.value;
 
-            row.style.display = row.innerText.toLowerCase().includes(keyword)
-                ? ""
-                : "none";
+    const rows =
+        document.querySelectorAll(
+            "#employeeTable tbody tr"
+        );
 
-        });
+    rows.forEach(function(row){
+
+        const rowText =
+            row.innerText.toLowerCase();
+
+        const rowStatus =
+            row.dataset.status;
+
+        const searchMatch =
+            rowText.includes(keyword);
+
+        const statusMatch =
+            status === "All" ||
+            rowStatus === status;
+
+        row.style.display =
+            (searchMatch && statusMatch)
+            ? ""
+            : "none";
 
     });
 
+    // Attendance Report
+
+    document.getElementById(
+        "attendanceDownload"
+    ).href =
+        "/download?status=" +
+        encodeURIComponent(status);
+
+    // Monthly OT Report
+
+    document.getElementById(
+        "monthlyDownload"
+    ).href =
+        "/download_monthly?status=" +
+        encodeURIComponent(status);
+
+    // Database
+
+    document.getElementById(
+        "databaseDownload"
+    ).href =
+        "/download_database?status=" +
+        encodeURIComponent(status);
+
+    // Email Form
+
+    document.getElementById(
+        "emailForm"
+    ).action =
+        "/send_emails?status=" +
+        encodeURIComponent(status);
+
 }
+
+employeeSearch.addEventListener(
+    "keyup",
+    filterEmployees
+);
+
+otStatusFilter.addEventListener(
+    "change",
+    filterEmployees
+);
+
+filterEmployees();
 
 // ==============================================
 // Status Badge
 // ==============================================
 
-function setBadge(id, status) {
+function setBadge(id, status){
 
-    const badge = document.getElementById(id);
+    const badge =
+        document.getElementById(id);
+
+    if(!badge) return;
 
     badge.className = "badge";
 
-    switch (status) {
+    switch(status){
 
         case "Normal":
-            badge.classList.add("bg-success");
+
+            badge.classList.add(
+                "bg-success"
+            );
+
             break;
 
         case "Warning":
-            badge.classList.add("bg-warning", "text-dark");
+
+            badge.classList.add(
+                "bg-warning",
+                "text-dark"
+            );
+
             break;
 
         case "Limit Reached":
-            badge.classList.add("bg-dark");
+
+            badge.classList.add(
+                "bg-dark"
+            );
+
             break;
 
         case "Exceeded":
-            badge.classList.add("bg-danger");
+
+            badge.classList.add(
+                "bg-danger"
+            );
+
             break;
 
         default:
-            badge.classList.add("bg-secondary");
+
+            badge.classList.add(
+                "bg-secondary"
+            );
 
     }
 
-    badge.innerHTML = status;
+    badge.textContent = status;
 
 }
 
@@ -1079,45 +1278,63 @@ function showEmployee(
 
     setBadge("mMonthlyStatus", monthlyStatus);
 
-    document.getElementById("mNotification").value = notification;
-
-    // Reset Day1-Day31
+    document.getElementById(
+        "mNotification"
+    ).value =
+        notification || "";
 
     for(let i=1;i<=31;i++){
 
-        const cell=document.getElementById("mDay"+i);
+        const cell =
+            document.getElementById(
+                "mDay"+i
+            );
 
         if(cell){
 
-            cell.innerHTML="--";
+            cell.textContent="--";
 
         }
 
     }
 
-    const modal=new bootstrap.Modal(
+    new bootstrap.Modal(
 
-        document.getElementById("employeeModal")
+        document.getElementById(
+            "employeeModal"
+        )
 
-    );
-
-    modal.show();
+    ).show();
 
 }
-
 // ==============================================
 // Copy Notification
 // ==============================================
 
 function copyNotification(){
 
-    navigator.clipboard.writeText(
+    const text =
+        document.getElementById(
+            "mNotification"
+        ).value;
 
-        document.getElementById("mNotification").value
+    navigator.clipboard.writeText(text)
 
-    );
+    .then(function(){
 
-    alert("Notification copied successfully.");
+        alert(
+            "Notification copied successfully."
+        );
+
+    })
+
+    .catch(function(){
+
+        alert(
+            "Unable to copy notification."
+        );
+
+    });
 
 }
 
@@ -1127,13 +1344,28 @@ function copyNotification(){
 
 function copyHRReport(){
 
-    navigator.clipboard.writeText(
+    const text =
+        document.getElementById(
+            "hrReport"
+        ).value;
 
-        document.getElementById("hrReport").value
+    navigator.clipboard.writeText(text)
 
-    );
+    .then(function(){
 
-    alert("HR Report copied.");
+        alert(
+            "HR Report copied successfully."
+        );
+
+    })
+
+    .catch(function(){
+
+        alert(
+            "Unable to copy HR Report."
+        );
+
+    });
 
 }
 
@@ -1143,49 +1375,56 @@ function copyHRReport(){
 
 function copyLatePunchReport(){
 
-    navigator.clipboard.writeText(
+    const text =
+        document.getElementById(
+            "latePunchReport"
+        ).value;
 
-        document.getElementById("latePunchReport").value
+    navigator.clipboard.writeText(text)
 
-    );
+    .then(function(){
 
-    alert("Late Punch Report copied.");
+        alert(
+            "Late Punch Report copied."
+        );
+
+    })
+
+    .catch(function(){
+
+        alert(
+            "Unable to copy report."
+        );
+
+    });
 
 }
 
 // ==============================================
-// WhatsApp Reports
+// WhatsApp HR Report
 // ==============================================
 
 function sendHRReport(){
 
-    window.open(
+    const report =
+        document.getElementById(
+            "hrReport"
+        ).value;
 
-        "https://wa.me/?text="+
+    if(report.trim()===""){
 
-        encodeURIComponent(
+        alert(
+            "HR Report is empty."
+        );
 
-            document.getElementById("hrReport").value
+        return;
 
-        ),
-
-        "_blank"
-
-    );
-
-}
-
-function sendLatePunchReport(){
+    }
 
     window.open(
 
         "https://wa.me/?text="+
-
-        encodeURIComponent(
-
-            document.getElementById("latePunchReport").value
-
-        ),
+        encodeURIComponent(report),
 
         "_blank"
 
@@ -1194,22 +1433,92 @@ function sendLatePunchReport(){
 }
 
 // ==============================================
-// Add Employee Notification to HR Report
+// WhatsApp Late Punch Report
+// ==============================================
+
+function sendLatePunchReport(){
+
+    const report =
+        document.getElementById(
+            "latePunchReport"
+        ).value;
+
+    if(report.trim()===""){
+
+        alert(
+            "Late Punch Report is empty."
+        );
+
+        return;
+
+    }
+
+    window.open(
+
+        "https://wa.me/?text="+
+        encodeURIComponent(report),
+
+        "_blank"
+
+    );
+
+}
+
+// ==============================================
+// Add Employee Notification
 // ==============================================
 
 function addToReport(){
 
-    const report=document.getElementById("hrReport");
+    const report =
+        document.getElementById(
+            "hrReport"
+        );
 
-    const notification=document.getElementById("mNotification").value;
+    const notification =
+        document.getElementById(
+            "mNotification"
+        ).value.trim();
 
-    report.value +=
+    if(notification===""){
 
-        "\n\n----------------------------------------\n\n"+
+        alert(
+            "No notification available."
+        );
 
-        notification;
+        return;
 
-    alert("Added successfully.");
+    }
+
+    if(
+
+        !report.value.includes(notification)
+
+    ){
+
+        report.value +=
+
+            "\n\n----------------------------------------\n\n"+
+
+            notification;
+
+        alert(
+
+            "Employee added to HR Report."
+
+        );
+
+    }
+
+    else{
+
+        alert(
+
+            "Employee already exists in HR Report."
+
+        );
+
+    }
 
 }
 
@@ -1217,15 +1526,49 @@ function addToReport(){
 // Dashboard Loaded
 // ==============================================
 
-window.onload=function(){
+window.addEventListener(
 
-    console.log("====================================");
+    "load",
 
-    console.log("Attendance Notification System Pro");
+    function(){
 
-    console.log("Enterprise Dashboard Loaded");
+        console.log(
+            "Attendance Notification System Pro Loaded"
+        );
 
-    console.log("====================================");
+        const filter =
+            document.getElementById(
+                "otStatusFilter"
+            );
+
+        if(filter){
+
+            filter.value =
+                "{{ selected_status|default('All') }}";
+
+        }
+
+        filterEmployees();
+
+    }
+
+);
+
+// ==============================================
+// Clear Search
+// ==============================================
+
+function clearSearch(){
+
+    document.getElementById(
+        "employeeSearch"
+    ).value="";
+
+    document.getElementById(
+        "otStatusFilter"
+    ).value="All";
+
+    filterEmployees();
 
 }
 

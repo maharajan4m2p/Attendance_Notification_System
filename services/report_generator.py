@@ -51,88 +51,69 @@ class ReportGenerator:
             filename
         )
 
-        records = []
+        records = [
+
+        {
+
+            "S.No": number,
+
+            "Employee ID": employee.get("employee_id", ""),
+
+            "Employee Name": employee.get("name", ""),
+
+            "Department": employee.get("department", ""),
+
+            "Designation": employee.get("designation", ""),
+
+            "Attendance Date": employee.get("attendance_date", ""),
+
+            "Punch In": employee.get("punch_in", "--"),
+
+            "Punch Out": employee.get("punch_out", "--"),
+
+            "Daily OT": employee.get("daily_ot", "00:00"),
+
+            "Monthly OT": employee.get("monthly_ot", "00:00"),
+
+            "Remaining OT": employee.get("remaining_ot", "25:00"),
+
+            "Monthly Status": employee.get("monthly_status", "Normal"),
+
+            "Notification": employee.get("notification", "")
+
+        }
 
         for number, employee in enumerate(
+
             employees,
+
             start=1
-        ):
+            
 
-            row = {
-
-                "S.No": number,
-
-                "Employee ID": employee.get(
-                    "employee_id",
-                    ""
-                ),
-
-                "Employee Name": employee.get(
-                    "name",
-                    ""
-                ),
-
-                "Department": employee.get(
-                    "department",
-                    ""
-                ),
-
-                "Designation": employee.get(
-                    "designation",
-                    ""
-                ),
-
-                "Attendance Date": employee.get(
-                    "attendance_date",
-                    ""
-                ),
-
-                "Punch In": employee.get(
-                    "punch_in",
-                    "--"
-                ),
-
-                "Punch Out": employee.get(
-                    "punch_out",
-                    "--"
-                ),
-
-                "Daily OT": employee.get(
-                    "daily_ot",
-                    "00:00"
-                ),
-
-                "Monthly OT": employee.get(
-                    "monthly_ot",
-                    "00:00"
-                ),
-
-                "Remaining OT": employee.get(
-                    "remaining_ot",
-                    "25:00"
-                ),
-
-                "Monthly Status": employee.get(
-                    "monthly_status",
-                    "Normal"
-                ),
-
-                "Notification": employee.get(
-                    "notification",
-                    ""
-                )
-            }
-
-            records.append(row)
-
+            )
+        
+        ]
         dataframe = pd.DataFrame(records)
+        
+        with pd.ExcelWriter(
 
-        dataframe.to_excel(
             report_path,
-            index=False,
-            engine="openpyxl"
-        )
 
+            engine="openpyxl",
+
+            mode="w"
+
+        ) as writer:
+
+            dataframe.to_excel(
+
+                writer,
+
+                index=False,
+
+                sheet_name="Attendance"
+
+            )
         return report_path
     # =====================================================
     # Generate Summary
@@ -231,92 +212,117 @@ class ReportGenerator:
         records = []
 
         for number, employee in enumerate(
+
             employees,
+
             start=1
+
         ):
 
             row = {
 
                 "S.No": number,
 
-                "Employee ID": employee.get(
-                    "employee_id",
-                    ""
-                ),
+                "Employee ID": employee.get("employee_id", ""),
 
-                "Employee Name": employee.get(
-                    "name",
-                    ""
-                ),
+                "Employee Name": employee.get("name", ""),
 
-                "Department": employee.get(
-                    "department",
-                    ""
-                ),
+                "Department": employee.get("department", ""),
 
-                "Designation": employee.get(
-                    "designation",
-                    ""
-                )
+                "Designation": employee.get("designation", "")
 
             }
 
-            # ------------------------------------------
-            # Day1 -> Day31
-            # ------------------------------------------
+            row.update({
 
-            for day in range(1, 32):
+                f"Day{day}": employee.get(
 
-                row[f"Day{day}"] = employee.get(
                     f"Day{day}",
+
                     "00:00"
+
                 )
 
-            # ------------------------------------------
-            # Monthly Information
-            # ------------------------------------------
+                for day in range(1, 32)
 
-            row["Monthly OT"] = employee.get(
-                "monthly_ot",
-                "00:00"
-            )
+            })
 
-            row["Monthly OT Minutes"] = employee.get(
-                "monthly_ot_minutes",
-                0
-            )
+            row.update({
 
-            row["Remaining OT"] = employee.get(
-                "remaining_ot",
-                "25:00"
-            )
+                "Monthly OT": employee.get(
 
-            row["Remaining OT Minutes"] = employee.get(
-                "remaining_ot_minutes",
-                1500
-            )
+                    "monthly_ot",
 
-            row["Monthly Status"] = employee.get(
-                "monthly_status",
-                "Normal"
-            )
+                    "00:00"
 
-            row["Last Updated"] = employee.get(
-                "last_updated",
-                ""
-            )
+                ),
+
+                "Monthly OT Minutes": employee.get(
+
+                    "monthly_ot_minutes",
+
+                    0
+
+                ),
+
+                "Remaining OT": employee.get(
+
+                    "remaining_ot",
+
+                    "25:00"
+
+                ),
+
+                "Remaining OT Minutes": employee.get(
+
+                    "remaining_ot_minutes",
+
+                    1500
+
+                ),
+
+                "Monthly Status": employee.get(
+
+                    "monthly_status",
+
+                    "Normal"
+
+                ),
+
+                "Last Updated": employee.get(
+
+                    "last_updated",
+
+                    ""
+
+                )
+
+            })
 
             records.append(row)
-
+            
         dataframe = pd.DataFrame(records)
 
-        dataframe.to_excel(
-            report_path,
-            index=False,
-            engine="openpyxl"
-        )
+        with pd.ExcelWriter(
 
-        return report_path
+            report_path,
+
+            engine="openpyxl",
+
+            mode="w"
+
+        ) as writer:
+            
+
+            dataframe.to_excel(
+
+                writer,
+
+                index=False,
+
+                sheet_name="Monthly OT"
+
+            )
     # =====================================================
     # Load Monthly OT Database
     # =====================================================
@@ -353,10 +359,97 @@ class ReportGenerator:
 
     def export_monthly_database(
         self,
-        filename="Monthly_OT_Database.xlsx"
+        filename="Monthly_OT_Database.xlsx",
+        employees=None
     ):
 
-        dataframe = self.load_monthly_database()
+        if employees is None:
+
+            dataframe = self.load_monthly_database()
+
+        else:
+
+            records = []
+
+            for employee in employees:
+
+                row = {
+
+                    "Employee ID": employee.get("employee_id", ""),
+
+                    "Employee Name": employee.get("name", ""),
+
+                    "Department": employee.get("department", ""),
+
+                    "Designation": employee.get("designation", ""),
+
+                    "Email": employee.get("email", ""),
+
+                    "Phone": employee.get("phone", "")
+
+                }
+
+                for day in range(1, 32):
+
+                    row[f"Day{day}"] = employee.get(
+
+                        f"Day{day}",
+
+                        "00:00"
+
+                    )
+
+                row["Monthly OT"] = employee.get(
+
+                    "monthly_ot",
+
+                    "00:00"
+
+                )
+
+                row["Monthly OT Minutes"] = employee.get(
+
+                    "monthly_ot_minutes",
+
+                    0
+
+                )
+
+                row["Remaining OT"] = employee.get(
+
+                    "remaining_ot",
+
+                    "25:00"
+
+                )
+
+                row["Remaining OT Minutes"] = employee.get(
+
+                    "remaining_ot_minutes",
+
+                    1500
+
+                )
+
+                row["Monthly Status"] = employee.get(
+
+                    "monthly_status",
+
+                    "Normal"
+
+                )
+
+                row["Last Updated"] = employee.get(
+
+                    "last_updated",
+
+                    ""
+
+                )
+
+                records.append(row)
+
+            dataframe = pd.DataFrame(records)
 
         report_path = os.path.join(
             self.report_folder,
@@ -381,11 +474,25 @@ class ReportGenerator:
                 "Last Updated"
             ])
 
-        dataframe.to_excel(
+        with pd.ExcelWriter(
+
             report_path,
-            index=False,
-            engine="openpyxl"
-        )
+
+            engine="openpyxl",
+
+            mode="w"
+
+        ) as writer:
+
+            dataframe.to_excel(
+
+                writer,
+
+                index=False,
+
+                sheet_name="Monthly Database"
+
+            )
 
         return report_path
     # =====================================================
@@ -516,9 +623,14 @@ class ReportGenerator:
         # Attendance Report
         # ------------------------------------------
 
+        
+
         attendance_report = self.generate_excel(
+
             employees,
+
             f"Attendance_Report_{timestamp}.xlsx"
+
         )
 
         # ------------------------------------------
@@ -526,16 +638,23 @@ class ReportGenerator:
         # ------------------------------------------
 
         monthly_ot_report = self.generate_monthly_ot_report(
+
             employees,
+
             f"Monthly_OT_Report_{timestamp}.xlsx"
+
         )
 
         # ------------------------------------------
-        # Monthly Database Export
+        # Monthly Database Report
         # ------------------------------------------
 
         database_report = self.export_monthly_database(
-            f"Monthly_OT_Database_{timestamp}.xlsx"
+
+            f"Monthly_OT_Database_{timestamp}.xlsx",
+
+            employees
+
         )
 
         # ------------------------------------------
@@ -558,6 +677,12 @@ class ReportGenerator:
         # Return All Reports
         # ------------------------------------------
 
+        generated_time = datetime.now().strftime(
+
+            "%d-%b-%Y %H:%M:%S"
+
+        )
+
         return {
 
             "attendance_report": attendance_report,
@@ -570,9 +695,7 @@ class ReportGenerator:
 
             "dashboard_report": dashboard_report,
 
-            "generated_on": datetime.now().strftime(
-                "%d-%b-%Y %H:%M:%S"
-            ),
+            "generated_on": generated_time,
 
             "company": COMPANY_NAME
 

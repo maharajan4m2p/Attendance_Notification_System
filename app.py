@@ -536,6 +536,8 @@ def dashboard():
     global report_path
     global monthly_report_path
     global database_report_path
+    
+    status = request.args.get("status","All")
 
     if analysis_result is None:
 
@@ -553,6 +555,18 @@ def dashboard():
     # -----------------------------------------
 
     employees = get_employees()
+    
+    if status != "All":
+        
+        employees = [
+            
+            employee
+            
+            for employee in employees
+            
+            if employee.get("monthly_status") == status
+            
+        ]
 
     summary = get_summary()
 
@@ -568,7 +582,7 @@ def dashboard():
     # Sort by Monthly OT
     # -----------------------------------------
 
-    employees = sorted(
+    top_ot = sorted(
 
         employees,
 
@@ -582,13 +596,11 @@ def dashboard():
 
         reverse=True
 
-    )
+    )[:10]
 
     # -----------------------------------------
     # Top OT Employees
     # -----------------------------------------
-
-    top_ot = employees[:10]
 
     # -----------------------------------------
     # Dashboard Logging
@@ -654,7 +666,9 @@ def dashboard():
 
         database_report=database_report_path,
 
-        report_generated=(report_path is not None)
+        report_generated=(report_path is not None),
+        
+        selected_status=status
 
     )
     # =====================================================
@@ -663,21 +677,51 @@ def dashboard():
 
 @app.route("/download")
 def download_report():
+    
+    global analysis_result
+    
+    status = request.args.get("status","All")
 
-    global report_path
+    if analysis_result is None:
+        
+        flash("Upload attendance first","warning")
+        
+        return redirect(url_for("home"))
+    
+    employees = analysis_result["employees"]
+    
+    if status != "All":
+        
+        employees = [
+            
+            employee
+            
+            for  employee in employees
+            
+            if employee["monthly_status"] == status
+                
+        ]
+        
+        report = report_generator.generate_excel(
+            
+            employees,
+            
+            "Attendance_Report.xlsx"
+        )
+        
+        return send_file(
+            
+            report,
+            
+            as_attachment=True,
+            
+            download_name="Attendance_Report.xlsx"
+        )
 
-    if not report_path or not os.path.exists(report_path):
 
-        flash("Attendance report not found.", "warning")
-
-        return redirect(url_for("dashboard"))
-
-    return send_file(
-        report_path,
-        as_attachment=True,
-        download_name=os.path.basename(report_path)
-    )
-
+# =====================================================
+# Download Monthly OT Report
+# =====================================================
 
 # =====================================================
 # Download Monthly OT Report
@@ -686,20 +730,52 @@ def download_report():
 @app.route("/download_monthly")
 def download_monthly():
 
-    global monthly_report_path
+    global analysis_result
 
-    if not monthly_report_path or not os.path.exists(monthly_report_path):
+    status = request.args.get("status", "All")
 
-        flash("Monthly OT report not found.", "warning")
+    if analysis_result is None:
 
-        return redirect(url_for("dashboard"))
+        flash("Upload attendance first.", "warning")
 
-    return send_file(
-        monthly_report_path,
-        as_attachment=True,
-        download_name=os.path.basename(monthly_report_path)
+        return redirect(url_for("home"))
+
+    employees = analysis_result["employees"]
+
+    if status != "All":
+
+        employees = [
+
+            employee
+
+            for employee in employees
+
+            if employee.get("monthly_status") == status
+
+        ]
+
+    report = report_generator.generate_monthly_ot_report(
+
+        employees,
+
+        "Monthly_OT_Report.xlsx"
+
     )
 
+    return send_file(
+
+        report,
+
+        as_attachment=True,
+
+        download_name="Monthly_OT_Report.xlsx"
+
+    )
+
+
+# =====================================================
+# Download Monthly Database
+# =====================================================
 
 # =====================================================
 # Download Monthly Database
@@ -708,20 +784,52 @@ def download_monthly():
 @app.route("/download_database")
 def download_database():
 
-    global database_report_path
+    global analysis_result
 
-    if not database_report_path or not os.path.exists(database_report_path):
+    status = request.args.get("status", "All")
 
-        flash("Database report not found.", "warning")
+    if analysis_result is None:
 
-        return redirect(url_for("dashboard"))
+        flash("Upload attendance first.", "warning")
 
-    return send_file(
-        database_report_path,
-        as_attachment=True,
-        download_name=os.path.basename(database_report_path)
+        return redirect(url_for("home"))
+
+    employees = analysis_result["employees"]
+
+    if status != "All":
+
+        employees = [
+
+            employee
+
+            for employee in employees
+
+            if employee.get("monthly_status") == status
+
+        ]
+
+    report = report_generator.export_monthly_database(
+
+        "Monthly_OT_Database.xlsx",
+
+        employees
+
     )
 
+    return send_file(
+
+        report,
+
+        as_attachment=True,
+
+        download_name="Monthly_OT_Database.xlsx"
+
+    )
+
+
+# =====================================================
+# Send Employee Emails
+# =====================================================
 
 # =====================================================
 # Send Employee Emails
@@ -730,23 +838,55 @@ def download_database():
 @app.route("/send_emails", methods=["POST"])
 def send_batch():
 
+    global analysis_result
+
     if analysis_result is None:
 
         flash("Upload attendance first.", "warning")
 
         return redirect(url_for("home"))
 
+    status = request.args.get("status", "All")
+
+    employees = analysis_result["employees"]
+
+    # -----------------------------------------
+    # Filter Employees
+    # -----------------------------------------
+
+    if status != "All":
+
+        employees = [
+
+            employee
+
+            for employee in employees
+
+            if employee.get("monthly_status") == status
+
+        ]
+
+    # -----------------------------------------
+    # Send Emails
+    # -----------------------------------------
+
     result = email_service.send_batch(
 
-        get_employees()
+        employees
 
     )
 
     flash(
 
-        f"Sent: {result['sent']} | Failed: {result['failed']} | "
-        f"Skipped: {result['skipped']} | "
-        f"Success: {result['success_rate']}%",
+        f"Monthly OT Status : {status} | "
+
+        f"Sent : {result['sent']} | "
+
+        f"Failed : {result['failed']} | "
+
+        f"Skipped : {result['skipped']} | "
+
+        f"Success : {result['success_rate']}%",
 
         "success"
 
@@ -754,7 +894,13 @@ def send_batch():
 
     return redirect(
 
-        url_for("dashboard")
+        url_for(
+
+            "dashboard",
+
+            status=status
+
+        )
 
     )
 
