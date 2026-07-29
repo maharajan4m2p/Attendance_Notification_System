@@ -943,13 +943,65 @@ class AttendanceChecker:
         print("Saving Monthly OT Database...")
         print("=" * 60)
 
-        for employee in employees:
+        for index, employee in enumerate(employees):
 
-            self.database.update_employee(
+            employee[index] = self.database.update_employee(
                 employee
             )
 
         self.database.finalize()
+        
+        for employee in employees:
+            
+            db_employee = self.database.get_employee(
+                employee["employee_id"]    
+            )
+            
+            if db_employee:
+                
+                employee["monthly_ot"] = db_employee.get(
+                    "Monthly OT",
+                    "00:00"
+                )
+                
+                employee["monthly_ot_minutes"] = int(db_employee.get(
+                    "Monthly OT Minutes",
+                    0
+                    )
+                )
+                
+                employee["remaining_ot"] = db_employee.get(
+                    "Remaining OT",
+                    "25:00"
+                )
+                
+                employee["remaining_ot_minutes"] = int(db_employee.get(
+                    "Remaining OT Minutes",
+                    1500
+                    )
+                )
+                
+                employee["monthly_status"] = db_employee.get(
+                    "Monthly Status",
+                    "Normal"
+                    )
+                
+                for day in range(1,32):
+                    employee[f"Day{day}"] = db_employee.get(
+                        f"Day{day}",
+                        "00:00"
+                    )
+                
+            else:
+                
+                employee["monthly_ot"] = "00:00"
+                employee ["monthly_ot_miutes"]= 0
+                employee["remaing_ot"] = "25:00"
+                employee["remaininig_ot_minutes"] = 1500
+                employee["monthly_status"] ="Normal"
+                
+                for day in range(1,32):
+                    employee[f"Day{day}"] = "00:00"
 
         print("=" * 60)
         print("Monthly OT Database Updated Successfully")

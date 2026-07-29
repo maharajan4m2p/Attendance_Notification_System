@@ -633,34 +633,14 @@ class DatabaseManager:
         day_column = f"Day{day}"
 
         daily_ot = employee.get(
-
             "daily_ot",
-
             "00:00"
-
         )
-
+        
         if not daily_ot:
-
             daily_ot = "00:00"
-
-        current_value = str(
-
-            dataframe.at[index, day_column]
-
-        ).strip()
-
-        # Prevent duplicate upload
-
-        if current_value != daily_ot:
-
-            dataframe.at[
-
-                index,
-
-                day_column
-
-            ] = daily_ot
+            
+        dataframe.at[index, day_column] = daily_ot
             # ------------------------------------------
             # Calculate Monthly OT
             # ------------------------------------------
@@ -669,12 +649,10 @@ class DatabaseManager:
 
         for i in range(1, 32):
 
-            total_minutes += self.time_to_minutes(
-
-                dataframe.at[index, f"Day{i}"]
-
-            )
-
+            value = dataframe.at[index, f"Day{i}"]
+            
+            total_minutes += self.time_to_minutes(value)
+            
         monthly_ot = self.minutes_to_time(
 
             total_minutes
@@ -744,6 +722,10 @@ class DatabaseManager:
             dataframe
 
         )
+        
+        self._clear_cache()
+        
+        dataframe = self._get_dataframe()
 
         # ------------------------------------------
         # Update Employee Dictionary
