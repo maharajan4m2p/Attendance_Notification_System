@@ -74,8 +74,12 @@ class ReportGenerator:
             "Daily OT": employee.get("daily_ot", "00:00"),
 
             "Monthly OT": employee.get("monthly_ot", "00:00"),
+            
+            "Monthly OT Minutes": employee.get("monthly_ot_minutes", 0),
 
             "Remaining OT": employee.get("remaining_ot", "25:00"),
+            
+            "Remaining OT Minutes": employee.get("remaining_ot_minutes", 1500),
 
             "Monthly Status": employee.get("monthly_status", "Normal"),
 
@@ -323,6 +327,7 @@ class ReportGenerator:
                 sheet_name="Monthly OT"
 
             )
+        return report_path
     # =====================================================
     # Load Monthly OT Database
     # =====================================================

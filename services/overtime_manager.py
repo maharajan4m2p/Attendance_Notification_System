@@ -2,7 +2,7 @@
 =========================================================
 Attendance Notification System Pro
 Enterprise Overtime Manager
-Version : 13.0 Enterprise
+Version : 15.0 Enterprise
 =========================================================
 """
 
@@ -26,6 +26,7 @@ from services.database_manager import DatabaseManager
 class OvertimeManager:
     """
     Enterprise Overtime Processing Engine
+    Version 15.0 Enterprise
     """
 
     # =====================================================
@@ -42,12 +43,13 @@ class OvertimeManager:
         )
 
         self.daily_warning = DAILY_OT_WARNING
+
         self.daily_limit = DAILY_OT_LIMIT
 
         self.monthly_warning = MONTHLY_OT_WARNING_MINUTES
-        self.monthly_limit = MONTHLY_OT_LIMIT_MINUTES
 
-    # =====================================================
+        self.monthly_limit = MONTHLY_OT_LIMIT_MINUTES
+        # =====================================================
     # HH:MM -> Minutes
     # =====================================================
 
@@ -60,21 +62,21 @@ class OvertimeManager:
 
         if value in (
             "",
-            "00:00",
-            "nan",
+            "-",
             "None",
-            "-"
+            "nan",
+            "00:00"
         ):
             return 0
 
         try:
 
-            hours, minutes = value.split(":")
-
-            return (
-                int(hours) * 60 +
-                int(minutes)
+            hh, mm = map(
+                int,
+                value.split(":")
             )
+
+            return hh * 60 + mm
 
         except Exception:
 
@@ -87,23 +89,29 @@ class OvertimeManager:
     def minutes_to_time(self, minutes):
 
         try:
-            minutes = int(minutes)
+
+            minutes = max(
+                0,
+                int(minutes)
+            )
+
         except Exception:
+
             minutes = 0
 
-        if minutes < 0:
-            minutes = 0
+        hh = minutes // 60
 
-        hours = minutes // 60
-        mins = minutes % 60
+        mm = minutes % 60
 
-        return f"{hours:02d}:{mins:02d}"
-
+        return f"{hh:02d}:{mm:02d}"
     # =====================================================
-    # Calculate Daily Overtime
+    # Calculate Daily OT
     # =====================================================
 
-    def calculate_daily_overtime(self, punch_out):
+    def calculate_daily_overtime(
+        self,
+        punch_out
+    ):
 
         if punch_out is None:
             return 0
@@ -114,18 +122,20 @@ class OvertimeManager:
         ):
             return 0
 
-        overtime_minutes = int(
+        overtime = int(
+
             (
                 punch_out -
                 self.shift_end
             ).total_seconds() / 60
+
         )
 
-        if overtime_minutes < 0:
-            overtime_minutes = 0
-
-        return overtime_minutes
-    # =====================================================
+        return max(
+            0,
+            overtime
+        )
+        # =====================================================
     # Check Late Punch
     # =====================================================
 
@@ -146,6 +156,7 @@ class OvertimeManager:
 
         return punch_in > grace_time
 
+
     # =====================================================
     # Check Early Out
     # =====================================================
@@ -165,6 +176,7 @@ class OvertimeManager:
             return False
 
         return punch_out < self.shift_end
+
 
     # =====================================================
     # Daily OT Status
@@ -215,70 +227,90 @@ class OvertimeManager:
     ):
 
         # ------------------------------------------
-        # Update Employee in Database
+        # Save employee to Monthly Database
+        # DatabaseManager is responsible for:
+        #   • Updating today's Day column
+        #   • Calculating Monthly OT
+        #   • Remaining OT
+        #   • Monthly Status
         # ------------------------------------------
 
-        employee = self.database.update_employee(
-            employee
+        employee = self.database.update_employee(employee)
+
+        # ------------------------------------------
+        # Read latest values from database
+        # ------------------------------------------
+
+        database_employee = self.database.get_employee(
+            employee["employee_id"]
         )
 
+        if database_employee is None:
+            return employee
+
         # ------------------------------------------
-        # Monthly OT
+        # Copy Day1 - Day31
         # ------------------------------------------
 
-        employee["monthly_ot"] = employee.get(
-            "monthly_ot",
+        for day in range(1, 32):
+
+            employee[f"Day{day}"] = database_employee.get(
+                f"Day{day}",
+                "00:00"
+            )
+
+        # ------------------------------------------
+        # Copy Monthly Values
+        # ------------------------------------------
+
+        employee["monthly_ot"] = database_employee.get(
+            "Monthly OT",
             "00:00"
         )
 
-        employee["monthly_ot_minutes"] = employee.get(
-            "monthly_ot_minutes",
-            0
+        employee["monthly_ot_minutes"] = int(
+            database_employee.get(
+                "Monthly OT Minutes",
+                0
+            )
         )
 
-        # ------------------------------------------
-        # Remaining OT
-        # ------------------------------------------
-
-        employee["remaining_ot"] = employee.get(
-            "remaining_ot",
+        employee["remaining_ot"] = database_employee.get(
+            "Remaining OT",
             "25:00"
         )
 
-        employee["remaining_ot_minutes"] = employee.get(
-            "remaining_ot_minutes",
-            self.monthly_limit
+        employee["remaining_ot_minutes"] = int(
+            database_employee.get(
+                "Remaining OT Minutes",
+                self.monthly_limit
+            )
         )
 
-        # ------------------------------------------
-        # Monthly Status
-        # ------------------------------------------
-
-        status = employee.get(
-            "monthly_status",
+        employee["monthly_status"] = database_employee.get(
+            "Monthly Status",
             NORMAL_STATUS
         )
 
-        employee["monthly_status"] = status
+        employee["last_updated"] = database_employee.get(
+            "Last Updated",
+            datetime.now().strftime("%d-%b-%Y %H:%M")
+        )
 
         # ------------------------------------------
         # Dashboard Flags
         # ------------------------------------------
 
         employee["warning"] = (
-            status == WARNING_STATUS
+            employee["monthly_status"] == WARNING_STATUS
         )
 
         employee["limit_reached"] = (
-            status == LIMIT_REACHED_STATUS
+            employee["monthly_status"] == LIMIT_REACHED_STATUS
         )
 
         employee["ot_exceeded"] = (
-            status == EXCEEDED_STATUS
-        )
-
-        employee["last_updated"] = datetime.now().strftime(
-            "%d-%b-%Y %H:%M"
+            employee["monthly_status"] == EXCEEDED_STATUS
         )
 
         return employee
@@ -294,16 +326,12 @@ class OvertimeManager:
     ):
 
         # ------------------------------------------
-        # Calculate OT from Punch Out
+        # Calculate Today's OT
         # ------------------------------------------
 
         calculated_ot = self.calculate_daily_overtime(
             punch_out
         )
-
-        # ------------------------------------------
-        # Imported OT from Attendance File
-        # ------------------------------------------
 
         imported_ot = self.time_to_minutes(
             employee.get(
@@ -311,10 +339,6 @@ class OvertimeManager:
                 "00:00"
             )
         )
-
-        # ------------------------------------------
-        # Use Higher OT Value
-        # ------------------------------------------
 
         overtime_minutes = max(
             calculated_ot,
@@ -339,7 +363,7 @@ class OvertimeManager:
         employee["daily_message"] = message
 
         # ------------------------------------------
-        # Update Monthly Database
+        # Save to Monthly Database
         # ------------------------------------------
 
         employee = self.update_monthly_overtime(
@@ -355,19 +379,22 @@ class OvertimeManager:
         )
 
         employee["is_warning"] = (
-            employee["monthly_status"] == WARNING_STATUS
+            employee["monthly_status"]
+            == WARNING_STATUS
         )
 
         employee["is_limit_reached"] = (
-            employee["monthly_status"] == LIMIT_REACHED_STATUS
+            employee["monthly_status"]
+            == LIMIT_REACHED_STATUS
         )
 
         employee["is_exceeded"] = (
-            employee["monthly_status"] == EXCEEDED_STATUS
+            employee["monthly_status"]
+            == EXCEEDED_STATUS
         )
 
         # ------------------------------------------
-        # Notification
+        # Notification Defaults
         # ------------------------------------------
 
         employee.setdefault(
@@ -379,49 +406,43 @@ class OvertimeManager:
             "notification",
             ""
         )
+        
+        self.log_employee_summary(employee)
+        
+        return employee
 
         # ------------------------------------------
-        # Copy Day1-Day31 values from Database
+        # Enterprise Debug Log
         # ------------------------------------------
 
-        database_employee = self.database.get_employee(
-            employee["employee_id"]
-        )
-
-        if database_employee:
-
-            for day_number in range(1, 32):
-
-                column = f"Day{day_number}"
-
-                employee[column] = database_employee.get(
-                    column,
-                    "00:00"
-                )
-
-            employee["monthly_ot"] = database_employee.get(
-                "Monthly OT",
-                employee["monthly_ot"]
-            )
-
-            employee["monthly_ot_minutes"] = database_employee.get(
-                "Monthly OT Minutes",
-                employee["monthly_ot_minutes"]
-            )
-
-            employee["remaining_ot"] = database_employee.get(
-                "Remaining OT",
-                employee["remaining_ot"]
-            )
-
-            employee["remaining_ot_minutes"] = database_employee.get(
-                "Remaining OT Minutes",
-                employee["remaining_ot_minutes"]
-            )
-
-            employee["monthly_status"] = database_employee.get(
-                "Monthly Status",
-                employee["monthly_status"]
-            )
+        print("=" * 70)
+        print("Employee ID :", employee["employee_id"])
+        print("Daily OT    :", employee["daily_ot"])
+        print("Monthly OT  :", employee["monthly_ot"])
+        print("Status      :", employee["monthly_status"])
+        print("=" * 70)
 
         return employee
+    # =====================================================
+    # Enterprise Debug Logger
+    # =====================================================
+
+    def log_employee_summary(self, employee):
+
+        print("\n" + "=" * 70)
+        print("EMPLOYEE OVERTIME SUMMARY")
+        print("=" * 70)
+
+        print(f"Employee ID      : {employee.get('employee_id', '')}")
+        print(f"Employee Name    : {employee.get('employee_name', '')}")
+        print(f"Daily OT         : {employee.get('daily_ot', '00:00')}")
+        print(f"Monthly OT       : {employee.get('monthly_ot', '00:00')}")
+        print(f"Remaining OT     : {employee.get('remaining_ot', '00:00')}")
+        print(f"Monthly Status   : {employee.get('monthly_status', '')}")
+
+        print("-" * 70)
+
+        for day in range(1, 32):
+            print(f"Day{day:02d} : {employee.get(f'Day{day}', '00:00')}")
+
+        print("=" * 70)

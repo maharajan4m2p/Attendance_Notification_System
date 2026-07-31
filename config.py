@@ -2,7 +2,7 @@
 =========================================================
 Attendance Notification System Pro
 Enterprise Configuration
-Version : 13.0 Enterprise
+Version : 14.0 Enterprise
 =========================================================
 """
 
@@ -107,6 +107,28 @@ BACKUP_DATABASE = os.path.join(
     BACKUP_FOLDER,
     "monthly_ot_backup.xlsx"
 )
+MONTHLY_DATABASE_REPORT = os.path.join(
+    REPORT_FOLDER,
+    "Monthly_Database.xlsx"
+)
+
+MONTHLY_OT_REPORT = os.path.join(
+    REPORT_FOLDER,
+    "Monthly_OT_Report.xlsx"
+)
+
+ATTENDANCE_REPORT = os.path.join(
+    REPORT_FOLDER,
+    "Attendance_Report.xlsx"
+)
+
+
+ATTENDANCE_REPORT_NAME = "Attendance_Report.xlsx"
+
+MONTHLY_REPORT_NAME = "Monthly_OT_Report.xlsx"
+
+MONTHLY_DATABASE_NAME = "Monthly_Database.xlsx"
+
 # =====================================================
 # Upload Configuration
 # =====================================================
@@ -131,7 +153,9 @@ SUPPORTED_ENCODINGS = [
 
     "latin1",
 
-    "cp1252"
+    "cp1252",
+    
+    "ISO-8859-1"
 
 ]
 
