@@ -1306,9 +1306,14 @@ function clearSearch(){
 
 }
 
-populateFilters();
 
 </script>
+
+<script 
+src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle
+.min.js"></script>
+
+
 <!-- ========================================= -->
 <!-- JAVASCRIPT - EMPLOYEE MODAL -->
 <!-- ========================================= -->
@@ -1581,20 +1586,17 @@ if(chartCanvas){
 <!-- ========================================= -->
 <!-- BOOTSTRAP -->
 <!-- ========================================= -->
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
 
 document.addEventListener("DOMContentLoaded",function(){
 
-    if(typeof populateFilters==="function"){
+    if(typeof populateFilters ==="function"){
 
         populateFilters();
 
     }
 
-    if(typeof filterEmployees==="function"){
+    if(typeof filterEmployees ==="function"){
 
         filterEmployees();
 

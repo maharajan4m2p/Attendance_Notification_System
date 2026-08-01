@@ -605,9 +605,9 @@ def dashboard():
     logger.info(f"Late Punch     : {summary.get('late_in', 0)}")
     logger.info(f"Early Out      : {summary.get('early_out', 0)}")
     logger.info(f"OT Employees   : {summary.get('overtime', 0)}")
-    logger.info(f"Warning        : {dashboard.get('warning', 0)}")
-    logger.info(f"Limit Reached  : {dashboard.get('limit_reached', 0)}")
-    logger.info(f"Exceeded       : {dashboard.get('exceeded', 0)}")
+    logger.info(f"Warning        : {dashboard.get('monthly_warning', 0)}")
+    logger.info(f"Limit Reached  : {dashboard.get('monthly_limit_reached', 0)}")
+    logger.info(f"Exceeded       : {dashboard.get('monthly_exceeded', 0)}")
     logger.info("=" * 70)
 
     # =====================================================

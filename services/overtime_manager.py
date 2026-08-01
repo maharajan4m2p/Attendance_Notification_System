@@ -8,6 +8,8 @@ Version : 15.0 Enterprise
 
 from datetime import datetime
 
+from matplotlib.pylab import rint
+
 from config import (
     SHIFT_END,
     DAILY_OT_WARNING,
@@ -411,19 +413,7 @@ class OvertimeManager:
         
         return employee
 
-        # ------------------------------------------
-        # Enterprise Debug Log
-        # ------------------------------------------
-
-        print("=" * 70)
-        print("Employee ID :", employee["employee_id"])
-        print("Daily OT    :", employee["daily_ot"])
-        print("Monthly OT  :", employee["monthly_ot"])
-        print("Status      :", employee["monthly_status"])
-        print("=" * 70)
-
-        return employee
-    # =====================================================
+    #===========================
     # Enterprise Debug Logger
     # =====================================================
 
@@ -434,7 +424,7 @@ class OvertimeManager:
         print("=" * 70)
 
         print(f"Employee ID      : {employee.get('employee_id', '')}")
-        print(f"Employee Name    : {employee.get('employee_name', '')}")
+        print(f"Employee Name    : {employee.get('name', '')}")
         print(f"Daily OT         : {employee.get('daily_ot', '00:00')}")
         print(f"Monthly OT       : {employee.get('monthly_ot', '00:00')}")
         print(f"Remaining OT     : {employee.get('remaining_ot', '00:00')}")
@@ -443,6 +433,9 @@ class OvertimeManager:
         print("-" * 70)
 
         for day in range(1, 32):
-            print(f"Day{day:02d} : {employee.get(f'Day{day}', '00:00')}")
+            print(
+                f"Day{day:02d} : "
+                f"{employee.get(f'Day{day}', '00:00')}"
+            )
 
         print("=" * 70)
