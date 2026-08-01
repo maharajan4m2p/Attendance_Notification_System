@@ -386,11 +386,32 @@ def upload_file():
         analysis_result = attendance_checker.process_excel(
             uploaded_file
         )
+        print("=" * 60)
+        print("EMPLOYEE FROM PROCESS")
+        print("=" * 60)
 
-        employees = analysis_result.get(
-            "employees",
-            []
-        )
+        employees = []
+
+        for emp in analysis_result.get("employees", []):
+            db_emp = database_manager.get_employee(emp["employee_id"])
+
+            if db_emp:
+                employee = emp.copy()
+
+                # Copy Day1-Day31
+                for i in range(1, 32):
+                    employee[f"Day{i}"] = db_emp.get(f"Day{i}", "00:00")
+
+                # Copy monthly values
+                employee["monthly_ot"] = db_emp.get("Monthly OT", "00:00")
+                employee["monthly_ot_minutes"] = db_emp.get("Monthly OT Minutes", 0)
+                employee["remaining_ot"] = db_emp.get("Remaining OT", "25:00")
+                employee["remaining_ot_minutes"] = db_emp.get("Remaining OT Minutes", 1500)
+                employee["monthly_status"] = db_emp.get("Monthly Status", "Normal")
+
+                employees.append(employee)
+                
+        analysis_result["employees"] = employees
 
         summary = analysis_result.get(
             "summary",
@@ -465,7 +486,7 @@ def upload_file():
         return redirect(
             url_for("home")
         )
-        # =====================================================
+# =====================================================
 # Dashboard
 # =====================================================
 

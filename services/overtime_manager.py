@@ -7,9 +7,6 @@ Version : 15.0 Enterprise
 """
 
 from datetime import datetime
-
-from matplotlib.pylab import rint
-
 from config import (
     SHIFT_END,
     DAILY_OT_WARNING,
@@ -371,6 +368,40 @@ class OvertimeManager:
         employee = self.update_monthly_overtime(
             employee
         )
+        
+        print(employee["monthly_ot"])
+        print(employee["Day1"])
+        print(employee["Day2"])
+        print(employee["Day3"])
+        print(employee["Day4"])
+        print(employee["Day5"])
+        print(employee["Day6"])
+        print(employee["Day7"])
+        print(employee["Day8"])
+        print(employee["Day9"])
+        print(employee["Day10"])
+        print(employee["Day11"])
+        print(employee["Day12"])
+        print(employee["Day13"])
+        print(employee["Day14"])
+        print(employee["Day15"])
+        print(employee["Day16"])
+        print(employee["Day17"])
+        print(employee["Day18"])
+        print(employee["Day19"])
+        print(employee["Day20"])
+        print(employee["Day21"])
+        print(employee["Day22"])
+        print(employee["Day23"])
+        print(employee["Day24"])
+        print(employee["Day25"])
+        print(employee["Day26"])
+        print(employee["Day27"])
+        print(employee["Day28"])
+        print(employee["Day29"])
+        print(employee["Day30"])
+        print(employee["Day31"])
+        
 
         # ------------------------------------------
         # Dashboard Flags

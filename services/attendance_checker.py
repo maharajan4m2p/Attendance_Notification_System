@@ -479,16 +479,27 @@ class AttendanceChecker:
             "monthly_ot_exceeded": 0
 
         }
-
         # ==========================================
         # Process Each Employee
         # ==========================================
 
         for _, row in dataframe.iterrows():
+            
+            attendance_date = row.get(
+                columns["attendance_date"],
+                ""
+            )
+
+            print("=" * 70)
+            print("Employee ID      :", row.get(columns["employee_id"], ""))
+            print("Attendance Date(Excel):", attendance_date)
+            print("=" * 70)
 
             summary["total"] += 1
 
             employee = {
+                
+                "attendance_date": str(attendance_date).strip(),
 
                 "employee_id": str(
                     row.get(
@@ -532,7 +543,6 @@ class AttendanceChecker:
                     )
                 ).strip(),
 
-                "attendance_date": "",
 
                 "punch_in": "--",
 
@@ -564,27 +574,22 @@ class AttendanceChecker:
             # Attendance Date
             # ==========================================
 
-            attendance_date = pd.to_datetime(
-
-                row.get(
-                    columns["attendance_date"]
-                ),
-
+            attendance_date = pd.to_datetime(row.get(columns["attendance_date"]),
                 errors="coerce",
-
-                dayfirst=True
-
-            )
+                dayfirst=True)
 
             if pd.isna(attendance_date):
 
                 attendance_date = datetime.now()
 
-            employee["attendance_date"] = attendance_date.strftime(
-                "%d-%m-%Y"
-            )
+            employee["attendance_date"] = attendance_date
 
             current_day = attendance_date.day
+            
+            print("=" * 60)
+            print("Attendance Date:" ,attendance_date)
+            print("Current Day:", current_day)
+            print("=" * 60)
 
             # ==========================================
             # Punch Time

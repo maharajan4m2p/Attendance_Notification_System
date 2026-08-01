@@ -427,18 +427,17 @@ class DatabaseManager:
         # Attendance Date
         # ------------------------------------------
 
-        attendance_date = employee.get(
-            "attendance_date",
-            ""
-        )
+        attendance_date = employee.get("attendance_date")
+        
+        if isinstance(attendance_date, str):
+            
+            attendance_date = pd.to_datetime(
+                attendance_date,
+                errors="coerce",
+                dayfirst=True
+            )
 
-        attendance_date = pd.to_datetime(
-            attendance_date,
-            errors="coerce",
-            dayfirst=True
-        )
-
-        if pd.isna(attendance_date):
+        if attendance_date is None or pd.isna(attendance_date):
             attendance_date = datetime.now()
 
         day = attendance_date.day
@@ -448,8 +447,9 @@ class DatabaseManager:
         print("=" * 60)
         print("Attendance Date :", attendance_date)
         print("Employee ID     :", employee_id)
-        print("Day             :", day)
+        print("Saving Column   :", f"Day{day}")
         print("=" * 60)
+        
         # ------------------------------------------
         # Monthly Reset (Only if Month Changed)
         # ------------------------------------------
@@ -485,7 +485,7 @@ class DatabaseManager:
                         index,
                         f"Day{i}"
                     ] = "00:00"
-
+            
                 dataframe.at[index, "Monthly OT"] = "00:00"
                 dataframe.at[index, "Monthly OT Minutes"] = 0
                 dataframe.at[index, "Remaining OT"] = self.minutes_to_time(
@@ -522,7 +522,8 @@ class DatabaseManager:
             index,
             f"Day{day}"
         ] = daily_ot
-
+        print(f"Day{day} Saved =", daily_ot)
+        
         print("=" * 60)
         print("Employee ID :", employee_id)
         print("Attendance  :", attendance_date)
@@ -634,6 +635,8 @@ class DatabaseManager:
         self.save_database(
             dataframe
         )
+        
+        print("\nSaved Database Successfully!")
 
         self._clear_cache()
 
@@ -644,8 +647,21 @@ class DatabaseManager:
         updated_employee = self.get_employee(
             employee_id
         )
-
         if updated_employee is not None:
+        
+            print("\nReloaded Database")
+        
+            for i in range(1, 32):
+                day_value = updated_employee.get(
+                    f"Day{i}",
+                    "00:00"
+                )
+
+                print(
+                    f"Day{i:02d} : "
+                    f"{day_value}  "
+                    f"({self.time_to_minutes(day_value)} mins)"
+                )
 
             employee["monthly_ot"] = updated_employee.get(
                 "Monthly OT",
