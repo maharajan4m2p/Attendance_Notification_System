@@ -463,7 +463,7 @@ class AttendanceChecker:
 
         employees = []
 
-        summary = {
+        summary: dict[str, Any]= {
 
             "total": 0,
             "present": 0,
@@ -567,7 +567,9 @@ class AttendanceChecker:
 
                 "status": [],
 
-                "notification": ""
+                "notification": "",
+                
+                "current_day": 0,
 
             }
 
@@ -576,10 +578,11 @@ class AttendanceChecker:
             # ==========================================
 
             attendance_date = pd.to_datetime(
-                
-                row.get(columns["attendance_date"]),
+                str(row.get(columns["attendance_date"], "")),
                 errors="coerce",
-                dayfirst=True)
+                dayfirst=True
+            )
+            
             print("=" * 60)
             print("Raw Excel Date :", row.get(columns["attendance_date"]))
             print("Parsed Date    :", attendance_date)
@@ -591,8 +594,9 @@ class AttendanceChecker:
                 attendance_date = datetime.now()
 
             employee["attendance_date"] = attendance_date
+            employee["current_day"] = int(attendance_date.day)
 
-            current_day = attendance_date.day
+            current_day = employee["current_day"]
             
             if str(employee["employee_id"]) == "U1- 0005":
                 print("=" * 60)
@@ -684,7 +688,7 @@ class AttendanceChecker:
 
                 punch_out=out_time,
 
-                day=current_day
+                attendance_date=attendance_date
 
             )
 
@@ -867,11 +871,12 @@ class AttendanceChecker:
             print("=" * 60)
             print(f"Employee ID      : {employee['employee_id']}")
             print(f"Employee Name    : {employee['name']}")
-            print(f"Attendance Date  : {employee['attendance_date']}")
+            print(f"Attendance Date  : {employee['attendance_date'].strftime('%d-%m-%Y')}")
+            print(f"Punch In         : {employee['punch_in']}")
             print(f"Daily OT         : {employee['daily_ot']}")
             print(f"Monthly OT       : {employee['monthly_ot']}")
             print(f"Remaining OT     : {employee['remaining_ot']}")
-            print(f"Monthly Status   : {employee['monthly_status']}")
+            print(f"Monthly Status   : {employee['monthly_status']})")
             print("=" * 60)
 
         # ==========================================

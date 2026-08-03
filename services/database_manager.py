@@ -9,6 +9,7 @@ Version : 15.0 Enterprise
 import os
 from datetime import datetime
 
+from numpy.strings import index
 import pandas as pd
 
 from config import (
@@ -427,7 +428,7 @@ class DatabaseManager:
         # Attendance Date
         # ------------------------------------------
 
-        attendance_date = employee.get("attendance_date")
+        attendance_date = employee.get("attendance_date",datetime.now())
         
         if isinstance(attendance_date, str):
             
@@ -440,7 +441,7 @@ class DatabaseManager:
         if attendance_date is None or pd.isna(attendance_date):
             attendance_date = datetime.now()
 
-        day = attendance_date.day
+        day = int(employee.get("current_day", attendance_date.day))
         if employee_id == "U1- 0005":
             print("=" * 60)
             print("Attendance Date :", attendance_date)
@@ -450,8 +451,6 @@ class DatabaseManager:
         month = attendance_date.month
         year = attendance_date.year
 
-        
-        
         # ------------------------------------------
         # Monthly Reset (Only if Month Changed)
         # ------------------------------------------
@@ -520,10 +519,14 @@ class DatabaseManager:
         ):
             daily_ot = "00:00"
 
-        dataframe.at[
-            index,
-            f"Day{day}"
-        ] = daily_ot
+        column_name = f"Day{day}"
+        
+        old_value = str(dataframe.at[index, column_name]).strip()
+        
+        if old_value in ("","nan","None"):
+            old_value = "00:00"
+            
+        dataframe.at[index, column_name] = daily_ot
         print(f"Day{day} Saved =", daily_ot)
         
         print("=" * 60)
@@ -538,37 +541,16 @@ class DatabaseManager:
 
         total_minutes = 0
 
-        print("\n" + "=" * 70)
-        print("MONTHLY OT CALCULATION")
-        print("=" * 70)
-
         for i in range(1, 32):
-
-            day_value = dataframe.at[
-                index,
-                f"Day{i}"
-            ]
-
-            day_minutes = self.time_to_minutes(
-                day_value
-            )
-
-            total_minutes += day_minutes
-
-            print(
-                f"Day{i:02d} : "
-                f"{day_value}  "
-                f"({day_minutes} mins)"
-            )
-
-        print("-" * 70)
-        print(f"Total Minutes : {total_minutes}")
-
-        monthly_ot = self.minutes_to_time(
-            total_minutes
-        )
-
-        print(f"Monthly OT : {monthly_ot}")
+            
+            value = str(dataframe.at[index, f"Day{i}"]).strip()
+            
+            if value in ("","nan","None"):
+                value = "00:00"
+                
+            total_minutes += self.time_to_minutes(value)
+        
+        monthly_ot = self.minutes_to_time(total_minutes)
 
         # ------------------------------------------
         # Remaining OT
@@ -624,11 +606,7 @@ class DatabaseManager:
 
         dataframe.at[index, "Monthly Status"] = status
 
-        dataframe.at[index, "Last Updated"] = (
-            datetime.now().strftime(
-                "%d-%b-%Y %H:%M"
-            )
-        )
+        dataframe.at[index, "Last Updated"] = attendance_date.strftime("%d-%b-%Y")
 
         # ------------------------------------------
         # Save Database
@@ -727,18 +705,17 @@ class DatabaseManager:
 
             "monthly_warning": 0,
             "monthly_limit_reached": 0,
-            "monthly_ot_exceeded": 0
+            "monthly_ot_exceeded": 0,
+            "total_monthly_ot":"00:00"
         }
 
         if dataframe.empty:
             return summary
 
-        summary["overtime"] = int(
-            dataframe["Monthly OT Minutes"]
-            .fillna(0)
-            .astype(int)
-            .gt(0)
-            .sum()
+        summary["overtime"] = len(
+            dataframe[
+                dataframe["Monthly OT Minutes"] > 0
+            ]
         )
 
         status_counts = dataframe[
@@ -765,6 +742,13 @@ class DatabaseManager:
                 0
             )
         )
+        
+        total_inutes = dataframe["Monthly OT Minutes"].fillna(0).astype(int).sum()
+        
+        hours = total_inutes // 60
+        minutes = total_inutes % 60
+        
+        summary["total_monthly_ot"] = f"{hours:02d}:{minutes:02d}"
 
         return summary
 

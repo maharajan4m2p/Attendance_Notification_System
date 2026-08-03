@@ -321,7 +321,7 @@ class OvertimeManager:
         self,
         employee,
         punch_out,
-        day=None
+        attendance_date
     ):
 
         # ------------------------------------------
@@ -364,10 +364,13 @@ class OvertimeManager:
         # ------------------------------------------
         # Save to Monthly Database
         # ------------------------------------------
-
+        
+        employee["attendance_date"] = attendance_date
+        
         employee = self.update_monthly_overtime(
             employee
         )
+        
         
         print(employee["monthly_ot"])
         print(employee["Day1"])
