@@ -441,14 +441,16 @@ class DatabaseManager:
             attendance_date = datetime.now()
 
         day = attendance_date.day
+        if employee_id == "U1- 0005":
+            print("=" * 60)
+            print("Attendance Date :", attendance_date)
+            print("Employee ID     :", employee_id)
+            print("Saving Column   :", f"Day{day}")
+            print("=" * 60)
         month = attendance_date.month
         year = attendance_date.year
 
-        print("=" * 60)
-        print("Attendance Date :", attendance_date)
-        print("Employee ID     :", employee_id)
-        print("Saving Column   :", f"Day{day}")
-        print("=" * 60)
+        
         
         # ------------------------------------------
         # Monthly Reset (Only if Month Changed)

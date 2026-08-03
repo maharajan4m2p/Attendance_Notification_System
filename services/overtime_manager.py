@@ -401,8 +401,7 @@ class OvertimeManager:
         print(employee["Day29"])
         print(employee["Day30"])
         print(employee["Day31"])
-        
-
+    
         # ------------------------------------------
         # Dashboard Flags
         # ------------------------------------------

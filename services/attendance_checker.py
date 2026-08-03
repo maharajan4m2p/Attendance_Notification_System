@@ -490,6 +490,7 @@ class AttendanceChecker:
                 ""
             )
 
+
             print("=" * 70)
             print("Employee ID      :", row.get(columns["employee_id"], ""))
             print("Attendance Date(Excel):", attendance_date)
@@ -574,10 +575,17 @@ class AttendanceChecker:
             # Attendance Date
             # ==========================================
 
-            attendance_date = pd.to_datetime(row.get(columns["attendance_date"]),
+            attendance_date = pd.to_datetime(
+                
+                row.get(columns["attendance_date"]),
                 errors="coerce",
                 dayfirst=True)
-
+            print("=" * 60)
+            print("Raw Excel Date :", row.get(columns["attendance_date"]))
+            print("Parsed Date    :", attendance_date)
+            print("Current Day    :", attendance_date.day if not pd.isna(attendance_date) else "Invalid")
+            print("=" * 60)
+            
             if pd.isna(attendance_date):
 
                 attendance_date = datetime.now()
@@ -586,10 +594,11 @@ class AttendanceChecker:
 
             current_day = attendance_date.day
             
-            print("=" * 60)
-            print("Attendance Date:" ,attendance_date)
-            print("Current Day:", current_day)
-            print("=" * 60)
+            if str(employee["employee_id"]) == "U1- 0005":
+                print("=" * 60)
+                print("Attendance Date:" ,attendance_date)
+                print("Current Day:", current_day)
+                print("=" * 60)
 
             # ==========================================
             # Punch Time
