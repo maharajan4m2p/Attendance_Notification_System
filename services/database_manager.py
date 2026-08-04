@@ -7,9 +7,10 @@ Version : 15.0 Enterprise
 """
 
 import os
+
 from datetime import datetime
 
-from numpy.strings import index
+import numpy as np
 import pandas as pd
 
 from config import (
@@ -121,7 +122,8 @@ class DatabaseManager:
 
         dataframe["Employee ID"] = (
             dataframe["Employee ID"]
-            .astype(str)
+            .fillna("")
+            .astype("string")
             .str.strip()
         )
 
