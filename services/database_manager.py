@@ -544,16 +544,22 @@ class DatabaseManager:
         total_minutes = 0
 
         for i in range(1, 32):
-            
-            value = str(dataframe.at[index, f"Day{i}"]).strip()
-            
-            if value in ("","nan","None"):
-                value = "00:00"
-                
-            total_minutes += self.time_to_minutes(value)
-        
-        monthly_ot = self.minutes_to_time(total_minutes)
 
+            value = str(
+                dataframe.at[index, f"Day{i}"]
+            ).strip()
+
+            if value in ("", "None", "nan"):
+                value = "00:00"
+
+            total_minutes += self.time_to_minutes(value)
+
+        monthly_ot = self.minutes_to_time(total_minutes)
+        
+        employee["Monthly OT Minutes"] = total_minutes
+        
+        employee["Monthly OT"] = monthly_ot
+        
         # ------------------------------------------
         # Remaining OT
         # ------------------------------------------

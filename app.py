@@ -38,8 +38,8 @@ from config import (
     MAX_CONTENT_LENGTH
 )
 
-from services.attendance_checker import AttendanceChecker
-from services.database_manager import DatabaseManager
+from services.Attendance_Checker import AttendanceChecker
+from services.Database_Manager import DatabaseManager
 from services.report_generator import ReportGenerator
 from services.notification_service import NotificationService
 from services.email_service import EmailService
